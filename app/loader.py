@@ -53,7 +53,9 @@ def completed_week_cutoff(league: dict, state: dict) -> int:
     if state_season and state_season != str(league.get("season")):
         # Looking at an old season while the NFL is in a new one: everything's final.
         return MAX_WEEK
-    week = int(state.get("week") or 1)
+    if state.get("season_type") == "pre" or not state.get("week"):
+        return 0
+    week = int(state.get("week"))
     if state.get("season_type") == "post" or state.get("season_type") == "off":
         return MAX_WEEK
     return max(0, week - 1)
@@ -102,12 +104,14 @@ def load_season(client, cfg: dict, league_id: str) -> dict[str, Any]:
 
     user_by_id = {u["user_id"]: u for u in users}
     owners_cfg = cfg.get("owners") or {}
+    owners_cfg_ci = {str(k).lower(): v for k, v in owners_cfg.items()}
     teams: dict[int, dict] = {}
     for r in rosters:
         u = user_by_id.get(r.get("owner_id")) or {}
         meta = u.get("metadata") or {}
         display = u.get("display_name") or f"Roster {r['roster_id']}"
-        prof = owners_cfg.get(display) or owners_cfg.get(str(u.get("user_id"))) or {}
+        prof = (owners_cfg_ci.get(str(display).lower()) or owners_cfg.get(str(u.get("user_id")))
+                or owners_cfg.get(display) or {})
         s = r.get("settings") or {}
         teams[int(r["roster_id"])] = {
             "roster_id": int(r["roster_id"]),

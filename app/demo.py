@@ -268,5 +268,8 @@ class DemoClient:
     def winners_bracket(self, league_id: str):
         return []
 
+    def clear_cache(self, keep_players: bool = True) -> None:
+        pass
+
     def players(self):
         return self._cur["players"]

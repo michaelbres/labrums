@@ -21,7 +21,7 @@ AVATAR_BASE = "https://sleepercdn.com/avatars/thumbs"
 
 LIVE_TTL = 5 * 60          # league / rosters / users / state / current week
 PLAYERS_TTL = 24 * 3600    # the big players blob
-FOREVER = 10 * 365 * 24 * 3600
+FINAL_TTL = 7 * 24 * 3600  # finished weeks: re-pull weekly to pick up stat corrections
 
 PLAYER_FIELDS = ("full_name", "first_name", "last_name", "position", "team",
                  "fantasy_positions", "number", "injury_status", "status", "age")
@@ -73,11 +73,13 @@ class SleeperClient:
         except (urllib.error.URLError, TimeoutError, OSError) as e:
             raise SleeperError(f"network error for {url}: {e}") from e
 
-    def get(self, path: str, ttl: float = LIVE_TTL, transform=None) -> Any:
+    def get(self, path: str, ttl: float = LIVE_TTL, transform=None, ttl_for=None) -> Any:
+        """`ttl_for(data) -> seconds` may shorten the ttl based on what was cached."""
         cached = self._read_cache(path)
         if cached is not None:
             data, fetched_at = cached
-            if time.time() - fetched_at < ttl:
+            eff = ttl_for(data) if ttl_for is not None else ttl
+            if time.time() - fetched_at < eff:
                 return data
         try:
             data = self._fetch(path)
@@ -90,6 +92,16 @@ class SleeperClient:
             data = transform(data)
         self._write_cache(path, data)
         return data
+
+    def clear_cache(self, keep_players: bool = True) -> None:
+        """Delete cached API responses (the big players blob is kept by default)."""
+        for p in self.cache_dir.glob("*.json"):
+            if keep_players and p.name == self._cache_path("players/nfl").name:
+                continue
+            try:
+                p.unlink()
+            except OSError as e:
+                log.warning("could not delete cache file %s: %s", p, e)
 
     # ---- endpoints -------------------------------------------------------
     def state(self) -> dict:
@@ -105,10 +117,14 @@ class SleeperClient:
         return self.get(f"league/{league_id}/users", LIVE_TTL) or []
 
     def matchups(self, league_id: str, week: int, final: bool) -> list[dict]:
-        return self.get(f"league/{league_id}/matchups/{week}", FOREVER if final else LIVE_TTL) or []
+        ttl = FINAL_TTL if final else LIVE_TTL
+        # A week where every row is 0 points hasn't been scored yet: never cache it as final.
+        return self.get(f"league/{league_id}/matchups/{week}", ttl,
+                        ttl_for=lambda rows: ttl if any(float((r or {}).get("points") or 0) != 0
+                                                        for r in rows or []) else LIVE_TTL) or []
 
     def transactions(self, league_id: str, week: int, final: bool) -> list[dict]:
-        return self.get(f"league/{league_id}/transactions/{week}", FOREVER if final else LIVE_TTL) or []
+        return self.get(f"league/{league_id}/transactions/{week}", FINAL_TTL if final else LIVE_TTL) or []
 
     def winners_bracket(self, league_id: str) -> list[dict]:
         return self.get(f"league/{league_id}/winners_bracket", LIVE_TTL) or []

@@ -58,7 +58,7 @@ def optimal_lineup_points(ctx: dict, row: dict) -> float:
     used: set[str] = set()
     total = 0.0
     fixed = [s for s in slots if s not in FLEX_ELIGIBILITY]
-    flex = [s for s in slots if s in FLEX_ELIGIBILITY]
+    flex = sorted((s for s in slots if s in FLEX_ELIGIBILITY), key=lambda s: len(FLEX_ELIGIBILITY[s]))
     for slot in fixed:
         for pid in avail:
             if pid in used:
@@ -152,7 +152,7 @@ def compute(ctx: dict) -> dict[str, Any]:
             continue
         for r in rows:
             rid = int(r["roster_id"])
-            if rid not in teams:
+            if rid not in teams or r.get("matchup_id") is None:
                 continue
             starters = r.get("starters") or []
             sp = r.get("starters_points") or []
@@ -216,7 +216,7 @@ def compute(ctx: dict) -> dict[str, Any]:
                        for pid in t.get("players") or []],
         }
 
-    standings = sorted(team_stats.values(), key=lambda t: (-t["wins"], t["losses"], -t["pf"]))
+    standings = sorted(team_stats.values(), key=lambda t: (-(t["wins"] + 0.5 * t["ties"]), -t["pf"]))
     for i, t in enumerate(standings):
         t["rank"] = i + 1
         t["in_playoff_spot"] = i < ctx["playoff_teams"]

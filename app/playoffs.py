@@ -67,6 +67,20 @@ def simulate(ctx: dict, st: dict, sims: int | None = None, seed: int = 42) -> di
 
     out: dict[int, dict] = {}
     games_left = {rid: sum(1 for w, a, b in remaining if rid in (a, b)) for rid in rids}
+    cur_wins = {rid: teams[rid]["wins"] + 0.5 * teams[rid]["ties"] for rid in rids}
+    max_wins = {rid: cur_wins[rid] + games_left[rid] for rid in rids}
+
+    def exact_status(rid: int) -> str:
+        others = [o for o in rids if o != rid]
+        # Teams that could finish level with me can still win the tiebreak, so count >= here.
+        can_pass = sum(1 for o in others if max_wins[o] >= cur_wins[rid])
+        already_ahead = sum(1 for o in others if cur_wins[o] > max_wins[rid])
+        if can_pass < playoff_teams:
+            return "clinched"
+        if already_ahead >= playoff_teams:
+            return "eliminated"
+        return "alive"
+
     for rid in rids:
         i = idx[rid]
         p = float(made[:, i].mean())
@@ -85,7 +99,7 @@ def simulate(ctx: dict, st: dict, sims: int | None = None, seed: int = 42) -> di
             "proj_wins": round(float(wins[:, i].mean()), 2),
             "proj_pf": round(float(pf[:, i].mean()), 1),
             "games_left": games_left[rid],
-            "status": "clinched" if p >= 0.9995 else "eliminated" if p <= 0.0005 else "alive",
+            "status": exact_status(rid),
             "next_game": cond,
             "model": {"mu": round(float(mu[i]), 2), "sd": round(float(sd[i]), 2)},
         }

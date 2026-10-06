@@ -80,6 +80,8 @@ class State:
             ctx = load_season(self.client, self.cfg, league_id)
         except SleeperError as e:
             raise HTTPException(503, f"Sleeper API unavailable: {e}") from e
+        except ValueError as e:
+            raise HTTPException(404, str(e)) from e
         st = stats.compute(ctx)
         po = playoffs.simulate(ctx, st)
         items = shotguns.detect(ctx, st)
@@ -148,15 +150,20 @@ def season(season: str):
     return serialize(season, state.base_model(season))
 
 
-@app.post("/api/season/{season}/refresh")
+@app.post("/api/season/{season}/refresh", dependencies=[Depends(require_admin)])
 def refresh(season: str):
     state.reload_config()
+    state.client.clear_cache(keep_players=True)
     m = state.base_model(season, force=True)
     return {"ok": True, "build_seconds": m["build_seconds"]}
 
 
 @app.post("/api/season/{season}/shotguns/{key}/toggle", dependencies=[Depends(require_admin)])
 def toggle_shotgun(season: str, key: str):
+    m = state.base_model(season)
+    valid = {i["key"] for i in m["shotgun_items"]} | {i["key"] for i in manual_to_items(season, state.store.manual(season))}
+    if key not in valid:
+        raise HTTPException(404, f"Unknown shotgun {key}")
     done = state.store.toggle(season, key)
     return {"key": key, "completed": done, "completed_at": state.store.completed(season).get(key, {}).get("completed_at")}
 
@@ -170,6 +177,11 @@ class ManualShotgun(BaseModel):
 
 @app.post("/api/season/{season}/shotguns/manual", dependencies=[Depends(require_admin)])
 def add_manual(season: str, body: ManualShotgun):
+    ctx = state.base_model(season)["ctx"]
+    if not 1 <= body.week <= 18:
+        raise HTTPException(400, "week must be between 1 and 18")
+    if body.roster_id not in ctx["teams"]:
+        raise HTTPException(400, f"Unknown roster_id {body.roster_id}")
     return state.store.add_manual(season, body.week, body.roster_id, body.label.strip() or "Manual shotgun", body.detail)
 
 

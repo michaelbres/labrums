@@ -45,8 +45,8 @@ def detect(ctx: dict, st: dict) -> list[dict]:
             rid = int(r["roster_id"])
             if rid not in ctx["teams"]:
                 continue
-            if week not in reg_weeks and float(r.get("points") or 0) == 0 and not (r.get("players_points")):
-                continue  # not actually playing this playoff week
+            if r.get("matchup_id") is None:
+                continue  # not playing this week (e.g. out of the playoffs)
             starters = r.get("starters") or []
             sp = r.get("starters_points") or []
             pp = r.get("players_points") or {}
@@ -61,14 +61,14 @@ def detect(ctx: dict, st: dict) -> list[dict]:
                     pts = float(sp[i]) if i < len(sp) else float(pp.get(str(pid), 0) or 0)
                     if pts > threshold:
                         continue
-                    reason = "negative" if pts < 0 else "zero"
+                    reason = "negative" if pts < 0 else "zero" if pts == 0 else "low"
                 lab = player_label(players, pid)
                 items.append({
                     "key": f"{season}:{week}:{rid}:{lab['player_id']}:{i}",
                     "season": season, "week": week, "roster_id": rid, "slot": slot,
                     "player": lab, "points": round(pts, 2), "reason": reason,
                     "label": {"empty_slot": "Empty starting slot", "negative": "Negative points",
-                              "zero": "Zero points"}[reason],
+                              "zero": "Zero points", "low": f"Under the {threshold:g}-point line"}[reason],
                 })
 
     # Special rules.
@@ -78,6 +78,8 @@ def detect(ctx: dict, st: dict) -> list[dict]:
         rtype = rule.get("type")
         owners = [(_team_by_name(ctx, o), o) for o in rule.get("owners") or []]
         owners = [(rid, o) for rid, o in owners if rid is not None]
+        seen_owners: set[int] = set()
+        owners = [(rid, o) for rid, o in owners if not (rid in seen_owners or seen_owners.add(rid))]
         if not owners:
             continue
         label = rule.get("label") or rtype
@@ -112,6 +114,14 @@ def detect(ctx: dict, st: dict) -> list[dict]:
                     "player": {"player_id": None, "name": label, "position": "RULE", "team": None},
                     "points": round(mine, 2), "reason": "rule", "label": label, "detail": detail,
                 })
+    seen_keys: set[str] = set()
+    unique = []
+    for it in items:
+        if it["key"] in seen_keys:
+            continue
+        seen_keys.add(it["key"])
+        unique.append(it)
+    items = unique
     items.sort(key=lambda x: (x["week"], x["roster_id"], x["slot"]))
     return items
 

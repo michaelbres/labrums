@@ -71,7 +71,7 @@
       s += `<rect class="bar ${cls}" x="${x.toFixed(1)}" y="${y(v).toFixed(1)}" width="${bwid.toFixed(1)}" height="${(H - padB - y(v)).toFixed(1)}" rx="3"><title>${esc(tip)}</title></rect>`;
       s += `<text x="${(x + bwid / 2).toFixed(1)}" y="${H - padB + 16}" text-anchor="middle">${w}</text>`;
     });
-    s += `<line class="avg" x1="${padL}" x2="${W - padR}" y1="${y(leagueAvg)}" y2="${y(leagueAvg)}"/><text x="${W - padR}" y="${y(leagueAvg) - 4}" text-anchor="end">lg avg ${leagueAvg}</text>`;
+    s += `<line class="avg" x1="${padL}" x2="${W - padR}" y1="${y(leagueAvg)}" y2="${y(leagueAvg)}"/><text x="${padL + 4}" y="${y(leagueAvg) - 4}" text-anchor="start">lg avg ${leagueAvg}</text>`;
     s += '</svg>';
     s += `<div class="legend"><span><i style="background:var(--series-1)"></i>Win</span><span><i style="background:var(--series-2)"></i>Loss</span><span><i style="background:var(--text-3)"></i>League average</span></div>`;
     return s;
@@ -222,7 +222,7 @@
   }
 
   function shotRow(s, editable) {
-    const reasonBadge = { zero: '<span class="badge warn">0 pts</span>', negative: '<span class="badge bad">negative</span>', empty_slot: '<span class="badge">empty slot</span>', rule: '<span class="badge accent">rule</span>', manual: '<span class="badge">manual</span>' }[s.reason] || '';
+    const reasonBadge = { zero: '<span class="badge warn">0 pts</span>', negative: '<span class="badge bad">negative</span>', low: '<span class="badge warn">low</span>', empty_slot: '<span class="badge">empty slot</span>', rule: '<span class="badge accent">rule</span>', manual: '<span class="badge">manual</span>' }[s.reason] || '';
     const what = s.reason === 'rule' || s.reason === 'manual' ? `<b>${esc(s.label)}</b><small>${esc(s.detail || '')}</small>` : `<b>${esc(s.player.name)}</b><small>${esc(s.player.position)}${s.player.team ? ` · ${esc(s.player.team)}` : ''} · started at ${esc(s.slot)} · ${fmt(s.points)} pts</small>`;
     const del = editable && s.reason === 'manual' ? `<button class="btn btn-sm btn-ghost btn-danger" data-del="${s.manual_id}" title="Remove">✕</button>` : '';
     return `<div class="shot-row ${s.completed ? 'done' : ''}" data-key="${esc(s.key)}">

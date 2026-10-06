@@ -147,7 +147,7 @@ HEAD_RIVALRY = [
 HEAD_STANDINGS = [
     "Playoff Picture, Week {wk}: {bubble} Clings to the Final Spot",
     "Standings Check: {top} on Top, {bubble} on the Bubble, {bottom} on the Couch",
-    "Six Spots, {alive} Contenders: The Week {wk} Playoff Race",
+    "{spots} Spots, {alive} Contenders: The Week {wk} Playoff Race",
 ]
 
 ORDINALS = {1: "1st", 2: "2nd", 3: "3rd"}
@@ -157,6 +157,13 @@ def ordinal(n: int) -> str:
     if 10 <= n % 100 <= 20:
         return f"{n}th"
     return ORDINALS.get(n % 10, f"{n}th") if n % 10 in ORDINALS else f"{n}th"
+
+
+def _fill(text: str, **kw: str) -> str:
+    """Plain {key} replacement. Never str.format: user text may contain braces."""
+    for k, v in kw.items():
+        text = text.replace("{" + k + "}", str(v))
+    return text
 
 
 def pct(p: float | None) -> str:
@@ -198,8 +205,8 @@ class Newsroom:
             q = prof["catchphrase"]
         else:
             q = r.choice(bank)
-        q = q.format(me=self.name(rid), them=self.name(them) if them else "them",
-                     team=self.tname(them) if them else "that team")
+        q = _fill(q, me=self.name(rid), them=self.name(them) if them else "them",
+                  team=self.tname(them) if them else "that team")
         return f"“{q}” said {self.name(rid)}."
 
     def trait_line(self, rid: int, r: random.Random) -> str | None:
@@ -274,12 +281,10 @@ class Newsroom:
         week = g["week"]
         r = self.rng("recap", week, g["a"], g["b"])
         if g["winner"] is None:
-            w, l = g["a"], g["b"]
-            wp, lp = g["a_pts"], g["b_pts"]
-        else:
-            w = g["winner"]; l = g["b"] if w == g["a"] else g["a"]
-            wp = g["a_pts"] if w == g["a"] else g["b_pts"]
-            lp = g["b_pts"] if w == g["a"] else g["a_pts"]
+            return self.recap_tie(g, r)
+        w = g["winner"]; l = g["b"] if w == g["a"] else g["a"]
+        wp = g["a_pts"] if w == g["a"] else g["b_pts"]
+        lp = g["b_pts"] if w == g["a"] else g["a_pts"]
         m = g["margin"]
         tw, tl = self.teams[w], self.teams[l]
         # Was it an upset? Loser was higher in power rankings at the time (approx: season power rank).
@@ -328,6 +333,24 @@ class Newsroom:
         dek = f"{self.name(w)} {wp:g}, {self.name(l)} {lp:g}"
         return self.article("recap", week, head, dek, body, [w, l], r, ["recap", f"week-{week}"])
 
+    def recap_tie(self, g: dict, r: random.Random) -> dict:
+        week, a, b = g["week"], g["a"], g["b"]
+        pts = g["a_pts"]
+        ta, tb = self.teams[a], self.teams[b]
+        head = f"{self.name(a)} and {self.name(b)} Tie at {pts:g}, Nobody Happy"
+        body = [
+            f"{self.tname(a)} ({ta['record']}) and {self.tname(b)} ({tb['record']}) finished Week {week} dead even at {pts:g} points apiece.",
+            "The league office confirmed the final score twice. Neither owner has accepted it.",
+            r.choice([
+                "Sources say both owners spent Monday night refreshing the stat corrections, hoping for one more tenth of a point.",
+                "A tie counts as half a win for both sides, which is exactly as satisfying as it sounds.",
+            ]),
+            self.quote(a, Q_LOSS, r, b),
+            self.quote(b, Q_LOSS, r, a),
+        ]
+        dek = f"{self.name(a)} {pts:g}, {self.name(b)} {pts:g}"
+        return self.article("recap", week, head, dek, body, [a, b], r, ["recap", f"week-{week}"])
+
     def preview(self, g: dict) -> dict:
         week = g["week"]
         a, b = g["a"], g["b"]
@@ -343,8 +366,13 @@ class Newsroom:
         ]
         h2h = ta["h2h"].get(b)
         if h2h and (h2h["w"] + h2h["l"] + h2h["t"]) > 0:
-            body.append(f"Head to head this season: {self.name(a)} leads {h2h['w']}-{h2h['l']}" + (f"-{h2h['t']}" if h2h["t"] else "") + "." if h2h["w"] >= h2h["l"] else
-                        f"Head to head this season: {self.name(b)} leads {h2h['l']}-{h2h['w']}.")
+            tail = f"-{h2h['t']}" if h2h["t"] else ""
+            if h2h["w"] == h2h["l"]:
+                body.append(f"Head to head this season: {self.name(a)} and {self.name(b)} split {h2h['w']}-{h2h['l']}{tail}.")
+            elif h2h["w"] > h2h["l"]:
+                body.append(f"Head to head this season: {self.name(a)} leads {h2h['w']}-{h2h['l']}{tail}.")
+            else:
+                body.append(f"Head to head this season: {self.name(b)} leads {h2h['l']}-{h2h['w']}{tail}.")
         if pa and pb:
             body.append(f"The playoff math: {self.name(a)} sits at {pct(pa['playoff_pct'])} to make the top {self.po['playoff_teams']}, {self.name(b)} at {pct(pb['playoff_pct'])}.")
             ng_a, ng_b = pa.get("next_game") or {}, pb.get("next_game") or {}
@@ -379,6 +407,8 @@ class Newsroom:
         picks = tx.get("draft_picks") or []
         pick_to = {}
         for p in picks:
+            if p.get("owner_id") is None:
+                continue
             pick_to.setdefault(int(p.get("owner_id", 0)), []).append(f"{p.get('season')} round {p.get('round')} pick")
 
         def desc(pids: list[str], rid: int) -> str:
@@ -528,7 +558,7 @@ class Newsroom:
             h2h = ta["h2h"].get(b, {"w": 0, "l": 0, "t": 0})
             body = [
                 f"{rv['name']} is back on the schedule. {rv['backstory']}".strip(),
-                f"This season: {self.name(a)} {ta['record']}, {self.name(b)} {tb['record']}. Head to head: {h2h['w']}-{h2h['l']}" + (f"-{h2h['t']}" if h2h['t'] else "") + f" in favor of {self.name(a) if h2h['w'] >= h2h['l'] else self.name(b)}.",
+                f"This season: {self.name(a)} {ta['record']}, {self.name(b)} {tb['record']}. Head to head: " + (f"split {h2h['w']}-{h2h['l']}" if h2h['w'] == h2h['l'] else f"{h2h['w']}-{h2h['l']}") + (f"-{h2h['t']}" if h2h['t'] else "") + ("." if h2h['w'] == h2h['l'] else f" in favor of {self.name(a) if h2h['w'] > h2h['l'] else self.name(b)}."),
                 f"Scoring says {self.name(a if ta['avg'] >= tb['avg'] else b)} ({max(ta['avg'], tb['avg']):g} ppg). History says nothing about this game will go the way the scoring says.",
                 self.quote(a, Q_TRASH, r, b),
                 self.quote(b, Q_TRASH, r, a),
@@ -548,7 +578,7 @@ class Newsroom:
         bottom = standings[-1]
         alive = sum(1 for rid in standings if self.po["teams"][rid]["playoff_pct"] > 0.05)
         head = r.choice(HEAD_STANDINGS).format(wk=week, top=self.name(top), bubble=self.name(bubble),
-                                               bottom=self.name(bottom), alive=alive)
+                                               bottom=self.name(bottom), alive=alive, spots=n_po)
         po = self.po["teams"]
         body = [
             f"Through Week {week}, {self.name(top)} leads the league at {self.teams[top]['record']} with {pct(po[top]['playoff_pct'])} playoff odds and a {pct(po[top]['bye_pct'])} shot at a first-round bye."
@@ -565,7 +595,7 @@ class Newsroom:
         if clinched:
             body.append("Clinched: " + ", ".join(self.name(x) for x in clinched) + ".")
         if elim:
-            body.append("Eliminated, mathematically and spiritually: " + ", ".join(self.name(x) for x in elim) + ".")
+            body.append("Eliminated, mathematically: " + ", ".join(self.name(x) for x in elim) + ".")
         body.append(f"{self.name(bottom)} sits last at {self.teams[bottom]['record']}. " + r.choice([
             "Sources say the rebuild is 'on schedule,' which is what every rebuild says.",
             "The silver lining is draft position. The cloud is everything else.",
