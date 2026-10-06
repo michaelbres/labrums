@@ -91,6 +91,14 @@ def simulate(ctx: dict, st: dict, sims: int | None = None, seed: int = 42) -> di
     made = seeds <= playoff_teams
     bye_slots = 2 if playoff_teams == 6 else (0 if playoff_teams in (4, 8) else 1)
 
+    # Current seeds: the same seeding rule applied to today's records (no simulation).
+    cur_key = [(-(teams[rid]["wins"] + 0.5 * teams[rid]["ties"]), -teams[rid]["pf"], -teams[rid]["pa"]) for rid in rids]
+    cur_order = sorted(range(n), key=lambda i: cur_key[i])
+    if use_divs:
+        winners = {min((i for i in range(n) if div_of[i] == d), key=lambda i: cur_key[i]) for d in divs}
+        cur_order = sorted(winners, key=lambda i: cur_key[i]) + [i for i in cur_order if i not in winners]
+    current_seeds = {rids[i]: (pos + 1 if pos < playoff_teams else None) for pos, i in enumerate(cur_order)}
+
     out: dict[int, dict] = {}
     games_left = {rid: sum(1 for w, a, b in remaining if rid in (a, b)) for rid in rids}
     cur_wins = {rid: teams[rid]["wins"] + 0.5 * teams[rid]["ties"] for rid in rids}
@@ -138,5 +146,5 @@ def simulate(ctx: dict, st: dict, sims: int | None = None, seed: int = 42) -> di
             "next_game": cond,
             "model": {"mu": round(float(mu[i]), 2), "sd": round(float(sd[i]), 2)},
         }
-    return {"sims": sims, "playoff_teams": playoff_teams, "seeding_rule": seeding_rule, "next_week": next_week,
+    return {"sims": sims, "playoff_teams": playoff_teams, "seeding_rule": seeding_rule, "current_seeds": current_seeds, "next_week": next_week,
             "league_mu": round(league_mu, 2), "league_sd": round(league_sd, 2), "teams": out}

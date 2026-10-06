@@ -66,9 +66,14 @@ def completed_week_cutoff(league: dict, state: dict) -> int:
     return max(0, int(state.get("week")) - 1)
 
 
-def season_start_ms(state: dict, transactions: dict[int, list[dict]]) -> int | None:
-    """Epoch ms of the season start, or None if unknowable (then nothing counts as offseason)."""
-    sd = state.get("season_start_date")
+def season_start_ms(state: dict, transactions: dict[int, list[dict]], league: dict | None = None) -> int | None:
+    """Epoch ms of the season start, or None if unknowable (then nothing counts as offseason).
+
+    state["season_start_date"] describes the NFL's *current* season, so it is only trusted when this
+    league is in that season; otherwise the start is inferred from the league's own transactions.
+    """
+    same = league is None or str(league.get("season")) == str(state.get("season") or state.get("league_season"))
+    sd = state.get("season_start_date") if same else None
     if sd:
         try:
             dt = datetime.strptime(str(sd)[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
@@ -78,6 +83,9 @@ def season_start_ms(state: dict, transactions: dict[int, list[dict]]) -> int | N
     created = [int(t["created"]) for t in transactions.get(2, []) if t.get("created")]
     if created:
         return min(created) - 7 * 86_400_000
+    created = [int(t["created"]) for w in range(2, 6) for t in transactions.get(w, []) if t.get("created")]
+    if created:
+        return min(created)
     return None
 
 
@@ -183,7 +191,7 @@ def load_season(client, cfg: dict, league_id: str) -> dict[str, Any]:
         "last_completed": last_completed,
         "current_week": current_week,
         "divisions": divisions,
-        "season_start_ms": season_start_ms(state, transactions),
+        "season_start_ms": season_start_ms(state, transactions, league),
         "teams": teams,
         "matchups": matchups,
         "transactions": transactions,

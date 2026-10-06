@@ -1,8 +1,8 @@
 # Plan / status board
 
 ## Right now
-- v0.1 complete on demo data, two adversarial review rounds applied, 58 tests green, pushed to `claude/magical-edison-g0t0m1`.
-- Blocked on the owner: real config details (see handoff "Waiting on the owner") and a first live run against Sleeper from a machine that can reach it.
+- Running against the real league (Labrums and Lagers, 10 teams, 2 divisions, dynasty). Verified vs Sleeper: 10/10 records, 14/14 shotguns, 2025 playoff field. 78 tests green. Pushed to `claude/magical-edison-g0t0m1`.
+- Waiting on the owner: special-rule owners/target, owner profiles, rivalries (templates are in config.yaml with the real display names). Confirm division winners get the top-2 seeds (Sleeper default) or set `playoffs.division_winners_top_seeds: false`.
 
 ## Next
 - Fill `config.yaml` with the owner's real details (special rule owners/target, owner profiles, rivalries).
@@ -11,8 +11,9 @@
 - Idea (owner asked 2026-10-06, NOT started): "Adam Schefter" bot in the league iMessage group. Options: always-on Mac + BlueBubbles (two-way), iPhone Shortcuts scheduled posts (one-way), or a Discord/GroupMe bot. Would use the site API + Claude API for the persona. Waiting on: spare device? two-way or scheduled?
 
 ## Completed
+- 2026-10-06 (live): network allowlist opened; rounds 3-4 on real data (divisions + Sleeper seeding/tiebreaks, offseason roundup, regular-season schedule, ppts efficiency, per-season start date, seed column).
 - 2026-10-06 (later): test suite, README, Dockerfile; refuter round 1 (17 findings fixed) and round 2 (4 leftovers fixed).
 - 2026-10-06: project scaffold, Sleeper client + cache, demo fixture, stats, playoff Monte Carlo, shotgun detection + SQLite check-offs + manual adds, article generator, FastAPI API, SPA frontend (home/standings/teams/team detail/playoffs/shotguns/news/rivalries), CLAUDE.md orchestration rules, agent role files.
 
 ## Dead ends
-- Fetching Sleeper from the Claude sandbox: blocked by the environment's network policy (api.sleeper.app). Use demo mode here, live mode locally.
+- (Resolved) Sleeper was blocked from the sandbox until the owner added api.sleeper.app to the environment's allowed domains. Headless Chromium still can't load sleepercdn.com avatars here; that's a sandbox limit.

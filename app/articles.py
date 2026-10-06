@@ -125,7 +125,7 @@ HEAD_TRADE = [
 ]
 HEAD_WAIVER = [
     "Waiver Wire Report: {top} Breaks the Bank for {p}",
-    "{top} Wins the Week's Waiver Battle; {n} Other Moves Made",
+    "{top} Wins the Week's Waiver Battle; {n} Other {moves} Made",
     "FAAB Frenzy: {p} Lands With {top}",
 ]
 HEAD_SHOTGUN = [
@@ -208,6 +208,13 @@ class Newsroom:
             q = r.choice(bank)
         q = _fill(q, me=self.name(rid), them=self.name(them) if them else "them",
                   team=self.tname(them) if them else "that team")
+        q = q.strip()
+        if q.endswith("..."):
+            q = q[:-3] + "…"
+        if q.endswith("."):
+            q = q[:-1]
+        if q[-1:] not in ("!", "?"):
+            q += ","  # “…,” said Name.   (a trailing ! or ? stays as is)
         return f"“{q}” said {self.name(rid)}."
 
     def trait_line(self, rid: int, r: random.Random) -> str | None:
@@ -410,7 +417,7 @@ class Newsroom:
         for p in picks:
             if p.get("owner_id") is None:
                 continue
-            pick_to.setdefault(int(p.get("owner_id", 0)), []).append(f"{p.get('season')} round {p.get('round')} pick")
+            pick_to.setdefault(int(p.get("owner_id", 0)), []).append(f"a {p.get('season')} round {p.get('round')} pick")
 
         def desc(pids: list[str], rid: int) -> str:
             parts = [f"{player_label(self.ctx['players'], pid)['name']} ({player_label(self.ctx['players'], pid)['position']})" for pid in pids]
@@ -522,7 +529,8 @@ class Newsroom:
         r = self.rng("waiver", week)
         moves.sort(key=lambda m: (-(m["bid"] or 0), -m["since"]))
         top = moves[0]
-        head = r.choice(HEAD_WAIVER).format(top=self.name(top["rid"]), p=top["name"], n=len(moves) - 1)
+        head = r.choice(HEAD_WAIVER).format(top=self.name(top["rid"]), p=top["name"], n=len(moves) - 1,
+                                            moves="Move" if len(moves) - 1 == 1 else "Moves")
         body = []
         bid_txt = f" for ${top['bid']} of FAAB" if top["bid"] else ""
         body.append(f"The biggest splash on the Week {week} wire was {self.name(top['rid'])} landing {top['name']} ({top['pos']}){bid_txt}.")

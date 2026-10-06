@@ -109,6 +109,14 @@ def serialize(season: str, m: dict) -> dict[str, Any]:
     items = [dict(i) for i in m["shotgun_items"]] + manual_to_items(season, state.store.manual(season))
     board = shotguns.leaderboard(ctx, items, completed)
     league = ctx["league"]
+    seeds = m["playoffs"].get("current_seeds") or {}
+    teams = {}
+    for rid, t in st["teams"].items():
+        t = dict(t)
+        if seeds:
+            t["current_seed"] = seeds.get(rid)
+            t["in_playoff_spot"] = t["current_seed"] is not None
+        teams[str(rid)] = t
     return {
         "season": season,
         "league": {"league_id": ctx["league_id"], "name": league.get("name"), "status": league.get("status"),
@@ -117,7 +125,7 @@ def serialize(season: str, m: dict) -> dict[str, Any]:
                    "playoff_teams": ctx["playoff_teams"], "playoff_start": ctx["playoff_start"],
                    "regular_weeks": ctx["regular_weeks"], "last_completed": ctx["last_completed"],
                    "current_week": ctx["current_week"], "avatar": league.get("avatar")},
-        "teams": {str(rid): t for rid, t in st["teams"].items()},
+        "teams": teams,
         "standings": st["standings"],
         "divisions": {str(d): n for d, n in (ctx.get("divisions") or {}).items()},
         "division_standings": {str(d): r for d, r in st["division_standings"].items()},

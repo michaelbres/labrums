@@ -11,6 +11,13 @@
   const signed = (n) => n == null ? '—' : (n > 0 ? '+' : '') + fmt(n, 2);
   const ordinal = (n) => { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
   const team = (rid) => state.data.teams[String(rid)];
+  // Dashed cut line only when the seeded teams are exactly the top-N rows of the standings.
+  const cutIndex = () => {
+    const n = state.data.league.playoff_teams, order = state.data.standings;
+    return order.slice(0, n).every((rid) => team(rid).current_seed != null)
+      && order.slice(n).every((rid) => team(rid).current_seed == null) ? n - 1 : -1;
+  };
+  const seedCell = (rid) => `<td class="num">${team(rid).current_seed ?? ''}</td>`;
   const initials = (name) => (name || '?').split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
   const avatar = (t, cls = '') => t.avatar
     ? `<img class="avatar ${cls}" src="${esc(t.avatar)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'avatar ${cls}',textContent:'${esc(initials(t.display_name))}'}))">`
@@ -79,7 +86,7 @@
 
   // ---------- views ----------
   function viewHome() {
-    const d = state.data, L = d.league;
+    const d = state.data, L = d.league, cutIdx = cutIndex();
     const top = team(d.standings[0]);
     const lb = d.shotguns.leaderboard;
     const owed = lb.reduce((a, r) => a + r.outstanding, 0);
@@ -102,7 +109,7 @@
         <div>
           <div class="card section"><div class="card-h"><h2>Standings</h2><a href="#/standings">Full table →</a></div>
             <div class="table-wrap"><table><thead><tr><th>#</th><th>Team</th><th class="num">W-L</th><th class="num">PF</th><th class="num">Odds</th></tr></thead><tbody>
-            ${d.standings.map((rid, i) => { const t = team(rid); return `<tr class="${i === L.playoff_teams - 1 ? 'cut-line' : ''}"><td><span class="rank-pill ${i === 0 ? 'top' : ''}">${i + 1}</span></td><td>${teamCell(rid)}</td><td class="num">${t.record}</td><td class="num">${fmt(t.pf, 1)}</td><td class="num">${pct(po[rid]?.playoff_pct)}</td></tr>`; }).join('')}
+            ${d.standings.map((rid, i) => { const t = team(rid); return `<tr class="${i === cutIdx ? 'cut-line' : ''}"><td><span class="rank-pill ${i === 0 ? 'top' : ''}">${i + 1}</span></td><td>${teamCell(rid)}</td><td class="num">${t.record}</td><td class="num">${fmt(t.pf, 1)}</td><td class="num">${pct(po[rid]?.playoff_pct)}</td></tr>`; }).join('')}
             </tbody></table></div></div>
           <div class="card"><div class="card-h"><h2>Shotgun leaderboard</h2><a href="#/shotguns">Check them off →</a></div>
             ${lb.slice(0, 6).map((r) => `<div class="hbar"><span>${esc(r.display_name)}</span><div class="meter warn"><i style="width:${lb[0].total ? (r.total / lb[0].total) * 100 : 0}%"></i></div><span class="num">${r.total} <span class="dim">(${r.outstanding} owed)</span></span></div>`).join('')}
@@ -113,10 +120,11 @@
 
   function viewStandings() {
     const d = state.data, L = d.league, po = d.playoffs.teams;
+    const cutIdx = cutIndex();
     const rows = d.standings.map((rid, i) => {
       const t = team(rid);
-      return `<tr class="${i === L.playoff_teams - 1 ? 'cut-line' : ''}">
-        <td><span class="rank-pill ${i === 0 ? 'top' : ''}">${i + 1}</span></td><td>${teamCell(rid)}</td>
+      return `<tr class="${i === cutIdx ? 'cut-line' : ''}">
+        <td><span class="rank-pill ${i === 0 ? 'top' : ''}">${i + 1}</span></td>${seedCell(rid)}<td>${teamCell(rid)}</td>
         <td class="num"><b>${t.record}</b></td><td class="num">${fmt(t.pf, 1)}</td><td class="num">${fmt(t.pa, 1)}</td><td class="num">${fmt(t.avg, 1)}</td>
         <td class="num">${fmt(t.high, 1)}</td><td class="num">${fmt(t.low, 1)}</td><td>${streakBadge(t.streak)}</td>
         <td class="num">${t.all_play.w}-${t.all_play.l}</td><td class="num ${t.luck > 0.75 ? 'good' : t.luck < -0.75 ? 'bad' : ''}">${signed(t.luck)}</td>
@@ -135,9 +143,9 @@
     const divCard = divIds.length ? `<div class="card section"><div class="card-h"><h2>Divisions</h2></div><div class="grid grid-2">${divIds.map((id) => `
       <div><h3 style="margin:0 0 6px">${esc(d.divisions[id])}</h3><table><thead><tr><th>Team</th><th class="num">Record</th><th class="num">Div</th></tr></thead><tbody>${(d.division_standings[id] || []).map((rid) => `<tr><td>${teamCell(rid)}${d.division_leaders[id] === rid ? ' <span class="badge good">Leader</span>' : ''}</td><td class="num"><b>${team(rid).record}</b></td><td class="num">${team(rid).division_record ?? '—'}</td></tr>`).join('')}</tbody></table></div>`).join('')}</div></div>` : '';
     return `
-      <div class="page-h"><div><h1>Standings</h1><p>Sorted by wins, then points for, then points against. Dashed line = playoff cut (top ${L.playoff_teams}). Luck = actual wins minus all-play expected wins.</p></div></div>
+      <div class="page-h"><div><h1>Standings</h1><p>Sorted by wins, then points for, then points against. Seed = current playoff seed (division winners first). Dashed line = playoff cut when it falls cleanly after the top ${L.playoff_teams} rows. Luck = actual wins minus all-play expected wins.</p></div></div>
       ${divCard}
-      <div class="card section"><div class="table-wrap"><table><thead><tr><th>#</th><th>Team</th><th class="num">Record</th><th class="num">PF</th><th class="num">PA</th><th class="num">Avg</th><th class="num">High</th><th class="num">Low</th><th>Streak</th><th class="num">All-play</th><th class="num">Luck</th><th class="num">Power</th><th class="num">Playoff %</th><th>Trend</th></tr></thead><tbody>${rows}</tbody></table></div></div>
+      <div class="card section"><div class="table-wrap"><table><thead><tr><th>#</th><th class="num">Seed</th><th>Team</th><th class="num">Record</th><th class="num">PF</th><th class="num">PA</th><th class="num">Avg</th><th class="num">High</th><th class="num">Low</th><th>Streak</th><th class="num">All-play</th><th class="num">Luck</th><th class="num">Power</th><th class="num">Playoff %</th><th>Trend</th></tr></thead><tbody>${rows}</tbody></table></div></div>
       <div class="grid grid-2 section">
         <div class="card"><div class="card-h"><h2>Power rankings</h2><small>35% record · 40% all-play · 25% scoring</small></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Team</th><th class="num">Score</th><th class="num">Avg</th><th class="num">All-play</th><th class="num">Wk high</th><th class="num">Wk low</th><th class="num">Lineup eff.</th><th class="num">vs. standings</th></tr></thead><tbody>${power}</tbody></table></div></div>
         ${recCard}
