@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timezone
 from typing import Any
 
+from .config import clean_profile
 from .sleeper import avatar_url
 
 log = logging.getLogger("labrums.loader")
@@ -64,6 +66,25 @@ def completed_week_cutoff(league: dict, state: dict) -> int:
     return max(0, int(state.get("week")) - 1)
 
 
+def season_start_ms(state: dict, transactions: dict[int, list[dict]]) -> int | None:
+    """Epoch ms of the season start, or None if unknowable (then nothing counts as offseason)."""
+    sd = state.get("season_start_date")
+    if sd:
+        try:
+            dt = datetime.strptime(str(sd)[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            return int(dt.timestamp() * 1000)
+        except ValueError:
+            pass
+    created = [int(t["created"]) for t in transactions.get(2, []) if t.get("created")]
+    if created:
+        return min(created) - 7 * 86_400_000
+    return None
+
+
+def is_offseason(tx: dict, start_ms: int | None) -> bool:
+    return start_ms is not None and bool(tx.get("created")) and int(tx["created"]) < start_ms
+
+
 def load_season(client, cfg: dict, league_id: str) -> dict[str, Any]:
     league = client.league(league_id)
     if not league:
@@ -99,11 +120,18 @@ def load_season(client, cfg: dict, league_id: str) -> dict[str, Any]:
         except Exception as e:
             log.warning("transactions week %s failed: %s", week, e)
             tx = []
+        # Commissioner moves and failed/pending transactions are ignored everywhere.
+        tx = [t for t in tx if t.get("type") != "commissioner" and t.get("status") == "complete"]
         if tx:
             transactions[week] = tx
         if week > playoff_start + 3 and not rows:
             break
     last_completed = min(last_completed, last_week_with_data)
+
+    n_div = int(settings.get("divisions") or 0)
+    lmeta = league.get("metadata") or {}
+    divisions: dict[int, str] = ({i: (lmeta.get(f"division_{i}") or f"Division {i}") for i in range(1, n_div + 1)}
+                                 if n_div > 1 else {})
 
     user_by_id = {u["user_id"]: u for u in users}
     owners_cfg = cfg.get("owners") or {}
@@ -115,7 +143,13 @@ def load_season(client, cfg: dict, league_id: str) -> dict[str, Any]:
         display = u.get("display_name") or f"Roster {r['roster_id']}"
         prof = (owners_cfg_ci.get(str(display).lower()) or owners_cfg.get(str(u.get("user_id")))
                 or owners_cfg.get(display) or {})
+        prof = clean_profile(prof)
         s = r.get("settings") or {}
+        div = int(s["division"]) if divisions and s.get("division") else None
+        if div not in divisions:
+            div = None
+        # ppts = Sleeper's season "potential points" (max points). Undocumented field.
+        ppts = (float(s["ppts"]) + float(s.get("ppts_decimal") or 0) / 100.0) if s.get("ppts") is not None else None
         teams[int(r["roster_id"])] = {
             "roster_id": int(r["roster_id"]),
             "owner_id": u.get("user_id"),
@@ -129,7 +163,9 @@ def load_season(client, cfg: dict, league_id: str) -> dict[str, Any]:
             "pa": float(s.get("fpts_against") or 0) + float(s.get("fpts_against_decimal") or 0) / 100.0,
             "waiver_budget_used": s.get("waiver_budget_used"),
             "total_moves": s.get("total_moves"),
-            "division": s.get("division"),
+            "division": div,
+            "division_name": divisions.get(div) if div is not None else None,
+            "ppts": ppts,
             "players": list(r.get("players") or []),
             "starters": list(r.get("starters") or []),
         }
@@ -146,6 +182,8 @@ def load_season(client, cfg: dict, league_id: str) -> dict[str, Any]:
         "regular_weeks": regular_weeks,
         "last_completed": last_completed,
         "current_week": current_week,
+        "divisions": divisions,
+        "season_start_ms": season_start_ms(state, transactions),
         "teams": teams,
         "matchups": matchups,
         "transactions": transactions,

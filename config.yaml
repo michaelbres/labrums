@@ -21,6 +21,10 @@ playoffs:
   # How many "games" of league-average performance to blend into each team's
   # scoring estimate (keeps early-season odds from overreacting).
   prior_games: 3
+  # Seed division winners 1..D (the byes with 6 teams and 2 divisions), then the best
+  # remaining records. "auto" = on when the league has divisions and Sleeper's
+  # playoff_seed_type is 0 (default); true / false force it. Ties: PF, then PA.
+  division_winners_top_seeds: auto
 
 shotguns:
   # A started player scoring <= this many points earns a shotgun.
@@ -51,7 +55,17 @@ special_rules:
 #     traits: ["overpays for rookies", "never sets his lineup before Sunday"]
 #     catchphrase: "It's a marathon, not a sprint."
 #     hometown: "Philly"
-owners: {}
+owners:
+  michaelbreslow: {nickname: "", bio: "", traits: [], catchphrase: ""}
+  PatrickHanrahan: {nickname: "", bio: "", traits: [], catchphrase: ""}
+  JimmyWoods10: {nickname: "", bio: "", traits: [], catchphrase: ""}
+  bowieshreiber: {nickname: "", bio: "", traits: [], catchphrase: ""}
+  trottner: {nickname: "", bio: "", traits: [], catchphrase: ""}
+  asinagra25: {nickname: "", bio: "", traits: [], catchphrase: ""}
+  styerech: {nickname: "", bio: "", traits: [], catchphrase: ""}
+  cianmahoney: {nickname: "", bio: "", traits: [], catchphrase: ""}
+  ncarney7502: {nickname: "", bio: "", traits: [], catchphrase: ""}
+  colonbuns: {nickname: "", bio: "", traits: [], catchphrase: ""}
 
 # Rivalries feed hype pieces whenever the two owners meet or sit next to each
 # other in the standings. Example:

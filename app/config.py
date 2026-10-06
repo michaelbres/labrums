@@ -14,7 +14,7 @@ DATA_DIR = Path(os.environ.get("LABRUMS_DATA_DIR", ROOT / "data"))
 DEFAULTS: dict[str, Any] = {
     "current_season": None,
     "seasons": {},
-    "playoffs": {"teams": None, "simulations": 5000, "prior_games": 3},
+    "playoffs": {"teams": None, "simulations": 5000, "prior_games": 3, "division_winners_top_seeds": "auto"},
     "shotguns": {"threshold": 0, "count_empty_slots": True, "include_playoff_weeks": True},
     "special_rules": [],
     "owners": {},
@@ -33,6 +33,16 @@ def _merge(base: dict, override: dict) -> dict:
     return out
 
 
+def clean_profile(prof: dict | None) -> dict:
+    """Drop unset owner-profile fields: None, empty/blank strings, empty lists."""
+    out = {}
+    for k, v in (prof or {}).items():
+        if v is None or (isinstance(v, str) and not v.strip()) or (isinstance(v, (list, tuple, dict)) and not v):
+            continue
+        out[k] = v
+    return out
+
+
 def load_config(path: Path | None = None) -> dict[str, Any]:
     path = path or CONFIG_PATH
     raw: dict = {}
@@ -46,7 +56,7 @@ def load_config(path: Path | None = None) -> dict[str, Any]:
         cfg["current_season"] = str(cfg["current_season"])
     elif cfg["seasons"]:
         cfg["current_season"] = max(cfg["seasons"])
-    cfg["owners"] = {str(k): (v or {}) for k, v in (cfg.get("owners") or {}).items()}
+    cfg["owners"] = {str(k): clean_profile(v) for k, v in (cfg.get("owners") or {}).items()}
     cfg["rivalries"] = [r for r in (cfg.get("rivalries") or []) if r and r.get("owners")]
     rules = []
     for r in cfg.get("special_rules") or []:

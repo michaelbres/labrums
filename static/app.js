@@ -131,8 +131,12 @@
       ${rec.closest_game ? `<dt>Closest game</dt><dd>${teamLink(rec.closest_game.winner)} by ${fmt(rec.closest_game.margin)} over ${teamLink(rec.closest_game.winner === rec.closest_game.a ? rec.closest_game.b : rec.closest_game.a)} (week ${rec.closest_game.week})</dd>` : ''}
       <dt>Highest-scoring game</dt><dd>${teamLink(rec.highest_scoring_game.a)} ${fmt(rec.highest_scoring_game.a_pts)} – ${teamLink(rec.highest_scoring_game.b)} ${fmt(rec.highest_scoring_game.b_pts)} (week ${rec.highest_scoring_game.week})</dd>
     </dl></div>` : '';
+    const divIds = Object.keys(d.divisions || {});
+    const divCard = divIds.length ? `<div class="card section"><div class="card-h"><h2>Divisions</h2></div><div class="grid grid-2">${divIds.map((id) => `
+      <div><h3 style="margin:0 0 6px">${esc(d.divisions[id])}</h3><table><thead><tr><th>Team</th><th class="num">Record</th><th class="num">Div</th></tr></thead><tbody>${(d.division_standings[id] || []).map((rid) => `<tr><td>${teamCell(rid)}${d.division_leaders[id] === rid ? ' <span class="badge good">Leader</span>' : ''}</td><td class="num"><b>${team(rid).record}</b></td><td class="num">${team(rid).division_record ?? '—'}</td></tr>`).join('')}</tbody></table></div>`).join('')}</div></div>` : '';
     return `
-      <div class="page-h"><div><h1>Standings</h1><p>Sorted by wins, then points for. Dashed line = playoff cut (top ${L.playoff_teams}). Luck = actual wins minus all-play expected wins.</p></div></div>
+      <div class="page-h"><div><h1>Standings</h1><p>Sorted by wins, then points for, then points against. Dashed line = playoff cut (top ${L.playoff_teams}). Luck = actual wins minus all-play expected wins.</p></div></div>
+      ${divCard}
       <div class="card section"><div class="table-wrap"><table><thead><tr><th>#</th><th>Team</th><th class="num">Record</th><th class="num">PF</th><th class="num">PA</th><th class="num">Avg</th><th class="num">High</th><th class="num">Low</th><th>Streak</th><th class="num">All-play</th><th class="num">Luck</th><th class="num">Power</th><th class="num">Playoff %</th><th>Trend</th></tr></thead><tbody>${rows}</tbody></table></div></div>
       <div class="grid grid-2 section">
         <div class="card"><div class="card-h"><h2>Power rankings</h2><small>35% record · 40% all-play · 25% scoring</small></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Team</th><th class="num">Score</th><th class="num">Avg</th><th class="num">All-play</th><th class="num">Wk high</th><th class="num">Wk low</th><th class="num">Lineup eff.</th><th class="num">vs. standings</th></tr></thead><tbody>${power}</tbody></table></div></div>
@@ -171,7 +175,7 @@
     const prof = t.profile || {};
     const seedDist = (po.seed_dist || []).map((p, i) => `<div class="hbar"><span>Seed ${i + 1}</span><div class="meter ${i < d.league.playoff_teams ? '' : 'bad'}"><i style="width:${p * 100}%"></i></div><span class="num">${pct(p)}</span></div>`).join('');
     return `
-      <div class="team-head">${avatar(t, 'lg')}<div><h1>${esc(t.team_name)}</h1><div class="muted">${esc(t.display_name)}${t.nickname ? ` · “${esc(t.nickname)}”` : ''}${prof.hometown ? ` · ${esc(prof.hometown)}` : ''}</div>${prof.bio ? `<div class="muted" style="margin-top:4px">${esc(prof.bio)}</div>` : ''}</div>
+      <div class="team-head">${avatar(t, 'lg')}<div><h1>${esc(t.team_name)}</h1><div class="muted">${esc(t.display_name)}${t.division_name ? ` · ${esc(t.division_name)}` : ''}${t.nickname ? ` · “${esc(t.nickname)}”` : ''}${prof.hometown ? ` · ${esc(prof.hometown)}` : ''}</div>${prof.bio ? `<div class="muted" style="margin-top:4px">${esc(prof.bio)}</div>` : ''}</div>
         <div style="margin-left:auto">${statusBadge(po.status)}</div></div>
       <div class="tiles section">
         <div class="tile"><div class="label">Record</div><div class="value">${t.record}</div><div class="sub">${ordinal(t.rank)} place · power #${t.power_rank}</div></div>
@@ -216,7 +220,7 @@
     const seeds = order.map((rid) => `<tr><td>${teamCell(rid, { sub: 'record' })}</td>${P.teams[rid].seed_dist.map((p, i) => `<td class="num" style="background:color-mix(in srgb, var(--series-1) ${Math.round(p * 100)}%, transparent)">${p >= 0.005 ? pct(p) : '<span class="dim">·</span>'}</td>`).join('')}</tr>`).join('');
     const nseeds = order.length;
     return `
-      <div class="page-h"><div><h1>Playoff odds</h1><p>${P.sims.toLocaleString()} simulated seasons. Each team's weekly score ~ Normal(mean, sd), shrunk toward the league average (${fmt(P.league_mu, 1)} ± ${fmt(P.league_sd, 1)}). Seeds by wins, then points for. Top ${L.playoff_teams} make it${L.playoff_teams === 6 ? ', top 2 get a bye' : ''}.</p></div></div>
+      <div class="page-h"><div><h1>Playoff odds</h1><p>${P.sims.toLocaleString()} simulated seasons. Each team's weekly score ~ Normal(mean, sd), shrunk toward the league average (${fmt(P.league_mu, 1)} ± ${fmt(P.league_sd, 1)}). Seeding: ${esc(P.seeding_rule || 'by record, then points for')}. Top ${L.playoff_teams} make it${L.playoff_teams === 6 ? ', top 2 get a bye' : ''}.</p></div></div>
       <div class="card section"><div class="table-wrap"><table><thead><tr><th>Team</th><th>Make playoffs</th><th>First-round bye</th><th class="num">#1 seed</th><th class="num">Avg seed</th><th class="num">Proj W</th><th class="num">Proj PF</th><th class="num">Left</th><th>Next game: win / loss</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>
       <div class="card section"><div class="card-h"><h2>Seed distribution</h2><small>probability of finishing at each seed</small></div><div class="table-wrap"><table><thead><tr><th>Team</th>${Array.from({ length: nseeds }, (_, i) => `<th class="num">${i + 1}</th>`).join('')}</tr></thead><tbody>${seeds}</tbody></table></div></div>`;
   }

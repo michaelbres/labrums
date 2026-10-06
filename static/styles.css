@@ -169,6 +169,7 @@ tr.cut-line td { border-bottom: 2px dashed var(--series-2); }
 .article.type-feud { border-left-color: var(--series-5); }
 .article.type-rivalry { border-left-color: var(--bad); }
 .article.type-preview { border-left-color: var(--series-6); }
+.article.type-offseason { border-left-color: var(--series-1); }
 .article.type-standings { border-left-color: var(--text-3); }
 .article .kicker { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; color: var(--text-3); display: flex; gap: 8px; align-items: center; }
 .article h3 { font-size: 1.15rem; margin: 4px 0 2px; }

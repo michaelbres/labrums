@@ -7,6 +7,7 @@ from __future__ import annotations
 import random
 from typing import Any
 
+from .loader import is_offseason
 from .sleeper import player_label
 
 # --------------------------------------------------------------------------
@@ -418,7 +419,7 @@ class Newsroom:
                 return "nothing of note"
             return ", ".join(parts[:-1]) + (" and " if len(parts) > 1 else "") + parts[-1]
         n = sum(len(v) for v in got.values())
-        pa = desc(got[b], b) if got[b] else "assets"
+        pa = desc(got[a], a) if got[a] else "assets"
         pb = desc(got[b], b) if got[b] else "assets"
         head = r.choice(HEAD_TRADE).format(a=self.name(a), b=self.name(b), n=n or len(picks),
                                            pa=pa.split(",")[0].split(" and ")[0], pb=pb.split(",")[0].split(" and ")[0])
@@ -447,10 +448,66 @@ class Newsroom:
         dek = f"{self.name(a)} ⇄ {self.name(b)}"
         return self.article("trade", week, head, dek, body, [a, b], r, ["trade", f"week-{week}"])
 
+    def _live_txs(self, txs: list[dict]) -> list[dict]:
+        """Completed, non-commissioner transactions only."""
+        return [t for t in txs if t.get("type") != "commissioner" and t.get("status") == "complete"]
+
+    def offseason(self, txs: list[dict]) -> dict | None:
+        """One roundup article for everything that happened before the season started."""
+        trades = [t for t in txs if t.get("type") == "trade"]
+        pickups = sum(len(t.get("adds") or {}) for t in txs if t.get("type") in ("waiver", "free_agent"))
+        if not trades and not pickups:
+            return None
+        r = self.rng("offseason")
+        players = self.ctx["players"]
+
+        def assets(tx: dict) -> dict[int, list[str]]:
+            out: dict[int, list[str]] = {int(x): [] for x in tx.get("roster_ids") or [] if int(x) in self.teams}
+            for pid, to in (tx.get("adds") or {}).items():
+                if int(to) in out:
+                    lab = player_label(players, pid)
+                    out[int(to)].append(f"{lab['name']} ({lab['position']})")
+            for p in tx.get("draft_picks") or []:
+                if p.get("owner_id") is not None and int(p["owner_id"]) in out:
+                    out[int(p["owner_id"])].append(f"a {p.get('season')} round {p.get('round')} pick")
+            return out
+
+        def join(parts: list[str]) -> str:
+            if not parts:
+                return "nothing of note"
+            return ", ".join(parts[:-1]) + (" and " if len(parts) > 1 else "") + parts[-1]
+
+        counts: dict[int, int] = {}
+        for t in trades:
+            for x in t.get("roster_ids") or []:
+                if int(x) in self.teams:
+                    counts[int(x)] = counts.get(int(x), 0) + 1
+        busiest = sorted(counts, key=lambda x: (-counts[x], self.name(x).lower()))[:3]
+        head = f"Offseason Report: {len(trades)} Trades, {pickups} Pickups, and Several Questionable Decisions"
+        body = [f"Before a single snap of the season, the league logged {len(trades)} trades and {pickups} waiver and free-agent "
+                f"pickups. Nobody has been able to explain what most of them were for."]
+        if busiest:
+            lines = ", ".join(f"{self.name(x)} ({counts[x]})" for x in busiest)
+            body.append(f"The busiest traders of the offseason: {lines}. The league's phone companies thank them for their service.")
+        biggest = None
+        if trades:
+            biggest = max(trades, key=lambda t: (sum(len(v) for v in assets(t).values()), str(t.get("transaction_id"))))
+            sides = assets(biggest)
+            parts = [f"{self.name(x)} receives {join(v)}" for x, v in sides.items()]
+            body.append("The largest deal of the offseason: " + "; ".join(parts) + ". Dynasty leagues reward patience; this was not that.")
+        body.append("Offseason waiver and free-agent activity is not listed individually, out of respect for the people involved.")
+        speaker = busiest[0] if busiest else r.choice(sorted(self.teams))
+        body.append(self.quote(speaker, Q_TRADE_HAPPY, r))
+        involved = sorted(set(busiest) | (set(assets(biggest)) if biggest else set()))
+        dek = f"{len(trades)} trades · {pickups} pickups" + (f" · Busiest: {self.name(busiest[0])}" if busiest else "")
+        return self.article("offseason", 1, head, dek, body, involved, r, ["offseason", "trade", "week-1"])
+
     def waivers(self, txs: list[dict], week: int) -> dict | None:
         moves = []
         for tx in txs:
-            if tx.get("type") not in ("waiver", "free_agent") or tx.get("status") not in (None, "complete"):
+            if tx.get("type") not in ("waiver", "free_agent") or tx.get("status") != "complete":
+                continue
+            if is_offseason(tx, self.ctx.get("season_start_ms")):
                 continue
             rids = [int(x) for x in tx.get("roster_ids") or []]
             if not rids or rids[0] not in self.teams:
@@ -620,9 +677,10 @@ class Newsroom:
             br = self.beer_report(week)
             if br:
                 out.append(br)
-            txs = self.ctx["transactions"].get(week, [])
+            txs = [t for t in self._live_txs(self.ctx["transactions"].get(week, []))
+                   if not is_offseason(t, self.ctx.get("season_start_ms"))]
             for tx in txs:
-                if tx.get("type") == "trade" and tx.get("status") in (None, "complete"):
+                if tx.get("type") == "trade":
                     a = self.trade(tx, week)
                     if a:
                         out.append(a)
@@ -630,6 +688,11 @@ class Newsroom:
             if wv:
                 out.append(wv)
             out.append(self.feud(week))
+        off = [t for w in sorted(self.ctx["transactions"]) for t in self._live_txs(self.ctx["transactions"][w])
+               if is_offseason(t, self.ctx.get("season_start_ms"))]
+        oa = self.offseason(off)
+        if oa:
+            out.append(oa)
         if last >= 1:
             sw = self.standings_watch(last)
             if sw:
@@ -641,7 +704,7 @@ class Newsroom:
             for g in games:
                 out.append(self.preview(g))
         # Newest first; previews and standings on top of their week.
-        order = {"preview": 0, "rivalry": 0, "standings": 1, "shotgun": 2, "trade": 3, "waiver": 4, "feud": 5, "recap": 6}
+        order = {"preview": 0, "rivalry": 0, "standings": 1, "shotgun": 2, "offseason": 3, "trade": 3, "waiver": 4, "feud": 5, "recap": 6}
         out.sort(key=lambda a: (-a["week"], order.get(a["type"], 9), a["id"]))
         return out
 

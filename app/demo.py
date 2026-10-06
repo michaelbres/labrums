@@ -182,6 +182,7 @@ def build_demo(season: str = "2026", league_id: str = DEMO_LEAGUE_ID, current_we
                          "waiver_budget_used": rng.randint(0, 80), "waiver_position": ri, "total_moves": rng.randint(2, 20)},
             "metadata": {},
         })
+        rosters[-1]["settings"]["division"] = 1 if ri % 2 else 2  # odd/even
 
     # Transactions: trades + waivers + free agents on completed weeks.
     transactions: dict[int, list[dict]] = {w: [] for w in range(1, last_week + 1)}
@@ -213,17 +214,48 @@ def build_demo(season: str = "2026", league_id: str = DEMO_LEAGUE_ID, current_we
             })
             tid += 1
 
+    # Offseason transactions: Sleeper tags them all leg 1, stamped before the season start.
+    # Uses its own RNG so the fixture above is unchanged. Includes a commissioner move and a failed trade.
+    orng = random.Random(f"{seed}-{season}-offseason")
+    off_base = 1_700_000_000_000 - 13 * 86_400_000  # 2023-11-01, before season_start_date
+    for k in range(5):
+        a, b = orng.sample(range(1, n + 1), 2)
+        ga = orng.sample(rosters_players[a - 1][:8], orng.randint(1, 3 if k == 0 else 1))
+        gb = orng.sample(rosters_players[b - 1][:8], orng.randint(1, 2 if k == 0 else 1))
+        picks = [{"round": 1, "season": str(int(season) + 1), "league_id": None, "roster_id": a, "owner_id": b,
+                  "previous_owner_id": a}] if k % 2 == 0 else []
+        transactions[1].append({
+            "transaction_id": f"off{tid}", "type": "trade", "status": "complete" if k < 4 else "failed",
+            "roster_ids": [a, b], "adds": {**{p: b for p in ga}, **{p: a for p in gb}},
+            "drops": {**{p: a for p in ga}, **{p: b for p in gb}}, "settings": None, "draft_picks": picks,
+            "created": off_base + k * 3600_000, "leg": 1, "creator": f"u{a}"})
+        tid += 1
+    for k in range(6):
+        ri = orng.randint(1, n)
+        transactions[1].append({
+            "transaction_id": f"off{tid}", "type": "waiver" if k % 2 else "free_agent", "status": "complete",
+            "roster_ids": [ri], "adds": {orng.choice(free_agents): ri}, "drops": None,
+            "settings": None, "created": off_base + (10 + k) * 3600_000, "leg": 1, "draft_picks": [], "creator": f"u{ri}"})
+        tid += 1
+    transactions[1].append({
+        "transaction_id": f"off{tid}", "type": "commissioner", "status": "complete", "roster_ids": [1],
+        "adds": {orng.choice(free_agents): 1}, "drops": None, "settings": None,
+        "created": off_base + 20 * 3600_000, "leg": 1, "draft_picks": [], "creator": "u1"})
+    tid += 1
+
     league = {
         "league_id": league_id, "name": "Labrums Demo League", "season": season, "season_type": "regular",
         "status": status, "sport": "nfl", "total_rosters": n, "roster_positions": ROSTER_POSITIONS,
         "previous_league_id": previous_league_id, "draft_id": "draft-demo", "avatar": None,
+        "metadata": {"division_1": "Odds", "division_2": "Evens"},
         "settings": {"playoff_teams": 6, "playoff_week_start": season_weeks + 1, "num_teams": n, "leg": current_week,
-                     "last_scored_leg": current_week - 1, "playoff_type": 0, "playoff_seed_type": 0, "divisions": 0,
+                     "last_scored_leg": current_week - 1, "playoff_type": 0, "playoff_seed_type": 0, "divisions": 2,
                      "waiver_type": 2, "waiver_budget": 100},
         "scoring_settings": {"rec": 0.5, "pass_td": 4, "rush_td": 6, "rec_td": 6},
     }
     state = {"week": current_week, "leg": current_week, "season": season, "season_type": "regular",
-             "display_week": current_week, "league_season": season, "previous_season": str(int(season) - 1)}
+             "display_week": current_week, "league_season": season, "previous_season": str(int(season) - 1),
+             "season_start_date": "2023-11-20"}  # in-season demo transactions are stamped after this date
     public_players = {pid: {k: v for k, v in p.items() if not k.startswith("_")} for pid, p in players.items()}
     return {"league": league, "users": users, "rosters": rosters, "matchups": matchups,
             "transactions": transactions, "players": public_players, "state": state}

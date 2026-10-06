@@ -99,6 +99,7 @@ def compute(ctx: dict) -> dict[str, Any]:
     results: dict[int, list[str]] = {rid: [] for rid in teams}
     opp: dict[int, dict[int, int]] = {rid: {} for rid in teams}
     h2h: dict[int, dict[int, dict]] = {rid: defaultdict(lambda: {"w": 0, "l": 0, "t": 0}) for rid in teams}
+    div_rec: dict[int, dict[str, int]] = {rid: {"w": 0, "l": 0, "t": 0} for rid in teams}
     completed_games: list[dict] = []
     for week in sorted(games):
         if week > last_completed:
@@ -120,6 +121,10 @@ def compute(ctx: dict) -> dict[str, Any]:
                 results[a].append(ra); results[b].append(rb)
                 h2h[a][b]["w" if ra == "W" else "l" if ra == "L" else "t"] += 1
                 h2h[b][a]["w" if rb == "W" else "l" if rb == "L" else "t"] += 1
+                da, db = teams[a].get("division"), teams[b].get("division")
+                if da is not None and da == db:
+                    div_rec[a]["w" if ra == "W" else "l" if ra == "L" else "t"] += 1
+                    div_rec[b]["w" if rb == "W" else "l" if rb == "L" else "t"] += 1
 
     # Weekly ranks for all-play / luck.
     all_play: dict[int, dict[str, int]] = {rid: {"w": 0, "l": 0, "t": 0} for rid in teams}
@@ -186,12 +191,17 @@ def compute(ctx: dict) -> dict[str, Any]:
         pa = sum(scores[opp[rid][w]][w] for w in scores[rid] if w in reg_weeks and w in opp[rid])
         opt_total = sum(optimal[rid][w] for w in optimal[rid] if w in reg_weeks)
         act_for_opt = sum(scores[rid][w] for w in optimal[rid] if w in reg_weeks)
+        # Sleeper's own season "potential points" (roster settings.ppts, undocumented field) wins over our greedy calc.
+        if t.get("ppts"):
+            opt_total, act_for_opt = float(t["ppts"]), pf
         top_pid = max(player_points[rid], key=player_points[rid].get) if player_points[rid] else None
         team_stats[rid] = {
             **{k: v for k, v in t.items() if k not in ("players", "starters", "profile")},
             "profile": t.get("profile") or {},
             "wins": wins, "losses": losses, "ties": ties,
             "record": f"{wins}-{losses}" + (f"-{ties}" if ties else ""),
+            "division_record": (f"{div_rec[rid]['w']}-{div_rec[rid]['l']}" + (f"-{div_rec[rid]['t']}" if div_rec[rid]['t'] else "")
+                                if t.get("division") is not None else None),
             "win_pct": (wins + 0.5 * ties) / n if n else 0.0,
             "pf": round(pf, 2), "pa": round(pa, 2), "avg": round(avg, 2), "std": round(std, 2),
             "high": round(max(reg_scores), 2) if reg_scores else 0.0,
@@ -216,10 +226,20 @@ def compute(ctx: dict) -> dict[str, Any]:
                        for pid in t.get("players") or []],
         }
 
-    standings = sorted(team_stats.values(), key=lambda t: (-(t["wins"] + 0.5 * t["ties"]), -t["pf"]))
+    # Tiebreak everywhere: wins (ties = 0.5), then points-for, then points-against (higher PA advances).
+    def standing_key(t: dict) -> tuple:
+        return (-(t["wins"] + 0.5 * t["ties"]), -t["pf"], -t["pa"])
+
+    standings = sorted(team_stats.values(), key=standing_key)
     for i, t in enumerate(standings):
         t["rank"] = i + 1
         t["in_playoff_spot"] = i < ctx["playoff_teams"]
+
+    division_standings: dict[int, list[int]] = {}
+    for d in sorted(ctx.get("divisions") or {}):
+        members = [t for t in standings if t.get("division") == d]
+        division_standings[d] = [t["roster_id"] for t in members]
+    division_leaders = {d: rids[0] for d, rids in division_standings.items() if rids}
 
     # Power rankings: blend of win pct, all-play pct, and scoring vs league avg.
     for t in team_stats.values():
@@ -255,7 +275,9 @@ def compute(ctx: dict) -> dict[str, Any]:
         "standings": [t["roster_id"] for t in standings],
         "power_rankings": [t["roster_id"] for t in power],
         "games": completed_games,
-        "schedule": {w: gs for w, gs in games.items() if w > last_completed},
+        "division_standings": division_standings,
+        "division_leaders": division_leaders,
+        "schedule": {w: gs for w, gs in games.items() if w > last_completed and w in reg_weeks},
         "league_avg": round(league_mean, 2),
         "records": records,
     }
