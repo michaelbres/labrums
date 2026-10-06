@@ -19,6 +19,11 @@ Fantasy football league site for a Sleeper league. League ID changes each year (
 ## Orchestration
 Custom agent roles live in `.claude/agents/` (scout/researcher/builder/refuter/debugger). They were created this session and were not yet registered as agent types, so this session used general-purpose agents with matching models.
 
+## Known assumptions / unverified
+- Live Sleeper playoff weeks: the code assumes teams that play in a playoff week have a `matchup_id` and idle teams have `null`. Verified only against the demo fixture (UNVERIFIED on live data). If live playoff rows come back with null ids, `include_playoff_weeks` has no effect; check `data/cache/league__<id>__matchups__15.json` after the first live run.
+- Divisions are ignored for seeding.
+- Clinch/eliminate: exact counting rule while games remain (ties on wins count as "can still pass me"); final standings decide once the regular season is over.
+
 ## Waiting on the owner
 - Sleeper display names of the 3 owners under the special rule and the target team → `special_rules` in config.yaml.
 - Owner profiles (nickname, bio, traits, catchphrase) → `owners`.
