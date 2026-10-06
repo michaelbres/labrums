@@ -268,7 +268,7 @@ class DemoClient:
     def winners_bracket(self, league_id: str):
         return []
 
-    def clear_cache(self, keep_players: bool = True) -> None:
+    def clear_cache(self, keep_players: bool = True, league_id: str | None = None) -> None:
         pass
 
     def players(self):

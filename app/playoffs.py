@@ -70,7 +70,11 @@ def simulate(ctx: dict, st: dict, sims: int | None = None, seed: int = 42) -> di
     cur_wins = {rid: teams[rid]["wins"] + 0.5 * teams[rid]["ties"] for rid in rids}
     max_wins = {rid: cur_wins[rid] + games_left[rid] for rid in rids}
 
+    final_rank = {rid: i + 1 for i, rid in enumerate(st["standings"])}
+
     def exact_status(rid: int) -> str:
+        if not remaining:  # regular season over: the standings are the answer
+            return "clinched" if final_rank[rid] <= playoff_teams else "eliminated"
         others = [o for o in rids if o != rid]
         # Teams that could finish level with me can still win the tiebreak, so count >= here.
         can_pass = sum(1 for o in others if max_wins[o] >= cur_wins[rid])

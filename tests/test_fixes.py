@@ -59,6 +59,8 @@ def test_status_is_exact(week):
         clinched = sum(1 for o in others if cur[o] + left[o] >= cur[rid]) < k
         elim = sum(1 for o in others if cur[o] > cur[rid] + left[rid]) >= k
         want = "clinched" if clinched else "eliminated" if elim else "alive"
+        if not any(left.values()):  # regular season over: final standings decide
+            want = "clinched" if st["teams"][rid]["rank"] <= k else "eliminated"
         assert t["status"] == want, (rid, t["status"], want)
         if t["status"] == "clinched":
             assert t["playoff_pct"] == 1.0

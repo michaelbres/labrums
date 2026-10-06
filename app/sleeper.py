@@ -93,10 +93,17 @@ class SleeperClient:
         self._write_cache(path, data)
         return data
 
-    def clear_cache(self, keep_players: bool = True) -> None:
-        """Delete cached API responses (the big players blob is kept by default)."""
+    def clear_cache(self, keep_players: bool = True, league_id: str | None = None) -> None:
+        """Delete cached API responses so the next build re-pulls from Sleeper.
+
+        With `league_id`, only that league's files (plus the NFL state) are removed,
+        so other seasons keep their offline fallback. The players blob is kept by default.
+        """
+        prefix = f"league__{league_id}" if league_id else None
         for p in self.cache_dir.glob("*.json"):
             if keep_players and p.name == self._cache_path("players/nfl").name:
+                continue
+            if prefix and not (p.name.startswith(prefix + "__") or p.name == prefix + ".json" or p.name.startswith("state__")):
                 continue
             try:
                 p.unlink()

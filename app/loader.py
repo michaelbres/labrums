@@ -11,6 +11,10 @@ log = logging.getLogger("labrums.loader")
 MAX_WEEK = 18
 
 
+class LeagueNotFound(ValueError):
+    """The league id does not exist on Sleeper."""
+
+
 def discover_seasons(client, cfg: dict) -> list[dict]:
     """Seasons from config plus anything reachable via previous_league_id."""
     found: dict[str, dict] = {}
@@ -53,18 +57,17 @@ def completed_week_cutoff(league: dict, state: dict) -> int:
     if state_season and state_season != str(league.get("season")):
         # Looking at an old season while the NFL is in a new one: everything's final.
         return MAX_WEEK
+    if state.get("season_type") in ("post", "off"):
+        return MAX_WEEK
     if state.get("season_type") == "pre" or not state.get("week"):
         return 0
-    week = int(state.get("week"))
-    if state.get("season_type") == "post" or state.get("season_type") == "off":
-        return MAX_WEEK
-    return max(0, week - 1)
+    return max(0, int(state.get("week")) - 1)
 
 
 def load_season(client, cfg: dict, league_id: str) -> dict[str, Any]:
     league = client.league(league_id)
     if not league:
-        raise ValueError(f"League {league_id} not found on Sleeper")
+        raise LeagueNotFound(f"League {league_id} not found on Sleeper")
     state = client.state() or {}
     users = client.users(league_id)
     rosters = client.rosters(league_id)

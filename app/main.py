@@ -16,7 +16,7 @@ from pydantic import BaseModel
 from . import articles, playoffs, shotguns, stats
 from .config import DATA_DIR, ROOT, load_config
 from .db import Store, manual_to_items
-from .loader import discover_seasons, load_season
+from .loader import LeagueNotFound, discover_seasons, load_season
 from .sleeper import SleeperClient, SleeperError
 
 log = logging.getLogger("labrums")
@@ -80,7 +80,7 @@ class State:
             ctx = load_season(self.client, self.cfg, league_id)
         except SleeperError as e:
             raise HTTPException(503, f"Sleeper API unavailable: {e}") from e
-        except ValueError as e:
+        except LeagueNotFound as e:
             raise HTTPException(404, str(e)) from e
         st = stats.compute(ctx)
         po = playoffs.simulate(ctx, st)
@@ -153,7 +153,7 @@ def season(season: str):
 @app.post("/api/season/{season}/refresh", dependencies=[Depends(require_admin)])
 def refresh(season: str):
     state.reload_config()
-    state.client.clear_cache(keep_players=True)
+    state.client.clear_cache(keep_players=True, league_id=state.league_id_for(season))
     m = state.base_model(season, force=True)
     return {"ok": True, "build_seconds": m["build_seconds"]}
 

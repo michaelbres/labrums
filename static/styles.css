@@ -153,6 +153,7 @@ tr.cut-line td { border-bottom: 2px dashed var(--series-2); }
 .chart text { fill: var(--text-2); font-size: 11px; font-family: var(--font); }
 .chart .axis { stroke: var(--border); stroke-width: 1; }
 .chart .avg { stroke: var(--text-3); stroke-dasharray: 3 3; stroke-width: 1; }
+.chart text.avg-label { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; font-weight: 600; }
 .chart rect.bar { fill: var(--series-1); }
 .chart rect.bar.win { fill: var(--series-1); }
 .chart rect.bar.loss { fill: var(--series-2); }
