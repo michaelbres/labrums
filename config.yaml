@@ -1,0 +1,70 @@
+# ---------------------------------------------------------------------------
+# Labrums league config. Everything here is safe to edit; no code changes needed.
+# Owners are referenced by their Sleeper display name (the name shown in the
+# Sleeper app), or by their Sleeper user_id if you prefer.
+# ---------------------------------------------------------------------------
+
+# The season shown by default. Must be a key in `seasons`.
+current_season: "2026"
+
+# Sleeper league IDs by season. The ID changes every year: add a new line when
+# the league renews. Older seasons are also auto-discovered by following
+# Sleeper's previous_league_id chain, so you only strictly need the newest one.
+seasons:
+  "2026": "1312105961640448000"
+
+playoffs:
+  # null = use the league's Sleeper setting (top 6 for this league).
+  teams: null
+  # Number of Monte Carlo seasons simulated for playoff odds.
+  simulations: 5000
+  # How many "games" of league-average performance to blend into each team's
+  # scoring estimate (keeps early-season odds from overreacting).
+  prior_games: 3
+
+shotguns:
+  # A started player scoring <= this many points earns a shotgun.
+  threshold: 0
+  # An empty starting slot scores 0. Count it as a shotgun?
+  count_empty_slots: true
+  # Count playoff / consolation weeks too?
+  include_playoff_weeks: true
+
+# Special one-off rules. Fill in the three owners and the target team when you
+# have them. Supported types:
+#   score_less_than_team  -> each listed owner owes a shotgun any week they score
+#                            fewer points than `target` (another owner).
+#   score_below           -> each listed owner owes a shotgun any week they score
+#                            below `points`.
+special_rules:
+  - season: "2026"
+    type: score_less_than_team
+    label: "Scored less than the target team"
+    owners: []        # e.g. ["Mike", "Dan", "Jess"]  (Sleeper display names)
+    target: ""        # e.g. "Tyler"
+
+# Owner profiles feed the fake articles. All fields optional.
+# Example:
+#   "Mike":
+#     nickname: "The Commish"
+#     bio: "Three-time runner-up, zero-time champion."
+#     traits: ["overpays for rookies", "never sets his lineup before Sunday"]
+#     catchphrase: "It's a marathon, not a sprint."
+#     hometown: "Philly"
+owners: {}
+
+# Rivalries feed hype pieces whenever the two owners meet or sit next to each
+# other in the standings. Example:
+#   - name: "The Brothers' War"
+#     owners: ["Mike", "Dan"]
+#     backstory: "Siblings. Loser hosts Thanksgiving."
+rivalries: []
+
+# Fake newsroom bylines.
+reporters:
+  - "Skip Bayless Jr."
+  - "Adam Schefter's Nephew"
+  - "Woj Bomb"
+  - "Diana Russini-Lite"
+  - "The Beat Writer"
+  - "Anonymous League Source"

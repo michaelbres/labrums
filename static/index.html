@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Labrums League HQ</title>
+  <meta name="description" content="Standings, playoff odds, the shotgun leaderboard, and the fake news your fantasy league deserves.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%88%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#/">
+        <span class="brand-mark">🏈</span>
+        <span class="brand-text"><span id="league-name">League HQ</span><small id="league-sub">loading…</small></span>
+      </a>
+      <nav class="nav" id="nav">
+        <a href="#/" data-view="home">Home</a>
+        <a href="#/standings" data-view="standings">Standings</a>
+        <a href="#/teams" data-view="teams">Teams</a>
+        <a href="#/playoffs" data-view="playoffs">Playoff Odds</a>
+        <a href="#/shotguns" data-view="shotguns">Shotguns</a>
+        <a href="#/news" data-view="news">News</a>
+        <a href="#/rivalries" data-view="rivalries">Rivalries</a>
+      </nav>
+      <div class="topbar-tools">
+        <select id="season-select" class="select" title="Season"></select>
+        <button id="refresh-btn" class="btn btn-ghost" title="Re-pull from Sleeper and rebuild">↻</button>
+      </div>
+    </div>
+  </header>
+  <main class="wrap" id="app">
+    <div class="loading">Loading league data…</div>
+  </main>
+  <footer class="wrap foot">
+    <span id="foot-meta"></span>
+  </footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>
