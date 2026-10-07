@@ -168,9 +168,9 @@ tbody tr:hover { background: color-mix(in srgb, var(--ink) 3%, transparent); }
 .power-table th:nth-child(1) { width: 34px; }
 .power-table th:nth-child(3) { width: 118px; }
 .power-table th:nth-child(4) { width: 58px; }
-.power-table th:nth-child(5) { width: 84px; }
-.power-table.has-eff th:nth-child(6) { width: 88px; }
-.power-table th:last-child { width: 96px; }
+.power-table th:nth-child(5) { width: 104px; }
+.power-table.has-eff th:nth-child(6) { width: 100px; }
+.power-table th:last-child { width: 124px; }
 .power-table .team-cell { min-width: 0; }
 .power-table .team-cell .names { min-width: 0; }
 .power-table .team-cell .names b, .power-table .team-cell .names small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
