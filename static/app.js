@@ -29,6 +29,7 @@
   };
   const teamLink = (rid) => `<a href="#/teams/${rid}">${esc(team(rid).name)}</a>`;
   const meter = (p, cls = '') => `<div class="meter-row"><div class="meter ${cls}"><i style="width:${Math.max(0, Math.min(100, (p || 0) * 100))}%"></i></div><span class="pct">${pct(p)}</span></div>`;
+  const pageHead = (eyebrow, title, lead = '', extra = '') => `<div class="page-h"><div class="eyebrow">${eyebrow}</div><h1>${title}</h1>${lead ? `<p class="lead">${lead}</p>` : ''}${extra ? `<div class="page-tools">${extra}</div>` : ''}</div>`;
   const toast = (msg) => { let el = $('.toast'); if (!el) { el = document.createElement('div'); el.className = 'toast'; document.body.appendChild(el); } el.textContent = msg; el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2200); };
   const streakBadge = (s) => { if (!s || s === '—') return '<span class="dim">—</span>'; const cls = s[0] === 'W' ? 'good' : s[0] === 'L' ? 'bad' : ''; return `<span class="badge ${cls}">${esc(s)}</span>`; };
   const statusBadge = (st) => st === 'clinched' ? '<span class="badge good">Clinched</span>' : st === 'eliminated' ? '<span class="badge bad">Eliminated</span>' : '';
@@ -75,12 +76,12 @@
       const x = padL + i * bw + bw * 0.18, bwid = bw * 0.64;
       const opp = g ? (g.a === t.roster_id ? g.b : g.a) : null;
       const tip = `Week ${w}: ${v}${g ? ` ${won ? 'W' : won === false ? 'L' : 'T'} vs ${team(opp).name} (${g.a === t.roster_id ? g.b_pts : g.a_pts})` : ''}`;
-      s += `<rect class="bar ${cls}" x="${x.toFixed(1)}" y="${y(v).toFixed(1)}" width="${bwid.toFixed(1)}" height="${(H - padB - y(v)).toFixed(1)}" rx="3"><title>${esc(tip)}</title></rect>`;
+      s += `<rect class="bar ${cls}" x="${x.toFixed(1)}" y="${y(v).toFixed(1)}" width="${bwid.toFixed(1)}" height="${(H - padB - y(v)).toFixed(1)}" rx="0"><title>${esc(tip)}</title></rect>`;
       s += `<text x="${(x + bwid / 2).toFixed(1)}" y="${H - padB + 16}" text-anchor="middle">${w}</text>`;
     });
     s += `<line class="avg" x1="${padL}" x2="${W - padR}" y1="${y(leagueAvg)}" y2="${y(leagueAvg)}"/><text class="avg-label" x="${W - padR}" y="${y(leagueAvg) - 5}" text-anchor="end">lg avg ${leagueAvg}</text>`;
     s += '</svg>';
-    s += `<div class="legend"><span><i style="background:var(--series-1)"></i>Win</span><span><i style="background:var(--series-2)"></i>Loss</span><span><i style="background:var(--text-3)"></i>League average</span></div>`;
+    s += `<div class="legend"><span><i style="background:var(--accent)"></i>Win</span><span><i style="background:var(--faint)"></i>Loss</span><span><i class="dash"></i>League average</span></div>`;
     return s;
   }
 
@@ -94,13 +95,24 @@
     const hi = rec.high_score ? `${fmt(rec.high_score.points)} · ${team(rec.high_score.roster_id).name} (wk ${rec.high_score.week})` : '—';
     const headlines = d.articles.slice(0, 8);
     const po = d.playoffs.teams;
+    const [tw, tl, tt] = String(top.record).split('-').map(Number);
+    const bubble = d.standings.slice(1).map(team).filter((t) => po[t.roster_id] && po[t.roster_id].playoff_pct != null)
+      .sort((a, b) => Math.abs(po[a.roster_id].playoff_pct - 0.5) - Math.abs(po[b.roster_id].playoff_pct - 0.5))[0];
+    const heroTitle = L.status === 'complete' ? `${esc(top.name)} finished ${esc(top.record)} and the rest of you have notes.`
+      : (tw > 0 && !tl && !tt) ? `${esc(top.name)} is ${esc(top.record)} and nobody is okay.`
+      : `Week ${L.current_week}. ${esc(top.name)} leads.${bubble ? ` ${esc(bubble.name)} is sweating.` : ''}`;
     return `
-      <div class="page-h"><div><h1>${esc(L.name)}</h1><p>${L.status === 'complete' ? 'Season complete' : `Week ${L.current_week} · ${L.last_completed} week${L.last_completed === 1 ? '' : 's'} in the books`} · ${L.playoff_teams} playoff spots</p></div></div>
+      <section class="hero">
+        <div class="eyebrow"><span class="dot"></span>${esc(L.season)} / ${esc(L.name || 'Labrums and Lagers')}</div>
+        <h1>${heroTitle}</h1>
+        <p class="lead">${L.status === 'complete' ? 'Season complete' : `Week ${L.current_week} · ${L.last_completed} week${L.last_completed === 1 ? '' : 's'} in the books`} · ${L.playoff_teams} playoff spots. League average is ${fmt(d.league_avg, 1)} points per team-week and ${owed} shotgun${owed === 1 ? ' is' : 's are'} still owed.</p>
+        <div class="actions"><a class="btn btn-primary" href="#/standings">Standings</a><a class="btn-link" href="#/news">Latest news <span aria-hidden="true">↗</span></a></div>
+      </section>
       <div class="tiles section">
         <div class="tile"><div class="label">Leader</div><div class="value">${esc(top.name)}</div><div class="sub">${top.record} · ${fmt(top.pf, 1)} PF</div></div>
         <div class="tile"><div class="label">Top score</div><div class="value">${rec.high_score ? fmt(rec.high_score.points, 1) : '—'}</div><div class="sub">${rec.high_score ? `${esc(team(rec.high_score.roster_id).name)}, week ${rec.high_score.week}` : ''}</div></div>
         <div class="tile"><div class="label">League average</div><div class="value">${fmt(d.league_avg, 1)}</div><div class="sub">points per team-week</div></div>
-        <div class="tile"><div class="label">Shotguns owed</div><div class="value">${owed} <span class="beer">🍺</span></div><div class="sub">${lb[0] && lb[0].total ? `${esc(lb[0].name)} leads with ${lb[0].total}` : 'nobody yet'}</div></div>
+        <div class="tile"><div class="label">Shotguns owed</div><div class="value">${owed}</div><div class="sub">${lb[0] && lb[0].total ? `${esc(lb[0].name)} leads with ${lb[0].total}` : 'nobody yet'}</div></div>
       </div>
       <div class="grid grid-2 section">
         <div class="card"><div class="card-h"><h2>Headlines</h2><a href="#/news">All news →</a></div>
@@ -109,7 +121,7 @@
         <div>
           <div class="card section"><div class="card-h"><h2>Standings</h2><a href="#/standings">Full table →</a></div>
             <div class="table-wrap"><table><thead><tr><th>#</th><th>Team</th><th class="num">W-L</th><th class="num">PF</th><th class="num">Odds</th></tr></thead><tbody>
-            ${d.standings.map((rid, i) => { const t = team(rid); return `<tr class="${i === cutIdx ? 'cut-line' : ''}"><td><span class="rank-pill ${i === 0 ? 'top' : ''}">${i + 1}</span></td><td>${teamCell(rid)}</td><td class="num">${t.record}</td><td class="num">${fmt(t.pf, 1)}</td><td class="num">${pct(po[rid]?.playoff_pct)}</td></tr>`; }).join('')}
+            ${d.standings.map((rid, i) => { const t = team(rid); return `<tr class="${i === cutIdx ? 'cut-line' : ''}"><td><span class="rank ${i === 0 ? 'top' : ''}">${i + 1}</span></td><td>${teamCell(rid)}</td><td class="num">${t.record}</td><td class="num">${fmt(t.pf, 1)}</td><td class="num">${pct(po[rid]?.playoff_pct)}</td></tr>`; }).join('')}
             </tbody></table></div></div>
           <div class="card"><div class="card-h"><h2>Shotgun leaderboard</h2><a href="#/shotguns">Check them off →</a></div>
             ${lb.slice(0, 6).map((r) => `<div class="hbar"><span>${esc(r.name)}</span><div class="meter warn"><i style="width:${lb[0].total ? (r.total / lb[0].total) * 100 : 0}%"></i></div><span class="num">${r.total} <span class="dim">(${r.outstanding} owed)</span></span></div>`).join('')}
@@ -124,13 +136,13 @@
     const rows = d.standings.map((rid, i) => {
       const t = team(rid);
       return `<tr class="${i === cutIdx ? 'cut-line' : ''}">
-        <td><span class="rank-pill ${i === 0 ? 'top' : ''}">${i + 1}</span></td>${seedCell(rid)}<td>${teamCell(rid)}</td>
+        <td><span class="rank ${i === 0 ? 'top' : ''}">${i + 1}</span></td>${seedCell(rid)}<td>${teamCell(rid)}</td>
         <td class="num"><b>${t.record}</b></td><td class="num">${fmt(t.pf, 1)}</td><td class="num">${fmt(t.pa, 1)}</td><td class="num">${fmt(t.avg, 1)}</td>
         <td class="num">${fmt(t.high, 1)}</td><td class="num">${fmt(t.low, 1)}</td><td>${streakBadge(t.streak)}</td>
         <td class="num">${t.all_play.w}-${t.all_play.l}</td><td class="num ${t.luck > 0.75 ? 'good' : t.luck < -0.75 ? 'bad' : ''}">${signed(t.luck)}</td>
         <td class="num">${t.power_rank}</td><td class="num">${pct(po[rid]?.playoff_pct)}</td><td>${sparkline(t.scores, d.league_avg)}</td></tr>`;
     }).join('');
-    const power = d.power_rankings.map((rid, i) => { const t = team(rid); return `<tr><td><span class="rank-pill ${i === 0 ? 'top' : ''}">${i + 1}</span></td><td>${teamCell(rid, { sub: 'record' })}</td><td class="num">${fmt(t.power_score * 100, 1)}</td><td class="num">${fmt(t.avg, 1)}</td><td class="num">${pct(t.all_play.pct)}</td><td class="num">${t.weeks_top}</td><td class="num">${t.weeks_bottom}</td><td class="num">${pct(t.lineup_efficiency)}</td><td class="num">${t.rank - (i + 1) > 0 ? `<span class="badge good">+${t.rank - (i + 1)}</span>` : t.rank - (i + 1) < 0 ? `<span class="badge bad">${t.rank - (i + 1)}</span>` : '<span class="dim">—</span>'}</td></tr>`; }).join('');
+    const power = d.power_rankings.map((rid, i) => { const t = team(rid); return `<tr><td><span class="rank ${i === 0 ? 'top' : ''}">${i + 1}</span></td><td>${teamCell(rid, { sub: 'record' })}</td><td class="num">${fmt(t.power_score * 100, 1)}</td><td class="num">${fmt(t.avg, 1)}</td><td class="num">${pct(t.all_play.pct)}</td><td class="num">${t.weeks_top}</td><td class="num">${t.weeks_bottom}</td><td class="num">${pct(t.lineup_efficiency)}</td><td class="num">${t.rank - (i + 1) > 0 ? `<span class="badge good">+${t.rank - (i + 1)}</span>` : t.rank - (i + 1) < 0 ? `<span class="badge bad">${t.rank - (i + 1)}</span>` : '<span class="dim">—</span>'}</td></tr>`; }).join('');
     const rec = d.records || {};
     const recCard = rec.high_score ? `<div class="card"><div class="card-h"><h2>Season records</h2></div><dl class="kv">
       <dt>Highest score</dt><dd>${fmt(rec.high_score.points)} · ${teamLink(rec.high_score.roster_id)} (week ${rec.high_score.week})</dd>
@@ -143,7 +155,7 @@
     const divCard = divIds.length ? `<div class="card section"><div class="card-h"><h2>Divisions</h2></div><div class="grid grid-2">${divIds.map((id) => `
       <div><h3 style="margin:0 0 6px">${esc(d.divisions[id])}</h3><table><thead><tr><th>Team</th><th class="num">Record</th><th class="num">Div</th></tr></thead><tbody>${(d.division_standings[id] || []).map((rid) => `<tr><td>${teamCell(rid)}${d.division_leaders[id] === rid ? ' <span class="badge good">Leader</span>' : ''}</td><td class="num"><b>${team(rid).record}</b></td><td class="num">${team(rid).division_record ?? '—'}</td></tr>`).join('')}</tbody></table></div>`).join('')}</div></div>` : '';
     return `
-      <div class="page-h"><div><h1>Standings</h1><p>Sorted by wins, then points for, then points against. Seed = current playoff seed (division winners first). Dashed line = playoff cut when it falls cleanly after the top ${L.playoff_teams} rows. Luck = actual wins minus all-play expected wins.</p></div></div>
+      ${pageHead('01 / Standings', 'Standings', `Sorted by wins, then points for, then points against. Seed = current playoff seed (division winners first). Dashed line = playoff cut when it falls cleanly after the top ${L.playoff_teams} rows. Luck = actual wins minus all-play expected wins.`)}
       ${divCard}
       <div class="card section"><div class="table-wrap"><table><thead><tr><th>#</th><th class="num">Seed</th><th>Team</th><th class="num">Record</th><th class="num">PF</th><th class="num">PA</th><th class="num">Avg</th><th class="num">High</th><th class="num">Low</th><th>Streak</th><th class="num">All-play</th><th class="num">Luck</th><th class="num">Power</th><th class="num">Playoff %</th><th>Trend</th></tr></thead><tbody>${rows}</tbody></table></div></div>
       <div class="grid grid-2 section">
@@ -161,7 +173,7 @@
         <div class="kv"><dt>Record</dt><dd><b>${t.record}</b> (${ordinal(t.rank)})</dd><dt>Avg</dt><dd>${fmt(t.avg, 1)}</dd><dt>Streak</dt><dd>${streakBadge(t.streak)}</dd><dt>Playoffs</dt><dd>${pct(po[rid]?.playoff_pct)} ${statusBadge(po[rid]?.status)}</dd><dt>Top player</dt><dd>${t.top_player ? `${esc(t.top_player.name)} (${fmt(t.top_player.points, 1)})` : '—'}</dd></div>
         <div style="margin-top:8px">${sparkline(t.scores, d.league_avg)}</div></a>`;
     }).join('');
-    return `<div class="page-h"><div><h1>Teams</h1><p>Click a team for the full breakdown.</p></div></div><div class="cards">${cards}</div>`;
+    return `${pageHead('02 / Teams', 'Teams', 'Click a team for the full breakdown.')}<div class="cards">${cards}</div>`;
   }
 
   function viewTeam(rid) {
@@ -183,8 +195,8 @@
     const prof = t.profile || {};
     const seedDist = (po.seed_dist || []).map((p, i) => `<div class="hbar"><span>Seed ${i + 1}</span><div class="meter ${i < d.league.playoff_teams ? '' : 'bad'}"><i style="width:${p * 100}%"></i></div><span class="num">${pct(p)}</span></div>`).join('');
     return `
-      <div class="team-head">${avatar(t, 'lg')}<div><h1>${esc(t.team_name)}</h1><div class="muted">${esc(t.name)} <small class="handle">@${esc(t.display_name)}</small>${t.division_name ? ` · ${esc(t.division_name)}` : ''}${t.nickname ? ` · “${esc(t.nickname)}”` : ''}${prof.hometown ? ` · ${esc(prof.hometown)}` : ''}</div>${prof.bio ? `<div class="muted" style="margin-top:4px">${esc(prof.bio)}</div>` : ''}</div>
-        <div style="margin-left:auto">${statusBadge(po.status)}</div></div>
+      <div class="page-h team-head">${avatar(t, 'lg')}<div><div class="eyebrow">02 / Teams / ${ordinal(t.rank)} place</div><h1>${esc(t.team_name)}</h1><div class="lead">${esc(t.name)} <small class="handle">@${esc(t.display_name)}</small>${t.division_name ? ` · ${esc(t.division_name)}` : ''}${t.nickname ? ` · “${esc(t.nickname)}”` : ''}${prof.hometown ? ` · ${esc(prof.hometown)}` : ''}</div>${prof.bio ? `<div class="lead" style="margin-top:4px">${esc(prof.bio)}</div>` : ''}</div>
+        <div class="team-status">${statusBadge(po.status)}</div></div>
       <div class="tiles section">
         <div class="tile"><div class="label">Record</div><div class="value">${t.record}</div><div class="sub">${ordinal(t.rank)} place · power #${t.power_rank}</div></div>
         <div class="tile"><div class="label">Points for</div><div class="value">${fmt(t.pf, 1)}</div><div class="sub">${fmt(t.avg, 1)} avg · ±${fmt(t.std, 1)}</div></div>
@@ -192,7 +204,7 @@
         <div class="tile"><div class="label">Playoff odds</div><div class="value">${pct(po.playoff_pct)}</div><div class="sub">bye ${pct(po.bye_pct)} · proj ${fmt(po.proj_wins, 1)} wins</div></div>
         <div class="tile"><div class="label">Luck</div><div class="value">${signed(t.luck)}</div><div class="sub">all-play ${t.all_play.w}-${t.all_play.l} · ${fmt(t.expected_wins, 1)} xW</div></div>
         <div class="tile"><div class="label">Lineup efficiency</div><div class="value">${pct(t.lineup_efficiency)}</div><div class="sub">${fmt(t.bench_points_left, 1)} pts left on bench</div></div>
-        <div class="tile"><div class="label">Shotguns</div><div class="value">${shots.length} 🍺</div><div class="sub">${shots.filter((s) => !s.completed).length} outstanding</div></div>
+        <div class="tile"><div class="label">Shotguns</div><div class="value">${shots.length}</div><div class="sub">${shots.filter((s) => !s.completed).length} outstanding</div></div>
         <div class="tile"><div class="label">Streak</div><div class="value">${esc(t.streak)}</div><div class="sub">high ${fmt(t.high, 1)} · low ${fmt(t.low, 1)}</div></div>
       </div>
       <div class="card section"><div class="card-h"><h2>Weekly scores</h2><small>bars colored by result</small></div>${scoreChart(t, d.league_avg)}</div>
@@ -225,10 +237,10 @@
         <td>${meter(p.bye_pct)}</td><td class="num">${pct(p.top_seed_pct)}</td><td class="num">${fmt(p.avg_seed, 1)}</td><td class="num">${fmt(p.proj_wins, 1)}</td><td class="num">${fmt(p.proj_pf, 0)}</td><td class="num">${p.games_left}</td>
         <td>${ng && ng.if_win != null ? `<span class="good">${pct(ng.if_win)}</span> / <span class="bad">${pct(ng.if_loss)}</span>` : '<span class="dim">—</span>'}</td><td>${statusBadge(p.status)}</td></tr>`;
     }).join('');
-    const seeds = order.map((rid) => `<tr><td>${teamCell(rid, { sub: 'record' })}</td>${P.teams[rid].seed_dist.map((p, i) => `<td class="num" style="background:color-mix(in srgb, var(--series-1) ${Math.round(p * 100)}%, transparent)">${p >= 0.005 ? pct(p) : '<span class="dim">·</span>'}</td>`).join('')}</tr>`).join('');
+    const seeds = order.map((rid) => `<tr><td>${teamCell(rid, { sub: 'record' })}</td>${P.teams[rid].seed_dist.map((p, i) => `<td class="num" style="background:color-mix(in srgb, var(--accent) ${Math.round(p * 100)}%, transparent)">${p >= 0.005 ? pct(p) : '<span class="dim">·</span>'}</td>`).join('')}</tr>`).join('');
     const nseeds = order.length;
     return `
-      <div class="page-h"><div><h1>Playoff odds</h1><p>${P.sims.toLocaleString()} simulated seasons. Each team's weekly score ~ Normal(mean, sd), shrunk toward the league average (${fmt(P.league_mu, 1)} ± ${fmt(P.league_sd, 1)}). Seeding: ${esc(P.seeding_rule || 'by record, then points for')}. Top ${L.playoff_teams} make it${L.playoff_teams === 6 ? ', top 2 get a bye' : ''}.</p></div></div>
+      ${pageHead('03 / Playoff odds', 'Playoff odds', `${P.sims.toLocaleString()} simulated seasons. Each team's weekly score ~ Normal(mean, sd), shrunk toward the league average (${fmt(P.league_mu, 1)} ± ${fmt(P.league_sd, 1)}). Seeding: ${esc(P.seeding_rule || 'by record, then points for')}. Top ${L.playoff_teams} make it${L.playoff_teams === 6 ? ', top 2 get a bye' : ''}.`)}
       <div class="card section"><div class="table-wrap"><table><thead><tr><th>Team</th><th>Make playoffs</th><th>First-round bye</th><th class="num">#1 seed</th><th class="num">Avg seed</th><th class="num">Proj W</th><th class="num">Proj PF</th><th class="num">Left</th><th>Next game: win / loss</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>
       <div class="card section"><div class="card-h"><h2>Seed distribution</h2><small>probability of finishing at each seed</small></div><div class="table-wrap"><table><thead><tr><th>Team</th>${Array.from({ length: nseeds }, (_, i) => `<th class="num">${i + 1}</th>`).join('')}</tr></thead><tbody>${seeds}</tbody></table></div></div>`;
   }
@@ -246,7 +258,7 @@
     const d = state.data, S = d.shotguns, L = d.league;
     const lb = S.leaderboard, maxTotal = Math.max(1, ...lb.map((r) => r.total));
     const locked = d.meta.admin_locked && !localStorage.getItem('labrums_pin');
-    const rows = lb.map((r) => `<tr><td><span class="rank-pill ${r.rank === 1 && r.total ? 'top' : ''}">${r.rank}</span></td><td>${teamCell(r.roster_id)}</td><td class="num"><b>${r.total}</b></td><td class="num good">${r.completed}</td><td class="num ${r.outstanding ? 'bad' : ''}">${r.outstanding}</td><td><div class="meter-row"><div class="meter good" title="${r.completed} of ${r.total} done"><i style="width:${r.total ? (r.completed / r.total) * 100 : 0}%"></i></div><span class="pct">${r.total ? Math.round((r.completed / r.total) * 100) : 0}%</span></div></td><td class="dim">${Object.entries(r.by_reason).map(([k, v]) => `${v} ${k.replace('_', ' ')}`).join(', ') || '—'}</td><td class="dim">${r.worst_week ? `wk ${r.worst_week.week} (${r.worst_week.count})` : '—'}</td></tr>`).join('');
+    const rows = lb.map((r) => `<tr><td><span class="rank ${r.rank === 1 && r.total ? 'top' : ''}">${r.rank}</span></td><td>${teamCell(r.roster_id)}</td><td class="num"><b>${r.total}</b></td><td class="num good">${r.completed}</td><td class="num ${r.outstanding ? 'bad' : ''}">${r.outstanding}</td><td><div class="meter-row"><div class="meter good" title="${r.completed} of ${r.total} done"><i style="width:${r.total ? (r.completed / r.total) * 100 : 0}%"></i></div><span class="pct">${r.total ? Math.round((r.completed / r.total) * 100) : 0}%</span></div></td><td class="dim">${Object.entries(r.by_reason).map(([k, v]) => `${v} ${k.replace('_', ' ')}`).join(', ') || '—'}</td><td class="dim">${r.worst_week ? `wk ${r.worst_week.week} (${r.worst_week.count})` : '—'}</td></tr>`).join('');
     let items = S.items;
     if (state.shotFilter === 'outstanding') items = items.filter((s) => !s.completed);
     if (state.shotFilter === 'completed') items = items.filter((s) => s.completed);
@@ -261,8 +273,8 @@
     const ownerOpts = d.standings.map((rid) => `<option value="${rid}">${esc(team(rid).name)}</option>`).join('');
     const weekOpts = Array.from({ length: Math.max(1, L.last_completed) }, (_, i) => `<option value="${i + 1}">Week ${i + 1}</option>`).reverse().join('');
     return `
-      <div class="page-h"><div><h1>Shotgun leaderboard 🍺</h1><p>Start a player who scores ${S.rules.threshold} or fewer, shotgun a beer.${S.rules.count_empty_slots ? ' Empty starting slots count.' : ''}${special.length ? ` Special rules: ${special.map((r) => `${esc(r.label)} (${r.owners.map(esc).join(', ')}${r.target ? ` vs ${esc(r.target)}` : ''})`).join('; ')}.` : ''}</p></div>
-        ${d.meta.admin_locked ? `<div class="form-row"><input class="input" id="pin" type="password" placeholder="Admin PIN" value="${esc(localStorage.getItem('labrums_pin') || '')}"><button class="btn btn-sm" id="pin-save">Unlock</button>${locked ? '<span class="lock-note">Check-offs are locked until you enter the PIN.</span>' : '<span class="lock-note">Unlocked.</span>'}</div>` : ''}</div>
+      ${pageHead('04 / Shotguns', 'Shotgun leaderboard 🍺', `Start a player who scores ${S.rules.threshold} or fewer, shotgun a beer.${S.rules.count_empty_slots ? ' Empty starting slots count.' : ''}${special.length ? ` Special rules: ${special.map((r) => `${esc(r.label)} (${r.owners.map(esc).join(', ')}${r.target ? ` vs ${esc(r.target)}` : ''})`).join('; ')}.` : ''}`,
+        d.meta.admin_locked ? `<div class="form-row"><input class="input" id="pin" type="password" placeholder="Admin PIN" value="${esc(localStorage.getItem('labrums_pin') || '')}"><button class="btn btn-sm" id="pin-save">Unlock</button>${locked ? '<span class="lock-note">Check-offs are locked until you enter the PIN.</span>' : '<span class="lock-note">Unlocked.</span>'}</div>` : '')}
       <div class="card section"><div class="table-wrap"><table><thead><tr><th>#</th><th>Owner</th><th class="num">Total</th><th class="num">Done</th><th class="num">Owed</th><th>Progress</th><th>Breakdown</th><th>Worst week</th></tr></thead><tbody>${rows}</tbody></table></div></div>
       <div class="card section">
         <div class="card-h"><h2>The ledger</h2>
@@ -291,7 +303,7 @@
       const a = d.articles.find((x) => x.id === articleId);
       if (!a) return '<div class="error">Article not found.</div>';
       const related = d.articles.filter((x) => x.id !== a.id && x.teams.some((t) => a.teams.includes(t))).slice(0, 6);
-      return `<div class="page-h"><div><a href="#/news">← All news</a></div></div>${articleCard(a, true)}<div class="card section"><div class="card-h"><h2>Related</h2></div><ul class="clean headlines">${related.map((x) => `<li><div class="kicker">${esc(x.type)} · week ${x.week}</div><a href="#/news/${esc(x.id)}">${esc(x.headline)}</a></li>`).join('') || '<li class="empty">—</li>'}</ul></div>`;
+      return `<div class="back"><a href="#/news">← All news</a></div>${articleCard(a, true)}<div class="card section"><div class="card-h"><h2>Related</h2></div><ul class="clean headlines">${related.map((x) => `<li><div class="kicker">${esc(x.type)} · week ${x.week}</div><a href="#/news/${esc(x.id)}">${esc(x.headline)}</a></li>`).join('') || '<li class="empty">—</li>'}</ul></div>`;
     }
     const types = ['all', ...new Set(d.articles.map((a) => a.type))];
     const weeks = ['all', ...new Set(d.articles.map((a) => a.week))];
@@ -299,8 +311,8 @@
     if (state.newsFilter !== 'all') arts = arts.filter((a) => a.type === state.newsFilter);
     if (state.newsWeek !== 'all') arts = arts.filter((a) => String(a.week) === String(state.newsWeek));
     return `
-      <div class="page-h"><div><h1>League News</h1><p>All of it fake. Most of it accurate.</p></div>
-        <select class="select" id="news-week">${weeks.map((w) => `<option value="${w}" ${String(state.newsWeek) === String(w) ? 'selected' : ''}>${w === 'all' ? 'All weeks' : `Week ${w}`}</option>`).join('')}</select></div>
+      ${pageHead('05 / News', 'League News', 'All of it fake. Most of it accurate.',
+        `<select class="select" id="news-week">${weeks.map((w) => `<option value="${w}" ${String(state.newsWeek) === String(w) ? 'selected' : ''}>${w === 'all' ? 'All weeks' : `Week ${w}`}</option>`).join('')}</select>`)}
       <div class="chips section">${types.map((t) => `<span class="chip ${state.newsFilter === t ? 'active' : ''}" data-news="${t}">${t}</span>`).join('')}</div>
       <div class="grid" style="gap:12px">${arts.map((a) => articleCard(a)).join('') || '<div class="empty">No stories match.</div>'}</div>`;
   }
@@ -331,9 +343,9 @@
     for (let i = Math.max(0, cut - 3); i < Math.min(d.standings.length - 1, cut + 2); i++) hot.push([d.standings[i], d.standings[i + 1]]);
     const hotCards = hot.map(([a, b]) => `<div class="card"><div class="card-h"><h3>${esc(team(a).name)} vs. ${esc(team(b).name)}</h3><span class="badge warn">${ordinal(team(a).rank)} / ${ordinal(team(b).rank)}</span></div><div class="dim">${team(a).record} vs ${team(b).record} · ${fmt(Math.abs(team(a).pf - team(b).pf), 1)} PF apart · playoff odds ${pct(d.playoffs.teams[a].playoff_pct)} vs ${pct(d.playoffs.teams[b].playoff_pct)}</div></div>`).join('');
     return `
-      <div class="page-h"><div><h1>Rivalries</h1><p>Configured in <code>config.yaml</code> under <code>rivalries</code>. The newsroom writes hype pieces when rivals meet.</p></div></div>
+      ${pageHead('06 / Rivalries', 'Rivalries', 'Configured in <code>config.yaml</code> under <code>rivalries</code>. The newsroom writes hype pieces when rivals meet.')}
       ${cards ? `<div class="grid grid-2 section">${cards}</div>` : '<div class="card section"><div class="empty">No rivalries configured yet. Add them to config.yaml, then hit ↻.</div></div>'}
-      <h2>Fighting for the cut line</h2><p class="muted">Teams stacked around the ${ordinal(cut)} seed, where every week is a grudge match whether they like it or not.</p>
+      <div class="section-head"><div class="eyebrow">Heat</div><h2>Fighting for the cut line</h2><p class="lead">Teams stacked around the ${ordinal(cut)} seed, where every week is a grudge match whether they like it or not.</p></div>
       <div class="grid grid-3 section">${hotCards}</div>`;
   }
 
@@ -386,7 +398,7 @@
         if (item) { item.completed = r.completed; item.completed_at = r.completed_at; }
         const lb = state.data.shotguns.leaderboard.find((x) => x.roster_id === item?.roster_id);
         if (lb) { lb.completed += r.completed ? 1 : -1; lb.outstanding -= r.completed ? 1 : -1; }
-        toast(r.completed ? '🍺 Shotgun logged' : 'Un-logged');
+        toast(r.completed ? 'Shotgun logged' : 'Un-logged');
         route();
       } catch (err) { box.checked = !box.checked; box.disabled = false; toast(`Error: ${err.message}`); }
     }
@@ -417,8 +429,8 @@
     try {
       state.data = await api(`/api/season/${season}`);
       const L = state.data.league;
-      $('#league-name').textContent = L.name || 'League HQ';
-      $('#league-sub').textContent = `${L.season} season · ${L.status === 'complete' ? 'final' : `week ${L.current_week}`}${state.data.meta.demo ? ' · DEMO DATA' : ''}`;
+      $('#league-name').textContent = L.name || 'Labrums and Lagers';
+      $('#league-sub').textContent = `/ ${L.season} · ${L.status === 'complete' ? 'Final' : `Week ${L.current_week}`}${state.data.meta.demo ? ' · Demo data' : ''}`;
       $('#foot-meta').textContent = `Data via Sleeper · built ${new Date(state.data.meta.built_at * 1000).toLocaleString()} in ${state.data.meta.build_seconds}s · ${state.data.playoffs.sims.toLocaleString()} playoff sims${state.data.meta.demo ? ' · running on demo data' : ''}`;
       document.title = `${L.name || 'League HQ'} · ${L.season}`;
       route();
