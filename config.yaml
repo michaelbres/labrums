@@ -43,36 +43,115 @@ shotguns:
 special_rules:
   - season: "2026"
     type: score_less_than_team
-    label: "Scored less than the target team"
-    owners: []        # e.g. ["Mike", "Dan", "Jess"]  (Sleeper display names)
-    target: ""        # e.g. "Tyler"
+    label: "Scored less than Nick"
+    owners: ["michaelbreslow", "PatrickHanrahan", "bowieshreiber"]
+    target: "ncarney7502"
 
-# Owner profiles feed the fake articles. All fields optional.
-# Example:
-#   "Mike":
-#     nickname: "The Commish"
-#     bio: "Three-time runner-up, zero-time champion."
-#     traits: ["overpays for rookies", "never sets his lineup before Sunday"]
-#     catchphrase: "It's a marathon, not a sprint."
-#     hometown: "Philly"
+# Owner profiles feed the fake articles. Keyed by Sleeper display name.
+# name = what articles call them. All other fields optional.
 owners:
-  michaelbreslow: {nickname: "", bio: "", traits: [], catchphrase: ""}
-  PatrickHanrahan: {nickname: "", bio: "", traits: [], catchphrase: ""}
-  JimmyWoods10: {nickname: "", bio: "", traits: [], catchphrase: ""}
-  bowieshreiber: {nickname: "", bio: "", traits: [], catchphrase: ""}
-  trottner: {nickname: "", bio: "", traits: [], catchphrase: ""}
-  asinagra25: {nickname: "", bio: "", traits: [], catchphrase: ""}
-  styerech: {nickname: "", bio: "", traits: [], catchphrase: ""}
-  cianmahoney: {nickname: "", bio: "", traits: [], catchphrase: ""}
-  ncarney7502: {nickname: "", bio: "", traits: [], catchphrase: ""}
-  colonbuns: {nickname: "", bio: "", traits: [], catchphrase: ""}
+  "michaelbreslow":
+    name: "Michael"
+    bio: "Commissioner. Gambling addict who hates his job."
+    traits:
+      - "has a parlay riding on every game he's also starting players in"
+      - "answers lineup questions from his work bathroom"
+      - "treats the waiver wire like a sportsbook"
+    catchphrase: "It's not gambling if you know."
+  "JimmyWoods10":
+    name: "Jimmy"
+    bio: "Rips Pokemon cards. Loves Quentin Johnston more than Quentin Johnston's mother does."
+    traits:
+      - "would trade a first-round pick for a holographic Charizard"
+      - "starts Quentin Johnston no matter what the projections say"
+      - "opens a booster pack every time his team scores"
+    catchphrase: "Quentin Johnston is a top-ten receiver and I will not be taking questions."
+  "colonbuns":
+    name: "Colin"
+    nickname: "Colon Burns"
+    bio: "Spends too much time playing Minecraft. Follows the Rule of 5."
+    traits:
+      - "sets his lineup between Minecraft sessions"
+      - "cites the Rule of 5 for every decision, including trades"
+      - "has built a Minecraft replica of his starting lineup"
+    catchphrase: "Rule of 5. Look it up."
+  "cianmahoney":
+    name: "Cian"
+    nickname: "Zimbabwe"
+    bio: "Never around. Always in a random location. Whereabouts currently unknown."
+    traits:
+      - "sets his lineup from a different time zone every week"
+      - "has not been physically seen since the draft"
+      - "is rumored to be in Zimbabwe"
+    catchphrase: "I'm actually traveling right now, can this wait?"
+  "PatrickHanrahan":
+    name: "Patrick"
+    nickname: "Pat"
+    bio: "Heavy-set LARPer with a nose for running deer over with his car. Raging socialist."
+    traits:
+      - "has hit more deer than his running backs have hit holes"
+      - "shows up to the draft in chainmail"
+      - "proposes redistributing FAAB to the teams that need it most"
+    catchphrase: "The means of production belong to the workers, and so does your running back."
+  "trottner":
+    name: "Tom"
+    bio: "His parents' fourth-favorite child, behind his older brother Joe, his dog Pippa, and his dad's fishes."
+    traits:
+      - "is still trying to beat his brother Joe at something"
+      - "ranks below the family dog in the holiday card"
+      - "won a title and his dad asked how the fish were"
+    catchphrase: "Pippa doesn't even have a team."
+  "styerech":
+    name: "Steven"
+    bio: "Also never around. Mysterious source of income. Likes Daft Punk."
+    traits:
+      - "has a source of income nobody in the league can explain"
+      - "sets his lineup at 4 a.m. with Daft Punk on"
+      - "cannot be reached by phone, text, or carrier pigeon"
+    catchphrase: "Harder, better, faster, stronger. Mostly harder."
+  "bowieshreiber":
+    name: "Bowie"
+    bio: "Diabetic Philly sports fan who hates his life. Caffeine addiction."
+    traits:
+      - "is on his fourth energy drink before the early games kick off"
+      - "treats every loss like an Eagles playoff exit"
+      - "blames his blood sugar for his lineup decisions"
+    catchphrase: "This is a Philly thing, you wouldn't get it."
+  "asinagra25":
+    name: "Adam"
+    bio: "Very quiet. Known for some questionable Catan moves."
+    traits:
+      - "says nothing in the group chat for weeks, then makes a trade nobody understands"
+      - "once blocked a longest road and ended a friendship"
+      - "will trade you sheep for wood at a rate that should be illegal"
+    catchphrase: "..."
+  "ncarney7502":
+    name: "Nick"
+    bio: "Generally makes the worst moves in the league, and everyone flames him for it."
+    traits:
+      - "makes the trade everyone in the group chat begged him not to make"
+      - "is the reason three owners have a bonus shotgun rule"
+      - "drops a player the week before he goes off"
+    catchphrase: "You'll all see. Eventually."
 
 # Rivalries feed hype pieces whenever the two owners meet or sit next to each
-# other in the standings. Example:
-#   - name: "The Brothers' War"
-#     owners: ["Mike", "Dan"]
-#     backstory: "Siblings. Loser hosts Thanksgiving."
-rivalries: []
+# other in the standings.
+rivalries:
+  - name: "The AIPAC12 Bowl"
+    owners: ["bowieshreiber", "michaelbreslow"]
+    backstory: "Bowie and Michael. A diabetic Philly fan with a caffeine problem versus a gambling addict who hates his job. Neither is okay, and they take it out on each other."
+  - name: "The Where's Waldo Bowl"
+    owners: ["styerech", "cianmahoney"]
+    backstory: "Steven and Cian. Two owners who are never around, playing a game neither of them will watch, from locations neither will disclose."
+  - name: "The Big Dawg Bowl"
+    owners: ["PatrickHanrahan", "trottner"]
+    backstory: "Pat and Tom. A raging socialist LARPer with a body count of deer against a man ranked below his dad's fish in the family hierarchy."
+  - name: "The Newcomers Bowl"
+    owners: ["ncarney7502", "JimmyWoods10"]
+    backstory: "Nick and Jimmy. The league's worst decision-maker versus the Quentin Johnston truther. Somebody has to win this one, and the league would prefer neither did."
+  - name: "The Waste Management Bowl"
+    owners: ["asinagra25", "colonbuns"]
+    backstory: "Adam and Colin. Catan's most questionable trader against Minecraft's most dedicated builder. The Rule of 5 does not apply to sheep."
 
 # Fake newsroom bylines.
 reporters:
