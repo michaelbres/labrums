@@ -7,6 +7,7 @@ share between threads.
 """
 from __future__ import annotations
 
+import http.client
 import json
 import os
 import urllib.error
@@ -52,7 +53,7 @@ class UpstashRedis:
             except Exception:
                 pass
             raise RedisError(f"Redis REST HTTP {e.code}: {detail}".rstrip(": ")) from e
-        except (urllib.error.URLError, TimeoutError, OSError, ValueError) as e:
+        except (urllib.error.URLError, http.client.HTTPException, TimeoutError, OSError, ValueError) as e:
             raise RedisError(f"Redis REST request failed: {e}") from e
 
     @staticmethod
@@ -71,6 +72,8 @@ class UpstashRedis:
         if not cmds:
             return []
         body = self._post(f"{self.url}/pipeline", [self._args(c) for c in cmds])
+        if isinstance(body, dict) and body.get("error"):
+            raise RedisError(str(body["error"]))
         if not isinstance(body, list) or len(body) != len(cmds):
             raise RedisError("unexpected Redis REST pipeline response")
         out = []

@@ -1,11 +1,14 @@
 """Load and normalize config.yaml."""
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+log = logging.getLogger("labrums.config")
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG_PATH = Path(os.environ.get("LABRUMS_CONFIG", ROOT / "config.yaml"))
@@ -82,7 +85,13 @@ def redis_settings() -> tuple[str, str] | None:
     """(url, token) from the first env var pair where both are non-empty, else None."""
     for url_var, token_var in REDIS_ENV_PAIRS:
         url, token = os.environ.get(url_var, "").strip(), os.environ.get(token_var, "").strip()
+        if url and not token:
+            log.warning("%s is set but %s is empty; Redis not configured from this pair", url_var, token_var)
+            continue
         if url and token:
+            if not url.lower().startswith(("http://", "https://")):
+                log.warning("%s must start with http:// or https://; Redis not configured from this pair", url_var)
+                continue
             return url, token
     return None
 

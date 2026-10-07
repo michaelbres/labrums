@@ -130,14 +130,17 @@ Mount `/app/data` as a persistent volume or the check-offs disappear when the co
 
 The same app runs as a serverless function. SQLite and local files do not survive there, so check-offs and the Sleeper cache live in Upstash Redis (free).
 
-1. Import the repo in Vercel. The `app` object in `api/index.py` is detected as a FastAPI app, and the `/static` mount is served from the CDN. No build settings are needed. Python 3.12 or newer is required.
-2. In the project, open Storage and add an Upstash Redis database. Vercel injects `KV_REST_API_URL` and `KV_REST_API_TOKEN`. The app also reads `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (the Upstash console names) and `LABRUMS_REDIS_URL` / `LABRUMS_REDIS_TOKEN`. Precedence when several pairs are set: `UPSTASH_*`, then `KV_*`, then `LABRUMS_*`.
-3. Optional: set `LABRUMS_ADMIN_PIN` to protect check-offs and refresh. Set `LABRUMS_REDIS_PREFIX` if several deployments share one database.
-4. Deploy. Do **not** set `LABRUMS_DEMO`: demo mode never uses Redis and shows fake data.
+1. Import the repo in Vercel. The first deploy happens automatically and runs in ephemeral mode (no Redis yet). The `app` object in `api/index.py` is detected as a FastAPI app, and the `/static` mount is served from the CDN. No build settings are needed. Python 3.12 or newer is required.
+2. In the project, open Storage and create or connect an Upstash Redis database. Vercel injects `KV_REST_API_URL` and `KV_REST_API_TOKEN`. The app also reads `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (the Upstash console names) and `LABRUMS_REDIS_URL` / `LABRUMS_REDIS_TOKEN`. Precedence when several pairs are set: `UPSTASH_*`, then `KV_*`, then `LABRUMS_*`.
+3. Open Settings, then Environment Variables. Optional: set `LABRUMS_ADMIN_PIN` to protect check-offs and refresh, and `LABRUMS_REDIS_PREFIX` if several deployments share one database. Do **not** set `LABRUMS_DEMO`: demo mode never uses Redis and shows fake data.
+4. Open Deployments and Redeploy. Environment changes only apply to new deployments.
+5. For a custom domain, open Settings, then Domains, and add the CNAME or A record Vercel shows.
+
+The first load after a deploy takes about 10 seconds while Sleeper is pulled, then pages load in under a second.
 
 Without Redis on Vercel the app still works but writes to `/tmp`, which is wiped on cold starts. `meta.persistence` in `/api/season/<year>` reports `redis`, `sqlite` or `ephemeral`.
 
-Free-tier limits that matter: Upstash allows 500K commands a month and 256 MB (a model build costs a few dozen commands, and warm instances reuse their built model for five minutes). Hobby functions can run up to 300 seconds; `vercel.json` sets 120. The first request after a cold start pulls from Sleeper if the Redis cache is empty, so it is slower. The players blob is stored zlib-compressed and stays well under 1 MB.
+Free-tier limits that matter: Upstash allows 500K commands a month and 256 MB (about 90 Redis commands per cold build, 2 per warm page load, and warm instances reuse their built model for five minutes). Hobby functions can run up to 300 seconds; `vercel.json` sets 120. The first request after a cold start pulls from Sleeper if the Redis cache is empty, so it is slower. The players blob is stored zlib-compressed and stays well under 1 MB.
 
 Other hosts that run the Docker image need a persistent volume at `/app/data`.
 

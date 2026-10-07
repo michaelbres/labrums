@@ -129,7 +129,7 @@ class RedisCache:
         if len(text) > MAX_BLOB_BYTES:
             log.warning("not caching %s: %d bytes compressed exceeds %d", path, len(text), MAX_BLOB_BYTES)
             return
-        log.debug("redis cache write %s (%d bytes)", path, len(text))
+        log.info("redis cache write %s (%d bytes compressed)", path, len(text))
         try:
             self.r.cmd("SET", self._key(path), text, "EX", self.expire)
         except RedisError as e:

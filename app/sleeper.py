@@ -77,6 +77,7 @@ class SleeperClient:
         """`cache` is a backend with read/write/delete_matching, or a directory (-> DiskCache)."""
         self.cache = cache if hasattr(cache, "delete_matching") else DiskCache(cache)
         self.timeout = timeout
+        self._players: tuple[float, dict] | None = None  # in-process memo of the trimmed players dict
 
     # ---- low level -------------------------------------------------------
     def _cache_path(self, path: str) -> Path:
@@ -173,7 +174,13 @@ class SleeperClient:
                     continue
                 out[str(pid)] = {k: p.get(k) for k in PLAYER_FIELDS if p.get(k) is not None}
             return out
-        return self.get("players/nfl", PLAYERS_TTL, transform=trim) or {}
+        memo = self._players
+        if memo is not None and time.time() - memo[0] < PLAYERS_TTL:
+            return memo[1]
+        out = self.get("players/nfl", PLAYERS_TTL, transform=trim) or {}
+        if out:
+            self._players = (time.time(), out)
+        return out
 
 
 def avatar_url(avatar_id: str | None) -> str | None:

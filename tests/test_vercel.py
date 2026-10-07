@@ -267,3 +267,64 @@ class _Capture:
 
     def __init__(self, cache):
         self.cache = cache
+
+
+# ---- fix round ------------------------------------------------------------
+def test_store_outage_page_renders_and_toggle_503(monkeypatch, fake):
+    monkeypatch.setattr(sleeper, "SleeperClient", lambda cache, *a, **k: _Capture(cache))
+    main = _reload_main(monkeypatch, UPSTASH_REDIS_REST_URL=fake.url, UPSTASH_REDIS_REST_TOKEN=fake.token)
+    main.state.client = demo.DemoClient(current_week=7)
+    main.state.cfg["seasons"] = {"2026": "demo2026"}
+    main.state.cfg["current_season"] = "2026"
+    with TestClient(main.app) as c:
+        body = c.get("/api/season/2026").json()
+        assert "store_error" not in body["meta"]
+        key = body["shotguns"]["items"][0]["key"]
+        fake.stop()  # Redis goes away after the model is built
+        r = c.get("/api/season/2026")
+        assert r.status_code == 200
+        meta = r.json()["meta"]
+        assert meta["store_error"] and fake.token not in meta["store_error"]
+        assert c.post(f"/api/season/2026/shotguns/{key}/toggle").status_code == 503
+        assert c.post("/api/season/2026/shotguns/manual", json={"label": "m", "week": 2, "roster_id": 1}).status_code == 503
+        assert c.delete("/api/season/2026/shotguns/manual/1").status_code == 503
+    fake.stop = lambda: None  # fixture teardown would stop it twice
+    _reload_main(monkeypatch, LABRUMS_DEMO="1", LABRUMS_DEMO_DB="memory")
+
+
+def test_incomplete_read_is_redis_error(monkeypatch, redis):
+    import http.client
+    import urllib.request
+
+    def boom(*a, **k):
+        raise http.client.IncompleteRead(b"x")
+    monkeypatch.setattr(urllib.request, "urlopen", boom)
+    with pytest.raises(RedisError):
+        redis.cmd("GET", "k")
+
+
+def test_pipeline_dict_error_body(monkeypatch, redis):
+    monkeypatch.setattr(redis, "_post", lambda url, payload: {"error": "ERR boom"})
+    with pytest.raises(RedisError, match="boom"):
+        redis.pipeline([["GET", "a"]])
+
+
+def test_redis_settings_bad_scheme_or_missing_token(monkeypatch, caplog):
+    for v in REDIS_VARS:
+        monkeypatch.delenv(v, raising=False)
+    monkeypatch.setenv("UPSTASH_REDIS_REST_URL", "redis://x:6379"); monkeypatch.setenv("UPSTASH_REDIS_REST_TOKEN", "t")
+    monkeypatch.setenv("KV_REST_API_URL", "https://kv.example")
+    with caplog.at_level("WARNING", logger="labrums.config"):
+        assert config.redis_settings() is None
+    assert "UPSTASH_REDIS_REST_URL" in caplog.text and "KV_REST_API_TOKEN" in caplog.text
+
+
+def test_players_memoized_in_process(redis, monkeypatch):
+    client = sleeper.SleeperClient(RedisCache(redis))
+    calls = []
+    monkeypatch.setattr(client, "_fetch", lambda path: calls.append(path) or {"1": {"first_name": "A"}})
+    reads = []
+    real_read = client.cache.read
+    monkeypatch.setattr(client.cache, "read", lambda p: reads.append(p) or real_read(p))
+    assert client.players() == client.players()
+    assert len(reads) == 1 and len(calls) == 1

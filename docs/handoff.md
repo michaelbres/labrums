@@ -29,6 +29,13 @@ Custom agent roles live in `.claude/agents/` (scout/researcher/builder/refuter/d
 ## Design system (2026-10-07)
 Modeled on davidsasser.com (brief saved during the session; the tokens live at the top of static/styles.css). Paper #f4f3ef, ink #171816, muted #656861, faint #6b6e67 (raised from the reference's #898c85 for 4.5:1 contrast), border #d9dbd5, accent #235c3f. Geist + Geist Mono from Google Fonts. No shadows, radius 0 except avatars. Numbered mono eyebrows ("01 / STANDINGS"), 3px accent-top data cards, dashed accent cut line. Dark variant kept (the reference has none) under both prefers-color-scheme and data-theme. Hero copy on home is data-driven (unbeaten leaders, tied leaders, week 1, season complete).
 
+## Hosting (2026-10-07)
+- Target: Vercel Hobby (free). FastAPI auto-detected from api/index.py; static mount promoted to the CDN; vercel.json only sets maxDuration 120. requirements.txt mirrors pyproject (no uvicorn needed on Vercel). Python pinned >=3.12 (Vercel has no 3.11).
+- Persistence: Upstash Redis via Vercel Marketplace (KV_REST_API_URL/TOKEN; also accepts UPSTASH_REDIS_REST_* and LABRUMS_REDIS_URL/TOKEN). RedisStore (check-offs, manual shotguns) and RedisCache (zlib+base64 Sleeper responses; players blob ~410 KB). Store failures degrade to read-only pages with meta.store_error; writes return 503. No Redis on Vercel → /tmp fallback, meta.persistence "ephemeral".
+- Cold build from empty cache ~11 s (live Sleeper pulls); warm ~0.2 s. ~90 Redis commands per cold build, 2 per warm page view; players blob memoized in-process for 24 h.
+- davidsasser.com itself: Next.js (vinext) on Cloudflare; static, hence free. Rejected for us: Render free (sleeps), Fly/Railway (no free tier), Cloudflare Pages static rebuild (more refactor).
+- UNVERIFIED until a real deploy: FastAPI detection, static promotion, pyproject vs requirements precedence, real Upstash SCAN/limits.
+
 ## Known assumptions / unverified
 - Clinch/eliminate: exact counting rule while games remain (ties on wins count as "can still pass me"); final standings decide once the regular season is over.
 

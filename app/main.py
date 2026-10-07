@@ -5,6 +5,7 @@ import logging
 import os
 import threading
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -17,7 +18,7 @@ from . import articles, playoffs, shotguns, stats
 from .config import DATA_DIR, ROOT, load_config, on_vercel, redis_settings
 from .db import Store, manual_to_items
 from .loader import LeagueNotFound, discover_seasons, load_season
-from .redis_client import UpstashRedis
+from .redis_client import RedisError, UpstashRedis
 from .sleeper import SleeperClient, SleeperError
 from .storage import RedisCache, RedisStore
 
@@ -116,10 +117,26 @@ def require_admin(x_admin_pin: str | None = Header(default=None)):
         raise HTTPException(401, "Admin PIN required")
 
 
+@contextmanager
+def store_writes():
+    """Map a Redis outage during a check-off write to HTTP 503."""
+    try:
+        yield
+    except RedisError as e:
+        log.warning("check-off storage unavailable: %s", e)
+        raise HTTPException(503, "check-off storage unavailable") from e
+
+
 def serialize(season: str, m: dict) -> dict[str, Any]:
     ctx, st = m["ctx"], m["stats"]
-    completed = state.store.completed(season)
-    items = [dict(i) for i in m["shotgun_items"]] + manual_to_items(season, state.store.manual(season))
+    store_error = None
+    try:
+        completed = state.store.completed(season)
+        manual = state.store.manual(season)
+    except RedisError as e:
+        log.warning("store read failed, rendering without check-offs: %s", e)
+        completed, manual, store_error = {}, [], str(e)[:200]
+    items = [dict(i) for i in m["shotgun_items"]] + manual_to_items(season, manual)
     board = shotguns.leaderboard(ctx, items, completed)
     league = ctx["league"]
     seeds = m["playoffs"].get("current_seeds") or {}
@@ -155,7 +172,8 @@ def serialize(season: str, m: dict) -> dict[str, Any]:
         "articles": m["articles"],
         "rivalries": articles.Newsroom(ctx, st, m["playoffs"], m["shotgun_items"]).rivalries,
         "meta": {"demo": state.demo, "built_at": m["built_at"], "build_seconds": m["build_seconds"],
-                 "admin_locked": bool(state.admin_pin), "persistence": state.persistence},
+                 "admin_locked": bool(state.admin_pin), "persistence": state.persistence,
+                 **({"store_error": store_error} if store_error else {})},
     }
 
 
@@ -185,11 +203,12 @@ def refresh(season: str):
 @app.post("/api/season/{season}/shotguns/{key}/toggle", dependencies=[Depends(require_admin)])
 def toggle_shotgun(season: str, key: str):
     m = state.base_model(season)
-    valid = {i["key"] for i in m["shotgun_items"]} | {i["key"] for i in manual_to_items(season, state.store.manual(season))}
-    if key not in valid:
-        raise HTTPException(404, f"Unknown shotgun {key}")
-    done = state.store.toggle(season, key)
-    return {"key": key, "completed": done, "completed_at": state.store.completed(season).get(key, {}).get("completed_at")}
+    with store_writes():
+        valid = {i["key"] for i in m["shotgun_items"]} | {i["key"] for i in manual_to_items(season, state.store.manual(season))}
+        if key not in valid:
+            raise HTTPException(404, f"Unknown shotgun {key}")
+        done = state.store.toggle(season, key)
+        return {"key": key, "completed": done, "completed_at": state.store.completed(season).get(key, {}).get("completed_at")}
 
 
 class ManualShotgun(BaseModel):
@@ -206,12 +225,14 @@ def add_manual(season: str, body: ManualShotgun):
         raise HTTPException(400, "week must be between 1 and 18")
     if body.roster_id not in ctx["teams"]:
         raise HTTPException(400, f"Unknown roster_id {body.roster_id}")
-    return state.store.add_manual(season, body.week, body.roster_id, body.label.strip() or "Manual shotgun", body.detail)
+    with store_writes():
+        return state.store.add_manual(season, body.week, body.roster_id, body.label.strip() or "Manual shotgun", body.detail)
 
 
 @app.delete("/api/season/{season}/shotguns/manual/{manual_id}", dependencies=[Depends(require_admin)])
 def delete_manual(season: str, manual_id: int):
-    state.store.delete_manual(season, manual_id)
+    with store_writes():
+        state.store.delete_manual(season, manual_id)
     return {"ok": True}
 
 

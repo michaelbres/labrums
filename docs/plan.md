@@ -4,7 +4,8 @@
 - Running against the real league (Labrums and Lagers, 10 teams, 2 divisions, dynasty). Verified vs Sleeper: 10/10 records, 14/14 shotguns, 2025 playoff field. 78 tests green. Pushed to `claude/magical-edison-g0t0m1`.
 - Config is filled: 10 owner profiles with real names, 5 rivalry bowls, the Nick rule (Michael/Patrick/Bowie owe a shotgun any week they score less than Nick). Division seeding confirmed by the owner. Articles and pages use real first names; Sleeper handles shown as secondary. 82 tests green.
 - Restyled to match davidsasser.com (paper/ink/green, Geist + Geist Mono, hairlines, square, mono eyebrows, data-driven hero). Refuter-verified: all interactions, dark mode, mobile. His site: Next.js (vinext) on Cloudflare.
-- Next for the owner: pick a host (Fly.io or Railway run the Dockerfile with a volume); tweak catchphrases/traits in config.yaml.
+- Vercel (free Hobby) deployment is ready: api/index.py + vercel.json; Upstash Redis for check-offs and the Sleeper cache; SQLite/disk stay the local defaults. 105 tests. UNVERIFIED on real Vercel until the owner imports the repo.
+- Next for the owner: import the repo in Vercel, add Upstash Redis from Storage, set LABRUMS_ADMIN_PIN, redeploy (steps in README). Then report back the URL so the next session can smoke-test it.
 
 ## Next
 - Fill `config.yaml` with the owner's real details (special rule owners/target, owner profiles, rivalries).
