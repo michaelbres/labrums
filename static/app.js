@@ -27,6 +27,20 @@
     const subText = sub === 'team' ? t.team_name : sub === 'record' ? t.record : '';
     return `<a class="team-cell" href="#/teams/${rid}">${avatar(t)}<span class="names"><b>${esc(t.name)}</b><small>${esc(subText)}</small></span></a>`;
   };
+  const POWER_CAPTION = 'Rating 1–100: 35% record · 40% all-play · 25% scoring';
+  const powerTable = (d, { eff = true } = {}) => {
+    const rows = d.power_rankings.map((rid, i) => {
+      const t = team(rid), diff = t.rank - (i + 1);
+      const rating = t.power_rating ?? Math.round((t.power_score || 0) * 100);
+      const vs = diff > 0 ? `<span class="badge good">+${diff}</span>` : diff < 0 ? `<span class="badge bad">${diff}</span>` : '<span class="dim">—</span>';
+      return `<tr><td class="pw-rank"><span class="rank ${i === 0 ? 'top' : ''}">${i + 1}</span></td><td class="pw-team">${teamCell(rid, { sub: 'record' })}</td>
+        <td class="num pw-rating" data-label="Rating"><span class="pw-n">${rating}</span><span class="meter" aria-hidden="true"><i style="width:${rating}%"></i></span></td>
+        <td class="num" data-label="Avg">${fmt(t.avg, 1)}</td><td class="num" data-label="All-play">${pct(t.all_play.pct)}</td>
+        ${eff ? `<td class="num" data-label="Lineup">${pct(t.lineup_efficiency)}</td>` : ''}
+        <td class="num pw-vs" title="vs. standings">${vs}</td></tr>`;
+    }).join('');
+    return `<div class="table-wrap power-wrap"><table class="power-table ${eff ? 'has-eff' : ''}"><thead><tr><th class="pw-rank">#</th><th>Team</th><th class="num">Rating</th><th class="num">Avg</th><th class="num">All-play %</th>${eff ? '<th class="num">Lineup eff.</th>' : ''}<th class="num">vs. standings</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
   const teamLink = (rid) => `<a href="#/teams/${rid}">${esc(team(rid).name)}</a>`;
   const meter = (p, cls = '') => `<div class="meter-row"><div class="meter ${cls}"><i style="width:${Math.max(0, Math.min(100, (p || 0) * 100))}%"></i></div><span class="pct">${pct(p)}</span></div>`;
   const pageHead = (eyebrow, title, lead = '', extra = '') => `<div class="page-h"><div class="eyebrow">${eyebrow}</div><h1>${title}</h1>${lead ? `<p class="lead">${lead}</p>` : ''}${extra ? `<div class="page-tools">${extra}</div>` : ''}</div>`;
@@ -117,6 +131,7 @@
         <div class="tile"><div class="label">League average</div><div class="value">${fmt(d.league_avg, 1)}</div><div class="sub">points per team-week</div></div>
         <div class="tile"><div class="label">Shotguns owed</div><div class="value">${owed}</div><div class="sub">${lb[0] && lb[0].total ? `${esc(lb[0].name)} leads with ${lb[0].total}` : 'nobody yet'}</div></div>
       </div>
+      <div class="card power-card section"><div class="card-h"><h2>Power rankings</h2><small>${POWER_CAPTION}</small><a href="#/standings">Full standings →</a></div>${powerTable(d, { eff: false })}</div>
       <div class="grid grid-2 section">
         <div class="card"><div class="card-h"><h2>Headlines</h2><a href="#/news">All news →</a></div>
           <ul class="clean headlines">${headlines.map((a) => `<li><div class="kicker">${esc(a.type)} · week ${a.week}</div><a href="#/news/${esc(a.id)}">${esc(a.headline)}</a></li>`).join('') || '<li class="empty">Nothing yet.</li>'}</ul>
@@ -145,7 +160,6 @@
         <td class="num">${t.all_play.w}-${t.all_play.l}</td><td class="num ${t.luck > 0.75 ? 'good' : t.luck < -0.75 ? 'bad' : ''}">${signed(t.luck)}</td>
         <td class="num">${t.power_rank}</td><td class="num">${pct(po[rid]?.playoff_pct)}</td><td>${sparkline(t.scores, d.league_avg)}</td></tr>`;
     }).join('');
-    const power = d.power_rankings.map((rid, i) => { const t = team(rid); return `<tr><td><span class="rank ${i === 0 ? 'top' : ''}">${i + 1}</span></td><td>${teamCell(rid, { sub: 'record' })}</td><td class="num">${fmt(t.power_score * 100, 1)}</td><td class="num">${fmt(t.avg, 1)}</td><td class="num">${pct(t.all_play.pct)}</td><td class="num">${t.weeks_top}</td><td class="num">${t.weeks_bottom}</td><td class="num">${pct(t.lineup_efficiency)}</td><td class="num">${t.rank - (i + 1) > 0 ? `<span class="badge good">+${t.rank - (i + 1)}</span>` : t.rank - (i + 1) < 0 ? `<span class="badge bad">${t.rank - (i + 1)}</span>` : '<span class="dim">—</span>'}</td></tr>`; }).join('');
     const rec = d.records || {};
     const recCard = rec.high_score ? `<div class="card"><div class="card-h"><h2>Season records</h2></div><dl class="kv">
       <dt>Highest score</dt><dd>${fmt(rec.high_score.points)} · ${teamLink(rec.high_score.roster_id)} (week ${rec.high_score.week})</dd>
@@ -162,7 +176,7 @@
       ${divCard}
       <div class="card section"><div class="table-wrap"><table><thead><tr><th>#</th><th class="num">Seed</th><th>Team</th><th class="num">Record</th><th class="num">PF</th><th class="num">PA</th><th class="num">Avg</th><th class="num">High</th><th class="num">Low</th><th>Streak</th><th class="num">All-play</th><th class="num">Luck</th><th class="num">Power</th><th class="num">Playoff %</th><th>Trend</th></tr></thead><tbody>${rows}</tbody></table></div></div>
       <div class="grid grid-2 section">
-        <div class="card"><div class="card-h"><h2>Power rankings</h2><small>35% record · 40% all-play · 25% scoring</small></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Team</th><th class="num">Score</th><th class="num">Avg</th><th class="num">All-play</th><th class="num">Wk high</th><th class="num">Wk low</th><th class="num">Lineup eff.</th><th class="num">vs. standings</th></tr></thead><tbody>${power}</tbody></table></div></div>
+        <div class="card power-card"><div class="card-h"><h2>Power rankings</h2><small>${POWER_CAPTION}</small></div>${powerTable(d)}</div>
         ${recCard}
       </div>`;
   }
