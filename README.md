@@ -126,9 +126,20 @@ docker run -p 8000:8000 -v labrums-data:/app/data labrums
 
 Mount `/app/data` as a persistent volume or the check-offs disappear when the container is replaced. Set env vars with `-e`, for example `-e LABRUMS_ADMIN_PIN=secret`.
 
-- **Render:** new Web Service, runtime Docker, add a disk mounted at `/app/data`.
-- **Fly.io:** `fly launch`, then `fly volumes create data` and mount it at `/app/data`.
-- **Railway:** deploy from the repo (it detects the Dockerfile) and attach a volume at `/app/data`.
+### Vercel (free Hobby plan)
+
+The same app runs as a serverless function. SQLite and local files do not survive there, so check-offs and the Sleeper cache live in Upstash Redis (free).
+
+1. Import the repo in Vercel. The `app` object in `api/index.py` is detected as a FastAPI app, and the `/static` mount is served from the CDN. No build settings are needed. Python 3.12 or newer is required.
+2. In the project, open Storage and add an Upstash Redis database. Vercel injects `KV_REST_API_URL` and `KV_REST_API_TOKEN`. The app also reads `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (the Upstash console names) and `LABRUMS_REDIS_URL` / `LABRUMS_REDIS_TOKEN`. Precedence when several pairs are set: `UPSTASH_*`, then `KV_*`, then `LABRUMS_*`.
+3. Optional: set `LABRUMS_ADMIN_PIN` to protect check-offs and refresh. Set `LABRUMS_REDIS_PREFIX` if several deployments share one database.
+4. Deploy. Do **not** set `LABRUMS_DEMO`: demo mode never uses Redis and shows fake data.
+
+Without Redis on Vercel the app still works but writes to `/tmp`, which is wiped on cold starts. `meta.persistence` in `/api/season/<year>` reports `redis`, `sqlite` or `ephemeral`.
+
+Free-tier limits that matter: Upstash allows 500K commands a month and 256 MB (a model build costs a few dozen commands, and warm instances reuse their built model for five minutes). Hobby functions can run up to 300 seconds; `vercel.json` sets 120. The first request after a cold start pulls from Sleeper if the Redis cache is empty, so it is slower. The players blob is stored zlib-compressed and stays well under 1 MB.
+
+Other hosts that run the Docker image need a persistent volume at `/app/data`.
 
 ## Tests
 
@@ -143,13 +154,15 @@ The tests use the built-in demo data and never touch the network.
 ```
 app/
   main.py        FastAPI app and API endpoints
-  sleeper.py     Sleeper API client with a disk cache
+  sleeper.py     Sleeper API client with a pluggable (disk or Redis) cache
   loader.py      Assembles one season into a plain dict
   stats.py       Standings, records, luck, lineup efficiency
   playoffs.py    Monte Carlo playoff odds
   shotguns.py    Shotgun detection and leaderboard
   articles.py    Fake newsroom
   db.py          SQLite store for check-offs and manual shotguns
+  redis_client.py  stdlib Upstash REST client
+  storage.py     Redis store and Sleeper cache (used on Vercel)
   config.py      config.yaml loading
   demo.py        Deterministic fake league
 static/          Vanilla JS frontend

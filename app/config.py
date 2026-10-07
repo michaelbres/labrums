@@ -68,3 +68,24 @@ def load_config(path: Path | None = None) -> dict[str, Any]:
         rules.append(r)
     cfg["special_rules"] = rules
     return cfg
+
+
+# ---- storage backend selection ------------------------------------------------
+REDIS_ENV_PAIRS = (
+    ("UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"),  # Upstash console
+    ("KV_REST_API_URL", "KV_REST_API_TOKEN"),                # Vercel Marketplace integration
+    ("LABRUMS_REDIS_URL", "LABRUMS_REDIS_TOKEN"),            # manual override
+)
+
+
+def redis_settings() -> tuple[str, str] | None:
+    """(url, token) from the first env var pair where both are non-empty, else None."""
+    for url_var, token_var in REDIS_ENV_PAIRS:
+        url, token = os.environ.get(url_var, "").strip(), os.environ.get(token_var, "").strip()
+        if url and token:
+            return url, token
+    return None
+
+
+def on_vercel() -> bool:
+    return bool(os.environ.get("VERCEL"))

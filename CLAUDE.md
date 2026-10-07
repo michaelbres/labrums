@@ -1,7 +1,7 @@
 # Labrums
 
 Fantasy football league site: Sleeper data → standings, playoff odds (Monte Carlo), shotgun leaderboard, fake newsroom.
-Stack: Python 3.11+ / FastAPI / numpy / SQLite, vanilla JS frontend in `static/`. Run: `LABRUMS_DEMO=1 uv run uvicorn app.main:app --reload` (demo) or without the env var for live Sleeper data. Tests: `uv run pytest`.
+Stack: Python 3.12+ / FastAPI / numpy / SQLite, vanilla JS frontend in `static/`. Run: `LABRUMS_DEMO=1 uv run uvicorn app.main:app --reload` (demo) or without the env var for live Sleeper data. Tests: `uv run pytest`.
 
 ## Orchestration (user-directed 2026-09-10 — how Claude works here)
 

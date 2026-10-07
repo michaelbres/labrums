@@ -1,4 +1,4 @@
-"""Thin Sleeper API client with a disk cache.
+"""Thin Sleeper API client with a pluggable cache (disk by default, Redis on Vercel).
 
 The Sleeper API is public and read-only (no auth). Completed weeks never change,
 so they're cached permanently; live data is cached for a few minutes. When the
@@ -31,19 +31,18 @@ class SleeperError(RuntimeError):
     pass
 
 
-class SleeperClient:
-    def __init__(self, cache_dir: Path, timeout: float = 20.0):
-        self.cache_dir = Path(cache_dir)
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
-        self.timeout = timeout
+class DiskCache:
+    """One JSON file per API path under `cache_dir`. The directory is created on first write."""
 
-    # ---- low level -------------------------------------------------------
-    def _cache_path(self, path: str) -> Path:
+    def __init__(self, cache_dir: Path | str):
+        self.cache_dir = Path(cache_dir)
+
+    def path_for(self, path: str) -> Path:
         safe = path.strip("/").replace("/", "__")
         return self.cache_dir / f"{safe}.json"
 
-    def _read_cache(self, path: str) -> tuple[Any, float] | None:
-        p = self._cache_path(path)
+    def read(self, path: str) -> tuple[Any, float] | None:
+        p = self.path_for(path)
         if not p.exists():
             return None
         try:
@@ -53,12 +52,41 @@ class SleeperClient:
         except Exception:  # corrupt cache: ignore it
             return None
 
-    def _write_cache(self, path: str, data: Any) -> None:
-        p = self._cache_path(path)
+    def write(self, path: str, data: Any, fetched_at: float) -> None:
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        p = self.path_for(path)
         tmp = p.with_suffix(".tmp")
         with open(tmp, "w", encoding="utf-8") as fh:
-            json.dump({"fetched_at": time.time(), "data": data}, fh)
+            json.dump({"fetched_at": fetched_at, "data": data}, fh)
         tmp.replace(p)
+
+    def delete_matching(self, predicate) -> None:
+        if not self.cache_dir.is_dir():
+            return
+        for p in self.cache_dir.glob("*.json"):
+            if not predicate(p.stem.replace("__", "/")):
+                continue
+            try:
+                p.unlink()
+            except OSError as e:
+                log.warning("could not delete cache file %s: %s", p, e)
+
+
+class SleeperClient:
+    def __init__(self, cache: Any, timeout: float = 20.0):
+        """`cache` is a backend with read/write/delete_matching, or a directory (-> DiskCache)."""
+        self.cache = cache if hasattr(cache, "delete_matching") else DiskCache(cache)
+        self.timeout = timeout
+
+    # ---- low level -------------------------------------------------------
+    def _cache_path(self, path: str) -> Path:
+        return self.cache.path_for(path)  # disk backend only
+
+    def _read_cache(self, path: str) -> tuple[Any, float] | None:
+        return self.cache.read(path)
+
+    def _write_cache(self, path: str, data: Any) -> None:
+        self.cache.write(path, data, time.time())
 
     def _fetch(self, path: str) -> Any:
         url = f"{BASE}/{path.strip('/')}"
@@ -96,19 +124,19 @@ class SleeperClient:
     def clear_cache(self, keep_players: bool = True, league_id: str | None = None) -> None:
         """Delete cached API responses so the next build re-pulls from Sleeper.
 
-        With `league_id`, only that league's files (plus the NFL state) are removed,
+        With `league_id`, only that league's entries (plus the NFL state) are removed,
         so other seasons keep their offline fallback. The players blob is kept by default.
         """
-        prefix = f"league__{league_id}" if league_id else None
-        for p in self.cache_dir.glob("*.json"):
-            if keep_players and p.name == self._cache_path("players/nfl").name:
-                continue
-            if prefix and not (p.name.startswith(prefix + "__") or p.name == prefix + ".json" or p.name.startswith("state__")):
-                continue
-            try:
-                p.unlink()
-            except OSError as e:
-                log.warning("could not delete cache file %s: %s", p, e)
+        prefix = f"league/{league_id}" if league_id else None
+
+        def doomed(path: str) -> bool:
+            if keep_players and path == "players/nfl":
+                return False
+            if prefix and not (path == prefix or path.startswith(prefix + "/") or path.startswith("state/")):
+                return False
+            return True
+
+        self.cache.delete_matching(doomed)
 
     # ---- endpoints -------------------------------------------------------
     def state(self) -> dict:

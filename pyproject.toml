@@ -2,7 +2,7 @@
 name = "labrums"
 version = "0.1.0"
 description = "Fantasy football league stats, playoff odds, fake news, and the shotgun leaderboard. Powered by the Sleeper API."
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",

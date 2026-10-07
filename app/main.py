@@ -14,10 +14,12 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from . import articles, playoffs, shotguns, stats
-from .config import DATA_DIR, ROOT, load_config
+from .config import DATA_DIR, ROOT, load_config, on_vercel, redis_settings
 from .db import Store, manual_to_items
 from .loader import LeagueNotFound, discover_seasons, load_season
+from .redis_client import UpstashRedis
 from .sleeper import SleeperClient, SleeperError
+from .storage import RedisCache, RedisStore
 
 log = logging.getLogger("labrums")
 logging.basicConfig(level=os.environ.get("LABRUMS_LOG", "INFO"))
@@ -30,16 +32,27 @@ class State:
     def __init__(self):
         self.cfg = load_config()
         self.demo = os.environ.get("LABRUMS_DEMO", "").lower() in ("1", "true", "yes")
+        # Serverless Vercel: only /tmp is writable (and it is not durable), so Redis is the real store there.
+        data_dir = Path("/tmp") if on_vercel() else DATA_DIR
+        redis = None if self.demo else redis_settings()  # demo data never goes to a shared Redis
         if self.demo:
             from .demo import DemoClient
             self.client = DemoClient(current_week=int(os.environ.get("LABRUMS_DEMO_WEEK", 7)))
             self.cfg["seasons"] = {"2026": "demo2026"}
             self.cfg["current_season"] = "2026"
-            db_path = ":memory:" if os.environ.get("LABRUMS_DEMO_DB", "") == "memory" else DATA_DIR / "labrums-demo.db"
+            db_path = ":memory:" if os.environ.get("LABRUMS_DEMO_DB", "") == "memory" else data_dir / "labrums-demo.db"
+        elif redis:
+            conn = UpstashRedis(*redis)
+            self.client = SleeperClient(RedisCache(conn))
         else:
-            self.client = SleeperClient(DATA_DIR / "cache")
-            db_path = DATA_DIR / "labrums.db"
-        self.store = Store(db_path)
+            self.client = SleeperClient(data_dir / ("labrums-cache" if on_vercel() else "cache"))
+            db_path = data_dir / "labrums.db"
+        if redis:
+            self.store = RedisStore(conn)
+            self.persistence = "redis"
+        else:
+            self.store = Store(db_path)
+            self.persistence = "ephemeral" if on_vercel() else "sqlite"
         self.admin_pin = os.environ.get("LABRUMS_ADMIN_PIN") or None
         self._lock = threading.Lock()
         self._models: dict[str, tuple[float, dict]] = {}
@@ -142,7 +155,7 @@ def serialize(season: str, m: dict) -> dict[str, Any]:
         "articles": m["articles"],
         "rivalries": articles.Newsroom(ctx, st, m["playoffs"], m["shotgun_items"]).rivalries,
         "meta": {"demo": state.demo, "built_at": m["built_at"], "build_seconds": m["build_seconds"],
-                 "admin_locked": bool(state.admin_pin)},
+                 "admin_locked": bool(state.admin_pin), "persistence": state.persistence},
     }
 
 
