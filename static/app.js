@@ -98,14 +98,17 @@
     const [tw, tl, tt] = String(top.record).split('-').map(Number);
     const bubble = d.standings.slice(1).map(team).filter((t) => po[t.roster_id] && po[t.roster_id].playoff_pct != null)
       .sort((a, b) => Math.abs(po[a.roster_id].playoff_pct - 0.5) - Math.abs(po[b.roster_id].playoff_pct - 0.5))[0];
+    const unbeaten = d.standings.map(team).filter((t) => t.wins > 0 && !t.losses && !t.ties);
     const heroTitle = L.status === 'complete' ? `${esc(top.name)} finished ${esc(top.record)} and the rest of you have notes.`
-      : (tw > 0 && !tl && !tt) ? `${esc(top.name)} is ${esc(top.record)} and nobody is okay.`
+      : L.last_completed === 0 ? `Week 1. Nobody has lost yet. Enjoy it while it lasts.`
+      : unbeaten.length > 1 ? `${unbeaten.map((t) => esc(t.name)).join(' and ')} are ${esc(top.record)} and nobody is okay.`
+      : unbeaten.length === 1 ? `${esc(top.name)} is ${esc(top.record)} and nobody is okay.`
       : `Week ${L.current_week}. ${esc(top.name)} leads.${bubble ? ` ${esc(bubble.name)} is sweating.` : ''}`;
     return `
       <section class="hero">
         <div class="eyebrow"><span class="dot"></span>${esc(L.season)} / ${esc(L.name || 'Labrums and Lagers')}</div>
         <h1>${heroTitle}</h1>
-        <p class="lead">${L.status === 'complete' ? 'Season complete' : `Week ${L.current_week} · ${L.last_completed} week${L.last_completed === 1 ? '' : 's'} in the books`} · ${L.playoff_teams} playoff spots. League average is ${fmt(d.league_avg, 1)} points per team-week and ${owed} shotgun${owed === 1 ? ' is' : 's are'} still owed.</p>
+        <p class="lead">${L.status === 'complete' ? 'Season complete' : `Week ${L.current_week} · ${L.last_completed} week${L.last_completed === 1 ? '' : 's'} in the books`} · ${L.playoff_teams} playoff spots. ${L.last_completed > 0 ? `League average is ${fmt(d.league_avg, 1)} points per team-week and ${owed} shotgun${owed === 1 ? ' is' : 's are'} still owed.` : 'Lineups lock Sunday. The shotgun ledger opens after the first scores post.'}</p>
         <div class="actions"><a class="btn btn-primary" href="#/standings">Standings</a><a class="btn-link" href="#/news">Latest news <span aria-hidden="true">↗</span></a></div>
       </section>
       <div class="tiles section">

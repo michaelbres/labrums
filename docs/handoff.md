@@ -26,6 +26,9 @@ Custom agent roles live in `.claude/agents/` (scout/researcher/builder/refuter/d
 - rosters[].settings.ppts is Sleeper's potential points (undocumented); used for lineup efficiency when present.
 - Prior seasons 2025/2024/2023 are discovered via previous_league_id; 2025 has no divisions.
 
+## Design system (2026-10-07)
+Modeled on davidsasser.com (brief saved during the session; the tokens live at the top of static/styles.css). Paper #f4f3ef, ink #171816, muted #656861, faint #6b6e67 (raised from the reference's #898c85 for 4.5:1 contrast), border #d9dbd5, accent #235c3f. Geist + Geist Mono from Google Fonts. No shadows, radius 0 except avatars. Numbered mono eyebrows ("01 / STANDINGS"), 3px accent-top data cards, dashed accent cut line. Dark variant kept (the reference has none) under both prefers-color-scheme and data-theme. Hero copy on home is data-driven (unbeaten leaders, tied leaders, week 1, season complete).
+
 ## Known assumptions / unverified
 - Clinch/eliminate: exact counting rule while games remain (ties on wins count as "can still pass me"); final standings decide once the regular season is over.
 
