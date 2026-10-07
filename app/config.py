@@ -22,11 +22,14 @@ DEFAULTS: dict[str, Any] = {
     "special_rules": [],
     "owners": {},
     "rivalries": [],
-    "reporters": [],          # optional extra guest bylines; the 50 staff reporters live in app/newsroom/voices.py
+    "reporters": {"overrides": {}},   # per-voice name/outlet/bio overrides; the 50 staff reporters live in app/newsroom/voices.py
+    "narratives": [],         # reporter grudges / crushes: see config.yaml and docs/newsroom.md
     "commissioner": None,     # Sleeper display name of the commissioner (only they may say "I made the rule")
 }
 
 UNSET_CATCHPHRASES = {"...", "…", ".", "-", "—"}
+STANCES = ("hater", "homer", "skeptic", "hype")
+REPORTER_FIELDS = ("name", "outlet", "bio")
 
 
 def _merge(base: dict, override: dict) -> dict:
@@ -76,7 +79,44 @@ def load_config(path: Path | None = None) -> dict[str, Any]:
         r["owners"] = [str(o) for o in (r.get("owners") or []) if str(o).strip()]
         rules.append(r)
     cfg["special_rules"] = rules
+    cfg["reporters"] = {"overrides": normalize_overrides(cfg.get("reporters"))}
+    cfg["narratives"] = normalize_narratives(cfg.get("narratives"))
     return cfg
+
+
+def normalize_overrides(raw: Any) -> dict[str, dict[str, str]]:
+    """reporters.overrides -> {voice_id: {name|outlet|bio: non-empty str}}; anything malformed is dropped."""
+    block = raw.get("overrides") if isinstance(raw, dict) else None
+    out: dict[str, dict[str, str]] = {}
+    for vid, fields in (block or {}).items():
+        if not isinstance(fields, dict):
+            log.warning("config: reporters.overrides.%s must be a mapping; ignored", vid)
+            continue
+        clean = {k: " ".join(str(v).split()) for k, v in fields.items() if k in REPORTER_FIELDS and v is not None and str(v).strip()}
+        if clean:
+            out[str(vid)] = clean
+    return out
+
+
+def normalize_narratives(raw: Any) -> list[dict[str, str]]:
+    """narratives -> [{reporter, about | player, stance, theme}]; entries that cannot work are dropped with a warning."""
+    out: list[dict[str, str]] = []
+    for i, n in enumerate(raw if isinstance(raw, list) else []):
+        if not isinstance(n, dict):
+            continue
+        rep = " ".join(str(n.get("reporter") or "").split())
+        about = " ".join(str(n.get("about") or "").split())
+        player = " ".join(str(n.get("player") or "").split())
+        stance = str(n.get("stance") or "").strip().lower()
+        if not rep or bool(about) == bool(player) or stance not in STANCES:
+            log.warning("config: narratives[%d] needs a reporter, exactly one of about/player and a stance in %s; ignored", i, STANCES)
+            continue
+        if (stance == "hype") != bool(player):
+            log.warning("config: narratives[%d]: 'hype' goes with player:, the other stances with about:; ignored", i)
+            continue
+        out.append({"reporter": rep, **({"about": about} if about else {"player": player}), "stance": stance,
+                    "theme": " ".join(str(n.get("theme") or "").split()).rstrip(".")})
+    return out
 
 
 # ---- storage backend selection ------------------------------------------------

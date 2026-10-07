@@ -146,3 +146,50 @@ rivalries:
   - name: "The Waste Management Bowl"
     owners: ["asinagra25", "colonbuns"]
     backstory: "Adam and Colin. Catan's most questionable trader against Minecraft's most dedicated builder. The Rule of 5 does not apply to sheep."
+
+# ---------------------------------------------------------------------------
+# Reporters. The newsroom has 50 staff voices (ids in app/newsroom/voices.py). Anything about a voice (name, outlet,
+# bio) can be overridden here, keyed by voice id; the voice keeps its writing style and beats. Add more lines to
+# rename more reporters. Delete a line to bring the original name back.
+# ---------------------------------------------------------------------------
+reporters:
+  overrides:
+    cody-brandish:            # hype / sports-talk voice
+      name: "Ricky Sepe"
+    rex-moxley:               # tabloid opinion voice (see the narrative below)
+      name: "Evan Klein"
+    felix-okonkwo-brandt:     # analytics nerd
+      name: "Evan Glas"
+    candi-moreau:             # wrestling play-by-play
+      name: "Doomfist"
+    everett-lindqvist:        # old-school columnist
+      name: "Jon Fascinelli"
+
+# ---------------------------------------------------------------------------
+# Narratives: a reporter with a take. When the reporter writes about the target, the framing follows the stance;
+# the facts never change (the numbers, scores and names are always the real ones).
+#   reporter: reporter name (as shown on the masthead) or voice id
+#   about:    an owner (Sleeper display name or the profile name above)   -- hater | homer | skeptic
+#   player:   a player's full name                                       -- hype
+#   stance:   hater  = negative framing: wins are lucky or "won, but...", losses are piled on
+#             homer  = generous framing: "despite" losses, highlights the owner's star
+#             skeptic = "yes, but" framing on wins, the theme cited once
+#             hype   = whenever the player shows up in the facts, a line pushing the narrative
+#   theme:    optional one-line thesis the reporter keeps returning to (also shown on the masthead)
+# A narrative whose reporter or owner cannot be found is ignored (a warning is logged).
+# ---------------------------------------------------------------------------
+narratives:
+  - reporter: "Evan Klein"
+    about: "PatrickHanrahan"
+    stance: hater
+    theme: "Patrick's roster is a collection of panic moves"
+  # EXAMPLE (edit or delete): a hype voice who has been pushing a player all year.
+  - reporter: "Ricky Sepe"
+    player: "Quentin Johnston"
+    stance: hype
+    theme: "Quentin Johnston is a star and the league is late to notice"
+  # EXAMPLE (edit or delete): the nerd thinks one schedule has been kind.
+  - reporter: "Evan Glas"
+    about: "trottner"
+    stance: skeptic
+    theme: "Tom's schedule has been soft"

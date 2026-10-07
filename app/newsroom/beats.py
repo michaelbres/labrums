@@ -39,6 +39,9 @@ class Beats(Book):
         facts["beats"] = list(w.beats)
         facts["paras"] = metas
         facts["quotes"] = list(w.quote_log)
+        slant = w.slant_summary()
+        if slant:
+            facts["slant"] = slant
         # Stable key (desk overrides are matched on it): data only, never the reporter, the text or the build order.
         # One-per-week pieces (roundup, preview, Beer Report, ...) use "all"; pair pieces use the two roster ids.
         kt = "all" if key_teams is None else "-".join(sorted(map(str, key_teams)))
@@ -111,8 +114,47 @@ class Beats(Book):
             groups.append(join_and(rules))
         return ", plus ".join(groups)
 
-    def _extras(self, w: Writer, f: dict, week: int, budget: int, skip_upset: bool = False, skip_top: bool = False) -> list[str]:
-        """Context sentences for one game, most notable first, within a budget."""
+    def _weak_line(self, w: Writer, f: dict, week: int, slant: str) -> str | None:
+        """Narrative framing of one game, built only from real facts. neg: why the target's WIN is shakier than it
+        looks (bench points left, a dud starter, a lucky all-play record, a thin margin); pos: why the target's LOSS
+        reads better than the score (a star who delivered, a score above the week's average, bad luck, a thin margin,
+        a dud starter). With no such fact the family's generic line is used."""
+        opts: list[tuple[str, dict]] = []
+        if slant == "neg":
+            left, _ = self.bench_left(week, f["_w"])
+            if left >= 10:
+                opts.append(("wbench", {"wbench": pts(left)}))
+            dud = self.worst_starter(week, f["_w"])
+            if dud and dud["points"] <= 3:
+                opts.append(("wdud", {"wdud": dud["name"], "wdpos": dud["position"], "wdpts": pts(dud["points"])}))
+            lk = f.get("_luck_w")
+            if lk and lk[0] >= 1 and lk[1] >= 3:
+                opts.append(("wluck", {"wluck": f"{lk[0]:.1f}", "w_rec": lk[2]}))
+            if f["mclass"] == "close":
+                opts.append(("thin", {"thin": f["m"]}))
+        else:
+            star = self.best_starter(week, f["_l"])
+            if star and star["points"] > 0:
+                opts.append(("lstar", {"lstar": star["name"], "lspos": star["position"], "lspts": pts(star["points"])}))
+            if round(f["_lp"], 2) > float(f["wavg"]):
+                opts.append(("labove", {"labove": f["wavg"]}))
+            lk = f.get("_luck_l")
+            if lk and lk[0] <= -1 and lk[1] >= 3:
+                opts.append(("lluck", {"lluck": f"{abs(lk[0]):.1f}", "l_rec": lk[2]}))
+            if f["mclass"] == "close":
+                opts.append(("thin", {"thin": f["m"]}))
+            if f.get("gname"):
+                opts.append(("gname", {"gname": f["gname"], "gpos": f["gpos"], "gpts": f["gpts"]}))
+        pick = w.rng.choice(opts) if opts else None
+        facts = {"w": f["w"], "l": f["l"], "wl": f["wl"], "wk": f["wk"], **(pick[1] if pick else {})}
+        if pick and pick[0] == "labove":
+            facts["lp"] = f["lp"]
+        return w.sline("g.weak", slant, facts, repeat=True, prefer=(pick[0],) if pick else ())
+
+    def _extras(self, w: Writer, f: dict, week: int, budget: int, skip_upset: bool = False, skip_top: bool = False,
+                nar=None) -> list[str]:
+        """Context sentences for one game, most notable first, within a budget. `nar`: the reporter's narrative about
+        one of the game's owners (it slants which facts are picked and how they are framed, never the facts)."""
         playoff = f.get("w_rec") is None
         tier0: list[tuple[str, dict]] = []
         tier1: list[tuple[str, dict]] = []
@@ -148,14 +190,33 @@ class Beats(Book):
                 tier2.append(("g.luck_up" if lk > 0 else "g.luck_down", {**f, "n": f[key], "luck": signed(lk), "luck_abs": f"{abs(lk):.1f}", "n_rec": rec}))
             tier2.append(("g.record", f))
         w.rng.shuffle(tier1)
+        lead: list[str | None] = []
+        replace: dict[str, str] = {}      # base slot -> slant: write this one from the slanted variants
+        if nar is not None:
+            won = nar.rid == f["_w"]
+            slant = w.slant_of(nar, won)
+            if (slant == "neg" and won) or (slant == "pos" and not won):
+                lead.append(self._weak_line(w, f, week, slant))
+            if slant and nar.stance != "skeptic":
+                for base, applies in (("g.star", won), ("g.goat", not won), ("g.record", True)):
+                    if applies:
+                        replace[base] = slant
+        rest = tier1 + tier2
+        budget += sum(1 for x in rest if x[0] in replace)   # the slanted facts come on top of the usual context, not instead of it
+        seq = tier0[:2] + [x for x in rest if x[0] in replace] + [x for x in rest if x[0] not in replace]
         out: list[str] = []
-        for slot, facts in tier0[:2] + tier1 + tier2:
+        for slot, facts in seq:
             if len(out) >= budget:
                 break
-            s = w.line(slot, facts)
+            s = w.sline(slot, replace[slot], facts) if slot in replace else None
+            s = s or w.line(slot, facts)
             if s:
                 out.append(s)
-        return out
+        hy = None
+        if w.narrs:   # a hype narrative: the player is the star (or the dud) of this game
+            hy = (w.hype(f.get("star"), f"scored {f['spts']} for {f['w']}") if f.get("star") else None) or \
+                 (w.hype(f.get("gname"), f"managed {f['gpts']} in a starting spot for {f['l']}") if f.get("gname") else None)
+        return [x for x in lead if x] + out + ([hy] if hy else [])
 
     def _quotes_for(self, w: Writer, f: dict, who: str, week: int, sig: bool = False) -> str | None:
         """Boast (who='w') or lament (who='l') for a decided game of class blowout/comfortable/close."""
@@ -181,6 +242,12 @@ class Beats(Book):
         gfs = [self.game_facts(g, week, info) for g in games]
         r = self.rng("roundup", week, voice.id)
         w = Writer(self, voice, r, "recap", week)
+        nar_g: dict[int, Any] = {}      # game index -> this reporter's narrative about one of its owners
+        for i, gf in enumerate(gfs):
+            if gf["mclass"] != "tie":
+                nar = w.active(gf["_w"], gf["_l"])
+                if nar:
+                    nar_g[i] = nar
 
         # ---- the week's biggest story ----
         decided = [i for i, f in enumerate(gfs) if f["mclass"] != "tie"]
@@ -205,7 +272,12 @@ class Beats(Book):
             story = avail[kind][0]
         slot_key = {"blowout": "blow", "upset": "upset", "close": "close", "top": "top", "tie": "tie"}[kind]
         sf = gfs[story]
-        headline = w.head(f"h.r.{slot_key}", sf)
+        headline = None
+        if story in nar_g:
+            won = nar_g[story].rid == sf["_w"]
+            headline = w.head_slanted(nar_g[story], "h.sl.win" if won else "h.sl.loss", sf, won)
+        if headline is None:
+            headline = w.head(f"h.r.{slot_key}", sf)
 
         def interest(i: int) -> float:
             f = gfs[i]
@@ -227,7 +299,8 @@ class Beats(Book):
             if rank_i == 0:
                 sents.append(w.line(f"r.lede.{slot_key}", f, repeat=True))
                 if f["mclass"] != "tie":
-                    sents.extend(self._extras(w, f, week, 2 + boost, skip_upset=(slot_key == "upset"), skip_top=(slot_key == "top")))
+                    sents.extend(self._extras(w, f, week, 2 + boost, skip_upset=(slot_key == "upset"), skip_top=(slot_key == "top"),
+                                              nar=nar_g.get(i)))
                     sents.append(w.aside(f["_l"], f"a {f['m']}-point loss to {f['w']}", wl, str(week)))
                     qsents = [self._quotes_for(w, f, "w", week, True), self._quotes_for(w, f, "l", week, True)]
                 else:
@@ -243,7 +316,7 @@ class Beats(Book):
                 sents.append(w.line("g.result", f, repeat=True,
                                     prefer=("noun", "m") if f["mclass"] in ("blowout", "close") else ()))
                 budget = (3 if (f["mclass"] in ("blowout", "close") or f.get("w_rank0")) else 2) + boost
-                sents.extend(self._extras(w, f, week, budget))
+                sents.extend(self._extras(w, f, week, budget, nar=nar_g.get(i)))
                 if i == quoted_second:
                     sents.append(self._quotes_for(w, f, "w", week))
             w.add(sents, meta)
@@ -276,6 +349,7 @@ class Beats(Book):
                     close_facts.update(in_names=join_and(shift["in"]), out_names=join_and(shift["out"]))
             sent = w.line("r.close_shift", close_facts, repeat=True) if shift else w.line("r.close_table", close_facts, repeat=True)
             w.add([sent], {"mclass": None})
+        w.add_theme(next(iter(nar_g.values()), None))
 
         top_i = max(decided, key=lambda i: gfs[i]["_wp"]) if decided else None
         big_i = max(decided, key=lambda i: gfs[i]["_margin"]) if decided else None
@@ -391,6 +465,7 @@ class Beats(Book):
         w = Writer(self, voice, r, "preview", week)
         n_po = self.ctx["playoff_teams"]
         rows = []
+        prev_nar = None
         for g in games:
             A, B = self._pv(g["a"], S), self._pv(g["b"], S)
             fav, dog, why = self._favorite(A, B)
@@ -404,6 +479,10 @@ class Beats(Book):
             return (x["swing"], pa + pb)
         gotw = max(rows, key=gotw_key)
         order = [gotw] + [x for x in rows if x is not gotw]
+        gotw_nar = w.active(gotw["A"]["rid"], gotw["B"]["rid"])
+        for x in order[1:]:
+            prev_nar = prev_nar or w.active(x["A"]["rid"], x["B"]["rid"])
+        prev_nar = gotw_nar or prev_nar
 
         def gfacts(x: dict) -> dict:
             A, B = x["A"], x["B"]
@@ -429,7 +508,11 @@ class Beats(Book):
             bucket, head_fav = "fav", gotw["fav"]["name"]
         else:
             bucket, head_fav = "even", None
-        headline = w.head(f"h.p.{bucket}", gf)
+        headline = None
+        if gotw_nar is not None and bucket != "fav":   # a headline that names the favorite must keep naming him
+            headline = w.head_slanted(gotw_nar, "h.sl.any", {"n": gotw_nar.label, "wl": wl, "wk": str(week)})
+        if headline is None:
+            headline = w.head(f"h.p.{bucket}", gf)
 
         for k, x in enumerate(order):
             A, B = x["A"], x["B"]
@@ -463,6 +546,7 @@ class Beats(Book):
             if k == 0:
                 s.append(w.line("p.close", f))
             w.add(s, meta)
+        w.add_theme(prev_nar)
 
         dek = f"{wl}: {plural(len(games), 'game')} · game of the week: {gotw['A']['name']} ({gotw['A']['rec']}) vs. {gotw['B']['name']} ({gotw['B']['rec']})"
         facts = {"type": "preview", "week": week, "favorite": gotw["fav"]["name"] if gotw["fav"] else None,

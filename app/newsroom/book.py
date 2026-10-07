@@ -32,12 +32,16 @@ class Book:
         self.catch_week: set[tuple] = set()   # (roster_id, week) pairs that already got their catchphrase
         self.n_articles = 0                   # finished articles so far (the catchphrase budget is a share of these)
         self.n_catch = 0                      # of which carry a catchphrase
+        self.narrs: list = []                 # resolved narratives (set by the Newsroom): reporter takes on owners / players
         self._protect_rx: re.Pattern | None = None
         self._norm_rx: re.Pattern | None = None
         self._players_rx: re.Pattern | None = None
         self.games_by_week: dict[int, list[dict]] = {}
         for g in st["games"]:
             self.games_by_week.setdefault(g["week"], []).append(g)
+
+    def narratives_of(self, voice_id: str) -> list:
+        return [n for n in self.narrs if n.voice_id == voice_id]
 
     # ---- names -----------------------------------------------------------
     def name(self, rid: int) -> str:

@@ -6,6 +6,7 @@ from collections import defaultdict
 from typing import Any
 
 from . import families, quotes
+from .narratives import HONORIFICS
 from .util import placeholders, polish, split_sentences
 import re
 
@@ -97,6 +98,13 @@ class Writer:
         self.paras: list[tuple[str, dict]] = []
         self.beats: list[str] = []
         self.quote_log: list[dict] = []
+        # narratives (config.yaml): this reporter's takes on owners / players, and what they have done in this article
+        self.narrs = book.narratives_of(voice.id)
+        self.engaged: list = []              # narratives whose target is a main party of this article
+        self.slant_log: list[dict] = []      # every slanted line written: {slot, text, nums}
+        self.theme_used = False
+        self.hype_used = False
+        self._vals: dict[str, str] = {}
 
     # ---- template choice ---------------------------------------------------
     def _perm(self, slot: str, n: int) -> list[int]:
@@ -125,7 +133,7 @@ class Writer:
         """One rendered sentence (or short run of sentences) for `slot`, or None if no template fits the facts.
         `need`: only templates containing this literal text (e.g. "over {l}") are eligible; `avoid`: templates
         matching this pattern are not."""
-        tpls = self.fam.T[slot]
+        tpls = self.fam.templates(slot)
         cand = [i for i, t in enumerate(tpls) if all(self._has(facts, k) for k in placeholders(t)) and (need is None or need in t)
                 and (avoid is None or not avoid.search(t))]
         if not cand:
@@ -150,6 +158,7 @@ class Writer:
             i = fresh[(start + step) % len(fresh)]
             self.rng.setstate(base_state[0]); self.used_lex = set(base_state[1]); self.nick_used = base_state[2]
             text = self._fill(tpls[i], facts)
+            vals = self._vals
             keys = self.book.sentence_keys(text, 2)   # short fragments ('Recent results!') are language too
             score = sum(10 for k in keys if self.book.seen[k]) + max((self.book.seen[k] for k in keys), default=0)
             low = text.lower()
@@ -159,10 +168,10 @@ class Writer:
                 score += 500    # this article already says that, word for word
             snap = (self.rng.getstate(), set(self.used_lex), self.nick_used)
             if best is None or score < best[0]:
-                best = (score, i, text, keys, snap)
+                best = (score, i, text, keys, snap, vals)
             if score == 0:
                 break
-        score, i, text, keys, snap = best
+        score, i, text, keys, snap, vals = best
         self.rng.setstate(snap[0]); self.used_lex = snap[1]; self.nick_used = snap[2]
         self.used[slot].add(i)
         for k in keys:
@@ -171,6 +180,9 @@ class Writer:
         low = text.lower()
         self.book.once_used.update(p for p in ONCE_PHRASES if p in low)
         self.beats.append(slot)
+        if "~" in slot:
+            nums = sorted(set(re.findall(r"\d+(?:\.\d+)?", " ".join(vals.values()))))
+            self.slant_log.append({"slot": slot, "text": text, "nums": nums})
         return text
 
     def _fill(self, tpl: str, facts: dict[str, Any]) -> str:
@@ -189,6 +201,7 @@ class Writer:
                     vals[k] = f"{plain}, \u201c{facts[k]}\u201d to the group chat,"; self.nick_used = True
             else:
                 vals[k] = str(facts[k])
+        self._vals = vals
         return agree(_render(tpl, vals), facts)
 
     def head(self, slot: str, facts: dict[str, Any]) -> str:
@@ -214,7 +227,13 @@ class Writer:
         qp = q if q[-1] in "!?" else q + "."
         name = self.book.name(rid)
         plain = self._plain()
-        text = self.line("x.attr", {"n": name, "qc": qc, "qp": qp}, repeat=True, avoid=WEATHER_RX if plain else None)
+        nar = self.target(rid)
+        slant = self.slant_of(nar, None)
+        text = None
+        if slant in ("neg", "pos"):   # a hater's attributions turn sour ("insisted", "claimed"), a homer's turn warm
+            text = self.sline("x.attr", slant, {"n": name, "qc": qc, "qp": qp}, repeat=True)
+        if text is None:
+            text = self.line("x.attr", {"n": name, "qc": qc, "qp": qp}, repeat=True, avoid=WEATHER_RX if plain else None)
         self.quote_log.append({"situation": situation, "speaker": name, "commissioner": commish})
         catch = (self.book.profile(rid).get("catchphrase") or "").strip()
         if sig_ok and catch and self._catch_allowed(rid) and self.rng.random() < 0.5:
@@ -225,6 +244,94 @@ class Writer:
                 self.book.catch_week.add((rid, self.week))
                 text = f"{text} {sig}"
         return text
+
+    # ---- narratives ----------------------------------------------------------
+    def active(self, *rids: int):
+        """This reporter's owner narrative (hater / homer / skeptic) about the first of `rids` it covers, else None.
+        A hit marks the narrative as engaged in this article."""
+        for n in self.narrs:
+            if n.kind == "owner" and n.rid in rids and n.stance != "hype":
+                if n not in self.engaged:
+                    self.engaged.append(n)
+                return n
+        return None
+
+    def target(self, rid: int):
+        """Like active() for one owner, without engaging (used for quote attributions)."""
+        for n in self.narrs:
+            if n.kind == "owner" and n.rid == rid and n.stance != "hype" and n in self.engaged:
+                return n
+        return None
+
+    @staticmethod
+    def slant_of(nar, won: bool | None) -> str | None:
+        """'neg' / 'pos' / None for how `nar` frames the target. `won`: did the target win (None: no game, e.g. a
+        trade). A skeptic leans negative only on a win ("yes, but") and is otherwise neutral."""
+        if nar is None:
+            return None
+        if nar.stance == "hater":
+            return "neg"
+        if nar.stance == "homer":
+            return "pos"
+        if nar.stance == "skeptic" and won:
+            return "neg"
+        return None
+
+    def sline(self, base: str, slant: str | None, facts: dict[str, Any], **kw) -> str | None:
+        """A line from the slanted variants of `base` (None when the family has none that fit: callers fall back)."""
+        key = f"{base}~{slant}"
+        if not slant or key not in self.fam.S:
+            return None
+        if self._plain() and "avoid" not in kw:
+            kw["avoid"] = WEATHER_RX
+        return self.line(key, facts, **kw)
+
+    def head_slanted(self, nar, slot: str, facts: dict[str, Any], won: bool | None = None) -> str | None:
+        slant = self.slant_of(nar, won) if nar is not None and nar.stance != "skeptic" else None
+        return self.sline(slot, slant, facts, repeat=True) if slant else None
+
+    def theme_line(self, nar) -> str | None:
+        """The reporter's thesis, once per article, in the stance's own register."""
+        if nar is None or not nar.theme or self.theme_used:
+            return None
+        slant = {"hater": "neg", "homer": "pos", "skeptic": "neutral"}.get(nar.stance)
+        s = self.sline("x.theme", slant, {"n": nar.label, "theme": nar.theme}, repeat=True)
+        if s:
+            self.theme_used = True
+        return s
+
+    def add_theme(self, nar) -> None:
+        s = self.theme_line(nar)
+        if s:
+            self.add([s], {"theme": True})
+
+    def rep_name(self) -> str:
+        """What the reporter calls himself in a line about a player ('Ricky' for 'Ricky Sepe')."""
+        words = [x for x in self.voice.name.split() if x.lower() not in HONORIFICS and not x.endswith(".")]
+        return words[0] if words else self.voice.name
+
+    def hype(self, name: str | None, ctx: str) -> str | None:
+        """One line pushing this reporter's hype narrative when `name` is the player (grounded in `ctx`, a clause
+        built from real facts). At most one per article."""
+        if not name or self.hype_used:
+            return None
+        for n in self.narrs:
+            if n.kind == "player" and n.stance == "hype" and str(n.player).casefold() == name.casefold():
+                s = self.sline("x.hype", "pos", {"player": name, "rep": self.rep_name(), "ctx": ctx}, repeat=True)
+                if s:
+                    self.hype_used = True
+                    if n not in self.engaged:
+                        self.engaged.append(n)
+                    return s
+        return None
+
+    def slant_summary(self) -> dict | None:
+        if not self.engaged:
+            return None
+        neg = sum(1 for b in self.beats if b.endswith("~neg"))
+        pos = sum(1 for b in self.beats if b.endswith("~pos"))
+        return {"narratives": [{"stance": n.stance, "target": n.label, "theme": n.theme or None} for n in self.engaged],
+                "neg": neg, "pos": pos, "lines": list(self.slant_log)}
 
     def _plain(self) -> bool:
         """True when this family must keep a plain register for this article type (weather: trade/waiver/shotgun)."""

@@ -69,6 +69,7 @@ class Beats2(Beats):
         a, b = T["a"], T["b"]
         r = self.rng("trade", week, T["tx"], voice.id)
         w = Writer(self, voice, r, "trade", week)
+        nar = w.active(a, b)
         ga, gb = T["got"][a], T["got"][b]
         f = {"a": self.name(a), "b": self.name(b), "a_got": T["text"][a], "b_got": T["text"][b], "wk": str(week), "wl": f"Week {week}",
              "gave_s": short_side(gb["players"], gb["picks"], gb["n_picks"]), "got_s": short_side(ga["players"], ga["picks"], ga["n_picks"])}
@@ -106,7 +107,11 @@ class Beats2(Beats):
             if S["teams"][a]["games"] >= 1:
                 s_rec = w.line("t.rec", {"a": f["a"], "b": f["b"], "a_rec": S["teams"][a]["record"], "b_rec": S["teams"][b]["record"],
                                          "a_rank": ordinal(S["teams"][a]["rank"]), "b_rank": ordinal(S["teams"][b]["rank"])})
-        w.add([s_ret, s_cnt, s_rec], {"trade": True})
+        hy = None
+        for x in (a, b):
+            for pid in T["got"][x]["pids"]:
+                hy = hy or w.hype(self.label(pid)["name"], f"changed hands in this trade, landing with {self.name(x)}")
+        w.add([s_ret, s_cnt, s_rec, hy], {"trade": True})
         # quotes: the happy / defensive lines go to whoever actually has the better / worse early return
         qs: list[str | None] = []
         for x, y in ((a, b), (b, a)):
@@ -119,6 +124,7 @@ class Beats2(Beats):
         if T["graded"] and r.random() < 0.5:
             qs = qs[:1] if T["lead"] == a else qs[1:]
         w.add(qs + [w.line("t.close", f, repeat=True)], {"trade": True})
+        w.add_theme(nar)
         dek = f"{self.name(a)} receives {short_side(ga['players'], ga['picks'], ga['n_picks'])}; {self.name(b)} receives {short_side(gb['players'], gb['picks'], gb['n_picks'])}"
         facts = {"type": "trade", "week": week, "teams": [self.name(a), self.name(b)],
                  "received": {self.name(a): ga["players"] + ga["picks"], self.name(b): gb["players"] + gb["picks"]},
@@ -160,6 +166,7 @@ class Beats2(Beats):
         r = self.rng("waiver", week, voice.id)
         w = Writer(self, voice, r, "waiver", week)
         top = moves[0]
+        nar = w.active(top["rid"])
         budget = float(self.ctx["settings"].get("waiver_budget") or 100)
         weeks = top["weeks"]
         f = {"n": self.name(top["rid"]), "player": top["name"], "pos": top["pos"], "wk": str(week), "wl": f"Week {week}"}
@@ -169,7 +176,9 @@ class Beats2(Beats):
             hs = f"h.w.{bucket}"
         else:
             hs = "h.w.free"
-        headline = w.head(hs, f)
+        headline = w.head_slanted(nar, "h.sl.any", {"n": f["n"], "wl": f["wl"], "wk": f["wk"]}) if nar else None
+        if headline is None:
+            headline = w.head(hs, f)
         s1 = [w.line("w.top_bid" if top["bid"] else "w.top_free", f, repeat=True)]
         if weeks >= 1:
             tier = "hi" if top["since"] >= WAIVER_HI else "mid" if top["since"] >= WAIVER_MID else "lo"
@@ -185,6 +194,10 @@ class Beats2(Beats):
                             for rid, ms in by_owner.items()])
             s2.append(w.line("w.others", {"others_text": txt, "n_other": str(len(others))}))
         s2.append(w.line("w.total", {**f, "total_n": plural(len(moves), "player"), "total_owners": plural(len({m['rid'] for m in moves}), "owner")}))
+        for m in moves[:5]:   # a hype narrative: its player is one of the pickups
+            who = self.name(m["rid"])
+            s2.append(w.hype(m["name"], f"has scored {pts(m['since'])} for {who} since the claim" if m["weeks"] >= 1
+                             else f"was one of the week's pickups, added by {who}"))
         t = self.teams[top["rid"]]
         if week == self.ctx["last_completed"] and t.get("waiver_budget_used") is not None:
             s2.append(w.line("w.budget", {"n": f["n"], "spent": f"${t['waiver_budget_used']}", "budget": f"${int(budget)}"}))
@@ -204,6 +217,7 @@ class Beats2(Beats):
         if weeks >= 1:
             qf["spts"] = pts(top["since"])
         w.add([w.quote(top["rid"], qsit, qf), w.line("w.close", f, repeat=True)], {"waiver": True})
+        w.add_theme(nar)
         dek = f"{plural(len(moves), 'add')} · top move: {f['n']} adds {top['name']} ({top['pos']})" + (f" for {f['bid']}" if top["bid"] else "")
         facts = {"type": "waiver", "week": week, "top": {"owner": f["n"], "player": top["name"], "pos": top["pos"], "bid": top["bid"] or None,
                                                        "points_since": top["since"] if weeks >= 1 else None},
@@ -238,9 +252,12 @@ class Beats2(Beats):
             per.setdefault(s["roster_id"], []).append(s)
         ranked = sorted(per.items(), key=lambda kv: (-len(kv[1]), self.name(kv[0])))
         top_rid, top_items = ranked[0]
+        nar = w.active(top_rid)
         f = {"total_n": plural(len(items), "shotgun"), "owners_n": plural(len(per), "owner"), "top": self.name(top_rid),
              "topn": plural(len(top_items), "shotgun"), "top_times": times(len(top_items)), "wk": str(week), "wl": f"Week {week}"}
-        headline = w.head("h.s", f)
+        headline = w.head_slanted(nar, "h.sl.any", {"n": self.name(top_rid), "wl": f["wl"], "wk": f["wk"]}) if nar else None
+        if headline is None:
+            headline = w.head("h.s", f)
         w.add([w.line("s.total", f, repeat=True)], {"shotgun": True})
         lines = []
         for rid, its in ranked:
@@ -270,6 +287,7 @@ class Beats2(Beats):
             if len(top_items) == 1 and top_items[0]["reason"] in ("negative", "zero", "low"):
                 qf["player"] = top_items[0]["player"]["name"]
         w.add([w.quote(top_rid, sit, qf, multi=len(top_items) >= 2, sig_ok=True), w.line("s.close", f, repeat=True)], {"shotgun": True})
+        w.add_theme(nar)
         dek = f"{plural(len(items), 'shotgun')} owed across {plural(len(per), 'owner')} · {self.name(top_rid)} leads with {len(top_items)}"
         facts = {"type": "shotgun", "week": week, "total": len(items),
                  "owners": [{"owner": self.name(rid), "count": len(its), "items": [{"reason": s["reason"], "player": s["player"]["name"], "pos": s["player"]["position"],
@@ -408,6 +426,7 @@ class Beats2(Beats):
     def feud(self, week: int, a: int, b: int, voice) -> dict | None:
         r = self.rng("feud", week, a, b, voice.id)
         w = Writer(self, voice, r, "feud", week)
+        nar = w.active(a, b)
         S = self.snap(week)  # as-of (regular season through `week`)
         nm = self.name
         rv = self.rivalry_between(a, b)
@@ -477,7 +496,9 @@ class Beats2(Beats):
             opts = rest + (["third"] if third else [])
             second = r.choices(opts, weights=[3 if k == "third" else weights[k] for k in opts])[0]
         f = {"a": nm(a), "b": nm(b)}
-        headline = w.head("h.f", f)
+        headline = w.head_slanted(nar, "h.sl.any", {"n": nm(nar.rid), "wl": f"Week {week}", "wk": str(week)}) if nar else None
+        if headline is None:
+            headline = w.head("h.f", f)
         slot = {"h2h": "f.h2h", "trade": "f.trade", "adj": "f.adj", "sg": "f.sg", "story": "f.story", "trait": "f.trait"}
         paras = [[w.line(slot[primary], inc[primary], repeat=True)]]
         p2: list[str | None] = []
@@ -496,6 +517,7 @@ class Beats2(Beats):
         w.add(paras[0], meta)
         w.add(p2, meta)
         w.add(quotes + [w.line("f.close", f, repeat=True)], meta)
+        w.add_theme(nar)
         dek = self._feud_dek(primary, inc[primary], a, b)
         shown = [k for k in (primary, second) if k and k != "third"]
         facts = {"type": "feud", "week": week, "teams": [nm(a), nm(b)], "incidents": {k: dict(inc[k]) for k in shown},

@@ -24,9 +24,11 @@ class Voice:
     openers: tuple
     closers: tuple
     tics: tuple
+    known_for: str = ""      # masthead line ("Known for: ...") for a reporter with a narrative; set from config
 
     def card(self) -> dict:
-        return {"id": self.id, "name": self.name, "outlet": self.outlet, "bio": self.bio, "family": self.family}
+        return {"id": self.id, "name": self.name, "outlet": self.outlet, "bio": self.bio, "family": self.family,
+                "known_for": self.known_for}
 
 
 def _v(id, name, outlet, bio, family, beats, openers, closers, tics) -> Voice:
@@ -34,7 +36,7 @@ def _v(id, name, outlet, bio, family, beats, openers, closers, tics) -> Voice:
                  tuple(openers), tuple(closers), tuple(tics))
 
 
-VOICES: list[Voice] = [
+BASE_VOICES: list[Voice] = [   # the staff as written here; config.yaml `reporters.overrides` renames them (see VOICES below)
     # ---------------- wire-service straight news ----------------
     _v("hollis-tanager", "Hollis Tanager", "Tri-County Wire Service",
        "Thirty-one years on the wire desk and has never used an adjective he couldn't source.", "wire", "RPTWNOA",
@@ -301,5 +303,19 @@ VOICES: list[Voice] = [
        ["Upside is limited. Downside is a lineup.", "We are overweight on drama.", "Guidance may be revised."]),
 ]
 
+
+
+def _configured() -> list[Voice]:
+    """The staff with config.yaml's overrides and narratives applied (the Newsroom re-applies them to the config it is
+    given, so a different config never depends on what was loaded at import)."""
+    try:
+        from . import narratives
+        from ..config import load_config
+        return narratives.staff(load_config(), warn=False)[0]
+    except Exception:   # a broken config must never take the site down: fall back to the staff as written
+        return list(BASE_VOICES)
+
+
+VOICES: list[Voice] = _configured()
 BY_ID: dict[str, Voice] = {v.id: v for v in VOICES}
 FAMILY_OF = {v.id: v.family for v in VOICES}

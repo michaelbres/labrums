@@ -106,6 +106,33 @@ or the coherence lint is skipped with a warning and the template article stays.
   only for a margin under 7. Playoff weeks are "playoff week N" with no standings shift.
 - No `{` or `}` characters, no double spaces, no `..` or ` ,`, no "None", "nan" or "1 points".
 
+## Reporters and narratives (config.yaml)
+
+**Renaming a reporter.** `reporters.overrides` is keyed by voice id (the ids are in `app/newsroom/voices.py`); any of
+`name`, `outlet`, `bio` can be overridden and the voice keeps its style family, beats and signature lines. The overrides
+are applied when the newsroom is built, so the byline, the masthead and `desk` cards all show the new name.
+
+**A narrative** is a reporter's take on an owner (`about:`, the Sleeper display name or the profile name) or a player
+(`player:`). `reporter:` is the masthead name or the voice id; `stance:` is one of:
+
+| stance | what changes |
+|---|---|
+| `hater` | negative-slant variants in the recap/roundup (wins are "won, but..." with a real weakness: bench points left, a dud starter, a lucky all-play record or a thin margin; losses get the dud and the bench), a slanted headline when the owner is the subject, sour quote tags ("claimed", "insisted"), and a closing line that restates the `theme` |
+| `homer` | the mirror: the star credited to the owner, a loss read as bad luck or "despite" (real facts again), warm tags, the theme as a closer |
+| `skeptic` | "yes, but" after the owner's wins, the theme cited once |
+| `hype` (player) | whenever the player is a star, a dud, a trade asset or a pickup in a piece this reporter writes, one line pushing the narrative, built from the player's actual points |
+
+The reporter is cast more often on articles whose main parties include the target (recap/preview teams, trade
+parties, the feud or column pair, the Beer Report leader, the top waiver owner) but not always. A reporter with a
+narrative gets `known_for` on the masthead card (the `theme`, or a line like "a well-documented grudge against Patrick").
+A narrative whose reporter or owner cannot be found is ignored with a warning (once per process).
+
+**Slant is framing, never facts.** Every slanted variant (`app/newsroom/slants.py`, one set per style family) may only
+use numbers and names that come from the facts; the lint rejects a slanted line that states a number the facts did not
+supply, a warm line in a hater article, a sour one in a homer article, or the theme more than once. `facts.beats`
+tags slanted lines `slot~neg` / `slot~pos` / `slot~neutral` and `facts.slant` summarizes them (the sentiment score is the
+count of `~neg` beats).
+
 ## Under the hood
 
 `app/newsroom/desk.py` loads and applies the files; `app/newsroom/calendar.py` computes `publish_on`;

@@ -1,7 +1,7 @@
-"""The Labrums newsroom: 50 reporters, 14 style families, facts-first articles.
+"""The Labrums newsroom: 50 reporters (renamable in config.yaml), 14 style families, facts-first articles.
 
 Public API (re-exported by app.articles): Newsroom, generate(ctx, st, po, shotgun_items).
-Every article dict carries `reporter` ({id, name, outlet, bio, family}) and `facts` (a JSON-friendly
+Every article dict carries `reporter` ({id, name, outlet, bio, family, known_for}) and `facts` (a JSON-friendly
 packet of everything the article states, plus `beats` and `paras`) so an LLM writer can re-tell
 the same story from the same facts in the same reporter's voice.
 """
@@ -12,11 +12,18 @@ import os
 import random
 from collections import Counter, defaultdict
 
-from . import calendar, desk, lint
+from . import calendar, desk, lint, narratives
 from .beats_extra import Beats3
 from .voices import BY_ID, VOICES, Voice
 
 log = logging.getLogger("labrums.newsroom")
+
+# Casting a narrative reporter: (chance, slack). When he is free and the article involves his target he is chosen
+# outright with this chance, as long as his family has not been used more than `slack` times beyond the least-used
+# family for that beat (so a recap or preview, where an owner is always involved, keeps the family rotation intact
+# and only decides WHICH voice of the family writes it). Seeded, never random.
+FAVOR = {"recap": (0.8, 0), "preview": (0.8, 0)}
+FAVOR_DEFAULT = (0.5, 1)
 
 TYPE_ORDER = {"preview": 0, "rivalry": 0, "recap": 1, "standings": 2, "shotgun": 3, "trade": 4, "offseason": 4,
               "waiver": 5, "feud": 6, "column": 7, "analytics": 8}
@@ -33,6 +40,7 @@ class Assigner:
         self.beat_use: Counter = Counter()
         self.week_used: dict[int, set] = defaultdict(set)
         self._rank: dict[tuple, float] = {}
+        self._favored = False   # the last pick() was a narrative casting (it does not count against the voice's turn)
 
     def rank(self, beat: str, vid: str) -> float:
         k = (beat, vid)
@@ -40,14 +48,26 @@ class Assigner:
             self._rank[k] = random.Random(f"{self.season}:{beat}:{vid}").random()
         return self._rank[k]
 
-    def pick(self, beat: str, week: int) -> Voice:
+    def pick(self, beat: str, week: int, favor: dict[str, tuple[float, int]] | None = None) -> Voice:
+        """`favor`: voice id -> (chance, slack) of casting that voice outright (a narrative reporter whose target is in the story)."""
         elig = [v for v in self.voices if beat in v.beats]
         free = [v for v in elig if v.id not in self.week_used[week]] or elig
+        self._favored = False
+        if favor:
+            low = min(self.fam[(beat, v.family)] for v in free)
+            for v in free:
+                p, slack = favor.get(v.id) or (0, 0)
+                if p and self.fam[(beat, v.family)] <= low + slack and \
+                        random.Random(f"{self.season}:favor:{beat}:{week}:{v.id}").random() < p:
+                    self._favored = True
+                    return v
         return min(free, key=lambda v: (self.fam[(beat, v.family)], self.beat_use[(beat, v.id)], self.total[v.id], self.rank(beat, v.id)))
 
     def commit(self, beat: str, week: int, v: Voice) -> None:
-        self.total[v.id] += 1
-        self.beat_use[(beat, v.id)] += 1
+        if not self._favored:   # a narrative casting is on top of the voice's normal turns, not instead of one
+            self.total[v.id] += 1
+            self.beat_use[(beat, v.id)] += 1
+        self._favored = False
         self.fam[(beat, v.family)] += 1
         self.week_used[week].add(v.id)
 
@@ -57,7 +77,8 @@ class Newsroom(Beats3):
         super().__init__(ctx, st, po, shotgun_items)
         self.debug = (os.environ.get("LABRUMS_NEWSROOM_DEBUG", "") in ("1", "true", "yes")) if debug is None else debug
         # the league id is part of the casting seed: two leagues that share a season label do not share a cast
-        self.assign = Assigner(f"lg:{(ctx.get('league') or {}).get('league_id', '')}:{self.season}", VOICES)
+        self.voices, self.narrs = narratives.staff(ctx.get("config") or {}, self.teams)
+        self.assign = Assigner(f"lg:{(ctx.get('league') or {}).get('league_id', '')}:{self.season}", self.voices)
         self._rv_voice: dict[str, Voice] = {}
         self.desk_report: list[dict] = []
 
@@ -71,8 +92,27 @@ class Newsroom(Beats3):
             log.exception("newsroom: could not write %s", label)
             return None
 
-    def _build(self, beat: str, week: int, builder):
-        v = self.assign.pick(beat, week)
+    def _favor(self, beat: str, rids=(), players=()) -> dict[str, tuple[float, int]]:
+        """Casting boost for reporters with a narrative about one of `rids` (owners) or `players` (hype)."""
+        p = FAVOR.get(beat, FAVOR_DEFAULT)
+        low = {str(x).casefold() for x in players}
+        return {n.voice_id: p for n in self.narrs
+                if (n.kind == "owner" and n.rid in rids) or (n.kind == "player" and str(n.player).casefold() in low)}
+
+    def _recap_players(self, week: int) -> list[str]:
+        """Names a recap would feature: each winner's top starter and each loser's worst one."""
+        out = []
+        for g in self.games_by_week.get(week, []):
+            if g.get("winner") is None or g["a"] not in self.teams or g["b"] not in self.teams:
+                continue
+            w_, l_ = g["winner"], g["b"] if g["winner"] == g["a"] else g["a"]
+            for pl in (self.best_starter(week, w_), self.worst_starter(week, l_)):
+                if pl:
+                    out.append(pl["name"])
+        return out
+
+    def _build(self, beat: str, week: int, builder, favor: dict[str, tuple[float, int]] | None = None):
+        v = self.assign.pick(beat, week, favor) if favor else self.assign.pick(beat, week)
         art = self._try(f"{beat} week {week}", lambda: builder(v))
         if art:
             self.assign.commit(beat, week, v)
@@ -92,20 +132,31 @@ class Newsroom(Beats3):
         used_pairs: set = set()
         feud_by_week: dict[int, frozenset | None] = {}
         for week in sorted(w for w in self.games_by_week if w <= last):
-            art = self._build("recap", week, lambda v, wk=week: self.roundup(wk, v))
+            games = [g for g in self.games_by_week.get(week, []) if g["a"] in self.teams and g["b"] in self.teams]
+            rids = {x for g in games for x in (g["a"], g["b"])}
+            fv = self._favor("recap", rids, self._recap_players(week) if self.narrs else ()) if self.narrs else None
+            art = self._build("recap", week, lambda v, wk=week: self.roundup(wk, v), fv)
             if art:
                 out.append(art)
             if self.sg_week(week):
-                art = self._build("shotgun", week, lambda v, wk=week: self.beer_report(wk, v))
+                per: Counter = Counter(s["roster_id"] for s in self.sg_week(week))
+                top = min(per, key=lambda x: (-per[x], self.name(x)))
+                art = self._build("shotgun", week, lambda v, wk=week: self.beer_report(wk, v),
+                                  self._favor("shotgun", (top,)) if self.narrs else None)
                 if art:
                     out.append(art)
             for tx in self.live_txs(week):
                 if tx.get("type") == "trade" and self.trade_info(tx, week):
-                    art = self._build("trade", week, lambda v, t=tx, wk=week: self.trade(t, wk, v))
+                    ti = self.trade_info(tx, week)
+                    names = [self.label(p)["name"] for x in (ti["a"], ti["b"]) for p in ti["got"][x]["pids"]]
+                    art = self._build("trade", week, lambda v, t=tx, wk=week: self.trade(t, wk, v),
+                                      self._favor("trade", (ti["a"], ti["b"]), names) if self.narrs else None)
                     if art:
                         out.append(art)
-            if self.waiver_moves(week):
-                art = self._build("waiver", week, lambda v, wk=week: self.waivers(wk, v))
+            wmoves = self.waiver_moves(week)
+            if wmoves:
+                art = self._build("waiver", week, lambda v, wk=week: self.waivers(wk, v),
+                                  self._favor("waiver", (wmoves[0]["rid"],), [m["name"] for m in wmoves[:5]]) if self.narrs else None)
                 if art:
                     out.append(art)
             pair = self.feud_pair(week, used_pairs, self.rng("feudpair", week))
@@ -118,7 +169,8 @@ class Newsroom(Beats3):
                     if art:
                         self.assign.commit("feud", week, v)
                 else:
-                    art = self._build("feud", week, lambda v, wk=week, x=a, y=b: self.feud(wk, x, y, v))
+                    art = self._build("feud", week, lambda v, wk=week, x=a, y=b: self.feud(wk, x, y, v),
+                                      self._favor("feud", (a, b)) if self.narrs else None)
                 if art:
                     used_pairs.add(frozenset((a, b)))
                     out.append(art)
@@ -134,7 +186,8 @@ class Newsroom(Beats3):
                 out.append(art)
         nxt = self.po.get("next_week")
         if nxt and nxt in self.st["schedule"]:
-            art = self._build("preview", nxt, lambda v: self.preview(nxt, v))
+            prids = {x for g in self.st["schedule"][nxt] for x in (g["a"], g["b"])}
+            art = self._build("preview", nxt, lambda v: self.preview(nxt, v), self._favor("preview", prids) if self.narrs else None)
             if art:
                 out.append(art)
             for g in self.st["schedule"][nxt]:
@@ -156,7 +209,8 @@ class Newsroom(Beats3):
                     if art:
                         self.assign.commit("column", week, v)
                 else:
-                    art = self._build("column", week, lambda v: self.column(week, ca, cb, crv, cnext, v))
+                    art = self._build("column", week, lambda v: self.column(week, ca, cb, crv, cnext, v),
+                                      self._favor("column", (ca, cb)) if self.narrs else None)
                 if art:
                     used_cols.add(frozenset((ca, cb)))
                     out.append(art)
@@ -198,6 +252,10 @@ class Newsroom(Beats3):
     @staticmethod
     def reporters() -> list[dict]:
         return [v.card() for v in VOICES]
+
+    def masthead(self) -> list[dict]:
+        """The reporter cards for THIS league's config (overrides and `known_for` resolved against its owners)."""
+        return [v.card() for v in self.voices]
 
 
 def generate(ctx: dict, st: dict, po: dict, shotgun_items: list[dict], *, debug: bool | None = None,

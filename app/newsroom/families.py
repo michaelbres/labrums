@@ -155,6 +155,24 @@ SLOTS: dict[str, tuple[int, str, str]] = {
     "x.sig": (3, "n catch", ""),
     "x.attr": (4, "n qc qp", ""),
 }
+# ---- slanted variants (narratives): `slot~slant` templates live in slants.py, apart from T so the neutral sets never change.
+# base slot -> ({slant: min variants}, guaranteed keys, optional keys). A slanted template may only use these keys and
+# no digits (a number can only come from a fact), and `lint` keeps its wording clear of class words (blowout, close ...).
+SLANTS = ("neg", "pos", "neutral")
+SLANT_SLOTS: dict[str, tuple[dict[str, int], str, str]] = {
+    "g.star": ({"neg": 2, "pos": 2}, "w l wp lp star spos spts sshare wl wk", "over_half part_note elsewhere"),
+    "g.goat": ({"neg": 2, "pos": 2}, "w l gname gpos gpts wl wk", ""),
+    "g.record": ({"neg": 2, "pos": 2}, "w l w_rec l_rec w_rank l_rank wl wk", ""),
+    # neg: why the target's WIN is shakier than it looks (wbench wdud wluck thin); pos: why the target's LOSS is better than it looks
+    "g.weak": ({"neg": 3, "pos": 3}, "w l wl wk",
+               "wbench wdud wdpos wdpts wluck w_rec thin lstar lspos lspts lp labove lluck l_rec gname gpos gpts"),
+    "x.attr": ({"neg": 3, "pos": 3}, "n qc qp", ""),
+    "x.theme": ({"neg": 2, "pos": 2, "neutral": 2}, "n theme", ""),
+    "x.hype": ({"pos": 2}, "player rep ctx", ""),
+    "h.sl.win": ({"neg": 2, "pos": 2}, "w l wp lp m wl wk", ""),
+    "h.sl.loss": ({"neg": 2, "pos": 2}, "w l wp lp m wl wk", ""),
+    "h.sl.any": ({"neg": 2, "pos": 2}, "n wl wk", ""),
+}
 LEX_KEYS = {"verb", "noun", "tier"}
 COMMON = {"wk", "wl"}
 MCLASSES = ("blowout", "comfortable", "normal", "close")
@@ -182,9 +200,10 @@ class Family:
     lex: dict
     T: dict[str, list[str]]
     extra: dict = field(default_factory=dict)
+    S: dict[str, list[str]] = field(default_factory=dict)   # "slot~slant" -> templates (see SLANT_SLOTS)
 
     def templates(self, slot: str) -> list[str]:
-        return self.T[slot]
+        return self.S[slot] if "~" in slot else self.T[slot]
 
 
 _CACHE: dict[str, Family] = {}
@@ -194,7 +213,9 @@ def get(fid: str) -> Family:
     if fid not in _CACHE:
         mod = importlib.import_module(f"{__package__}.styles.{fid}")
         d = dict(mod.FAMILY)
-        _CACHE[fid] = Family(id=d.pop("id"), label=d.pop("label"), desc=d.pop("desc"), rhythm=d.pop("rhythm"),
+        from .slants import SLANTS as _SL   # imported here: slants.py is plain data and needs nothing from this module
+        flat = {f"{slot}~{sl}": list(tpls) for slot, by in _SL.get(fid, {}).items() for sl, tpls in by.items()}
+        _CACHE[fid] = Family(S=flat, id=d.pop("id"), label=d.pop("label"), desc=d.pop("desc"), rhythm=d.pop("rhythm"),
                              formality=d.pop("formality"), metaphors=d.pop("metaphors"), numbers=d.pop("numbers"),
                              lex=d.pop("lex"), T=d.pop("T"), extra=d)
     return _CACHE[fid]
@@ -238,6 +259,7 @@ def validate(fam: Family) -> list[str]:
     for slot in fam.T:
         if slot not in SLOTS:
             bad.append(f"{fam.id}:{slot}: unknown slot")
+    bad += validate_slants(fam)
     for cls in MCLASSES:
         for kind in ("verb", "noun"):
             if len(fam.lex.get(kind, {}).get(cls, [])) < 3:
@@ -245,4 +267,35 @@ def validate(fam: Family) -> list[str]:
     for tier in TIERS:
         if len(fam.lex.get("tier", {}).get(tier, [])) < 3:
             bad.append(f"{fam.id}: lex tier/{tier} needs >= 3")
+    return bad
+
+
+def validate_slants(fam: Family) -> list[str]:
+    """Problems with a family's slanted variants: every slot/slant present with enough variants, only its own keys,
+    no digits, no class words, no spacing slips, and at least two variants that need nothing but the guaranteed keys."""
+    from . import lint
+    from .util import placeholders as _ph
+    bad: list[str] = []
+    for slot, (need, g, o) in SLANT_SLOTS.items():
+        guaranteed, ok = set(g.split()), set(g.split()) | set(o.split())
+        for sl, n_min in need.items():
+            key = f"{slot}~{sl}"
+            tpls = fam.S.get(key) or []
+            if len(tpls) < n_min:
+                bad.append(f"{fam.id}:{key}: needs >= {n_min} variants, has {len(tpls)}")
+            if sum(1 for t in tpls if not (_ph(t) - guaranteed)) < min(2, n_min):
+                bad.append(f"{fam.id}:{key}: needs at least {min(2, n_min)} templates that use only the guaranteed keys")
+            for t in tpls:
+                if _ph(t) - ok:
+                    bad.append(f"{fam.id}:{key}: unknown keys {sorted(_ph(t) - ok)} in {t!r}")
+                if any(c.isdigit() for c in t):
+                    bad.append(f"{fam.id}:{key}: digit in {t!r} (a number may only come from a fact)")
+                if "  " in t or t != t.strip():
+                    bad.append(f"{fam.id}:{key}: spacing in {t!r}")
+                if lint.BLOW_RE.search(t) or lint.CLOSE_RE.search(t) or lint.PLAYOFF_BAD.search(t) or lint.GENERIC_BAD.search(t):
+                    bad.append(f"{fam.id}:{key}: banned wording in {t!r}")
+    for key in fam.S:
+        slot, _, sl = key.partition("~")
+        if slot not in SLANT_SLOTS or sl not in SLANT_SLOTS[slot][0]:
+            bad.append(f"{fam.id}:{key}: unknown slanted slot")
     return bad

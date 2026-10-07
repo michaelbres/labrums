@@ -31,13 +31,16 @@ def check(a: dict, book=None) -> list[str]:
         probs.append(f"{aid}: {msg}")
 
     scrub = text
-    if book is not None:  # owner-written text (catchphrases, traits) may legitimately contain braces
+    themes = sorted({n.theme for n in getattr(book, "narrs", []) if n.theme}, key=len, reverse=True) if book is not None else []
+    if book is not None:  # owner-written text (catchphrases, traits, narrative themes) may legitimately contain braces
         for t in book.teams.values():
             prof = t.get("profile") or {}
             for chunk in [prof.get("catchphrase")] + list(prof.get("traits") or []):
                 for variant in (chunk, str(chunk or "").replace("{me}", "").replace("{them}", "")):
                     if variant:
                         scrub = scrub.replace(str(variant), "")
+        for th in themes:   # a deadpan sentence may open with the theme, which then gets a capital
+            scrub = re.sub(re.escape(th), "", scrub, flags=re.I)
     if re.search(r"[{}]", scrub):
         bad("unfilled braces")
     if "  " in text:
@@ -65,6 +68,8 @@ def check(a: dict, book=None) -> list[str]:
             if book.name(rid) not in body_text and book.nickname(rid) not in body_text:
                 bad(f"team {book.name(rid)!r} in teams but not mentioned in the body")
         owner_text = book.scrub_players(text)
+        for th in themes:
+            owner_text = re.sub(re.escape(th), "", owner_text, flags=re.I)
         for chunk in [rv["backstory"].strip() for rv in book.rivalries if rv.get("backstory")] + \
                 [str(c).strip() for t in book.teams.values() for c in [(t.get("profile") or {}).get("catchphrase")] + list((t.get("profile") or {}).get("traits") or []) if c]:
             if chunk:   # owner-written text keeps the owner's own wording, nicknames included
@@ -80,6 +85,7 @@ def check(a: dict, book=None) -> list[str]:
                     bad(f"nickname {nick!r} used as a bare name (only '<name>, \u201c{nick}\u201d to the group chat,' is allowed)")
     facts = a.get("facts") or {}
     kind = a["type"]
+    _lint_slant(a, facts, bad)
     if kind == "feud" and book is not None:
         _lint_feud(a, book, bad)
     if kind == "recap":
@@ -154,3 +160,34 @@ def _lint_feud(a: dict, book, bad) -> None:
             for nm in mentioned(sent):
                 if f"over {nm}" not in sent:
                     bad(f"feud sentence names third team {nm!r} without 'over {nm}': {sent[:80]!r}")
+
+
+_NUM = re.compile(r"\d+(?:\.\d+)?")
+
+
+def _lint_slant(a: dict, facts: dict, bad) -> None:
+    """Narratives only change framing: the slanted lines carry no number that did not come from a fact, a hater never
+    writes a warm line (nor a homer a sour one), and the thesis is stated at most once."""
+    beats = facts.get("beats") or []
+    sl = facts.get("slant")
+    if not sl:
+        if any("~" in b for b in beats):
+            bad("slanted beats without a facts.slant summary")
+        return
+    if not facts.get("paras"):   # a desk article replaces the template text; its hand-written body is not slanted by template
+        return
+    neg = sum(1 for b in beats if b.endswith("~neg"))
+    pos = sum(1 for b in beats if b.endswith("~pos"))
+    if (sl.get("neg"), sl.get("pos")) != (neg, pos):
+        bad("slant summary disagrees with the beats")
+    stances = {n.get("stance") for n in sl.get("narratives") or []}
+    if stances <= {"hater", "skeptic"} and pos:
+        bad("a hater/skeptic article contains a warm (pos) variant")
+    if stances <= {"homer"} and neg:
+        bad("a homer article contains a sour (neg) variant")
+    if sum(1 for b in beats if b.startswith("x.theme~")) > 1:
+        bad("the narrative theme is stated more than once")
+    for ln in sl.get("lines") or []:
+        extra = set(_NUM.findall(ln.get("text") or "")) - set(ln.get("nums") or [])
+        if extra:
+            bad(f"slanted line states numbers that are not facts: {sorted(extra)} in {ln.get('slot')}")

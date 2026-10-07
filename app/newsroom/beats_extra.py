@@ -72,14 +72,18 @@ class Beats3(Beats2):
             return None
         r = self.rng("column", week, a, b, voice.id)
         w = Writer(self, voice, r, "column", week)
+        nar = w.active(a, b)
         nm = self.name
         T = S["teams"]
         wk, wl = str(S["week"]), f"Week {S['week']}"
         A, B = self._pv(a, S), self._pv(b, S)
         f = {"a": nm(a), "b": nm(b), "a_team": self.tname(a), "b_team": self.tname(b), "wk": wk, "wl": wl}
         lede_f = {**f, "a_rec": T[a]["record"], "b_rec": T[b]["record"], "a_rank": ordinal(T[a]["rank"]), "b_rank": ordinal(T[b]["rank"])}
-        # headline: rivalry name > the coming meeting > the generic pairing
-        if rv:
+        # headline: the narrative's target > rivalry name > the coming meeting > the generic pairing
+        headline = w.head_slanted(nar, "h.sl.any", {"n": nm(nar.rid), "wl": wl, "wk": wk}) if nar else None
+        if headline is not None:
+            pass
+        elif rv:
             headline = w.head("h.c.rv", {**f, "rv_name": rv["name"]})
         elif upcoming:
             headline = w.head("h.c.next", {**f, "nwk": str(upcoming)})
@@ -121,6 +125,7 @@ class Beats3(Beats2):
             s3.append(w.line("c.pick", {**f, "fav": fav, "dog": dog, "fav_why": why}, repeat=True))
         w.add(s3, {"column": True})
         w.add([w.line("c.close", f, repeat=True)], {"column": True})
+        w.add_theme(nar)
 
         hh = self.h2h_games(a, b, week)
         wa = sum(1 for g in hh if g["winner"] == a)

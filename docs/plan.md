@@ -1,6 +1,7 @@
 # Plan / status board
 
 ## Right now
+- Added: power rankings on home (1-100 rating), Luck card + tiles, reporter name overrides (Ricky Sepe, Evan Klein, Evan Glas, Doomfist, Jon Fascinelli) and config-driven narratives (Evan Klein = Patrick hater). Catchphrases removed; quotes are situation-only until the iMessage export arrives.
 - Newsroom v2 shipped (50 reporters, 14 families, grounded facts, weekly roundup/preview, as-of-week snapshots); editorial desk + daily release calendar shipped; fix rounds 1-2 done (feud incidents, ordinals, trade timing, grammar, catchphrase share, game win probability in previews). Refuter7: all numbers verified, dates match calendar. 294 tests.
 - Daily routine "Labrums daily desk" (trig_01SvKFQhrc9AixSX936kn4Qp) fires 5:29 am America/New_York, fresh session, writes today's edition into content/articles/ and pushes to claude/magical-edison-g0t0m1. Update its prompt if the branch is merged to main.
 - Owner declined an Anthropic API key; the desk routine (their Claude Code subscription) is the "AI-written" path instead.

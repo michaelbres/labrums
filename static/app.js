@@ -357,7 +357,7 @@
     const rs = state.data.reporters || [];
     if (!rs.length) return '';
     return `<div class="card section masthead"><div class="card-h"><h2>Masthead</h2><small>${rs.length} reporters, no two alike</small></div>
-      <ul class="clean masthead-list">${rs.map((r) => `<li><div class="m-name">${esc(r.name)}</div><div class="m-outlet">${esc(r.outlet)}</div><div class="m-bio">${esc(r.bio)}</div></li>`).join('')}</ul></div>`;
+      <ul class="clean masthead-list">${rs.map((r) => `<li><div class="m-name">${esc(r.name)}</div><div class="m-outlet">${esc(r.outlet)}</div><div class="m-bio">${esc(r.bio)}</div>${r.known_for ? `<div class="m-known"><span class="dim">Known for:</span> ${esc(r.known_for)}</div>` : ''}</li>`).join('')}</ul></div>`;
   }
 
   function articleCard(a, open = false) {
