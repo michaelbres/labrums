@@ -281,3 +281,64 @@ def compute(ctx: dict) -> dict[str, Any]:
         "league_avg": round(league_mean, 2),
         "records": records,
     }
+
+
+def snapshot(st: dict, ctx: dict, week: int) -> dict[str, Any]:
+    """League state THROUGH `week` (regular-season games only), rebuilt from per-game results.
+
+    Returns {"week", "teams": {rid: {wins, losses, ties, record, rank, streak, pf, pa, avg, all_play,
+    expected_wins, luck, weekly_rank, weeks_top, weeks_bottom, results, games}}, "standings": [rid, ...]}.
+    Articles about a past week must use this, never the final-season numbers in st["teams"].
+    """
+    teams = ctx["teams"]
+    reg_weeks = set(ctx["regular_weeks"])
+    through = [g for g in st["games"] if g["week"] <= week and g["week"] in reg_weeks]
+    results: dict[int, list[str]] = {rid: [] for rid in teams}
+    pf = {rid: 0.0 for rid in teams}
+    pa = {rid: 0.0 for rid in teams}
+    by_week: dict[int, dict[int, float]] = {}
+    for g in sorted(through, key=lambda x: x["week"]):
+        a, b = g["a"], g["b"]
+        if a not in teams or b not in teams:
+            continue
+        by_week.setdefault(g["week"], {})[a] = g["a_pts"]
+        by_week[g["week"]][b] = g["b_pts"]
+        pf[a] += g["a_pts"]; pf[b] += g["b_pts"]
+        pa[a] += g["b_pts"]; pa[b] += g["a_pts"]
+        ra, rb = ("W", "L") if g["a_pts"] > g["b_pts"] else ("L", "W") if g["b_pts"] > g["a_pts"] else ("T", "T")
+        results[a].append(ra); results[b].append(rb)
+    all_play = {rid: {"w": 0, "l": 0, "t": 0} for rid in teams}
+    weekly_rank: dict[int, dict[int, int]] = {rid: {} for rid in teams}
+    weeks_top = {rid: 0 for rid in teams}
+    weeks_bottom = {rid: 0 for rid in teams}
+    for wk in sorted(by_week):
+        ranked = sorted(by_week[wk].items(), key=lambda kv: -kv[1])
+        weeks_top[ranked[0][0]] += 1
+        weeks_bottom[ranked[-1][0]] += 1
+        for i, (rid, pts) in enumerate(ranked):
+            weekly_rank[rid][wk] = i + 1
+            for rid2, pts2 in ranked:
+                if rid2 != rid:
+                    all_play[rid]["w" if pts > pts2 else "l" if pts < pts2 else "t"] += 1
+    out: dict[int, dict] = {}
+    for rid in teams:
+        res = results[rid]
+        w, l, t = res.count("W"), res.count("L"), res.count("T")
+        n = len(res)
+        ap = all_play[rid]
+        apg = ap["w"] + ap["l"] + ap["t"]
+        ap_pct = (ap["w"] + 0.5 * ap["t"]) / apg if apg else 0.0
+        exp = ap_pct * n
+        out[rid] = {
+            "roster_id": rid, "wins": w, "losses": l, "ties": t, "games": n,
+            "record": f"{w}-{l}" + (f"-{t}" if t else ""),
+            "streak": _streak(res), "results": res,
+            "pf": round(pf[rid], 2), "pa": round(pa[rid], 2), "avg": round(pf[rid] / n, 2) if n else 0.0,
+            "all_play": {**ap, "pct": round(ap_pct, 3)},
+            "expected_wins": round(exp, 2), "luck": round(w - exp, 2),
+            "weekly_rank": weekly_rank[rid], "weeks_top": weeks_top[rid], "weeks_bottom": weeks_bottom[rid],
+        }
+    order = sorted(out, key=lambda r: (-(out[r]["wins"] + 0.5 * out[r]["ties"]), -out[r]["pf"], -out[r]["pa"], r))
+    for i, rid in enumerate(order):
+        out[rid]["rank"] = i + 1
+    return {"week": week, "teams": out, "standings": order}

@@ -22,8 +22,11 @@ DEFAULTS: dict[str, Any] = {
     "special_rules": [],
     "owners": {},
     "rivalries": [],
-    "reporters": ["The Beat Writer", "Anonymous League Source"],
+    "reporters": [],          # optional extra guest bylines; the 50 staff reporters live in app/newsroom/voices.py
+    "commissioner": None,     # Sleeper display name of the commissioner (only they may say "I made the rule")
 }
+
+UNSET_CATCHPHRASES = {"...", "…", ".", "-", "—"}
 
 
 def _merge(base: dict, override: dict) -> dict:
@@ -42,6 +45,8 @@ def clean_profile(prof: dict | None) -> dict:
     for k, v in (prof or {}).items():
         if v is None or (isinstance(v, str) and not v.strip()) or (isinstance(v, (list, tuple, dict)) and not v):
             continue
+        if k == "catchphrase" and str(v).strip() in UNSET_CATCHPHRASES:
+            continue  # "..." means "no catchphrase", not a quote to print
         out[k] = v
     return out
 
@@ -59,6 +64,7 @@ def load_config(path: Path | None = None) -> dict[str, Any]:
         cfg["current_season"] = str(cfg["current_season"])
     elif cfg["seasons"]:
         cfg["current_season"] = max(cfg["seasons"])
+    cfg["commissioner"] = str(cfg["commissioner"]).strip() if cfg.get("commissioner") else None
     cfg["owners"] = {str(k): clean_profile(v) for k, v in (cfg.get("owners") or {}).items()}
     cfg["rivalries"] = [r for r in (cfg.get("rivalries") or []) if r and r.get("owners")]
     rules = []

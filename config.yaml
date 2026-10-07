@@ -7,6 +7,10 @@
 # The season shown by default. Must be a key in `seasons`.
 current_season: "2026"
 
+# Sleeper display name of the league commissioner. Only the commissioner is quoted saying "I made the rule";
+# leave unset if you do not want that joke.
+commissioner: "michaelbreslow"
+
 # Sleeper league IDs by season. The ID changes every year: add a new line when
 # the league renews. Older seasons are also auto-discovered by following
 # Sleeper's previous_league_id chain, so you only strictly need the newest one.
