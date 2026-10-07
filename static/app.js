@@ -20,14 +20,14 @@
   const seedCell = (rid) => `<td class="num">${team(rid).current_seed ?? ''}</td>`;
   const initials = (name) => (name || '?').split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
   const avatar = (t, cls = '') => t.avatar
-    ? `<img class="avatar ${cls}" src="${esc(t.avatar)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'avatar ${cls}',textContent:'${esc(initials(t.display_name))}'}))">`
-    : `<span class="avatar ${cls}">${esc(initials(t.display_name))}</span>`;
+    ? `<img class="avatar ${cls}" src="${esc(t.avatar)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'avatar ${cls}',textContent:'${esc(initials(t.name))}'}))">`
+    : `<span class="avatar ${cls}">${esc(initials(t.name))}</span>`;
   const teamCell = (rid, { sub = 'team' } = {}) => {
     const t = team(rid);
     const subText = sub === 'team' ? t.team_name : sub === 'record' ? t.record : '';
-    return `<a class="team-cell" href="#/teams/${rid}">${avatar(t)}<span class="names"><b>${esc(t.display_name)}</b><small>${esc(subText)}</small></span></a>`;
+    return `<a class="team-cell" href="#/teams/${rid}">${avatar(t)}<span class="names"><b>${esc(t.name)}</b><small>${esc(subText)}</small></span></a>`;
   };
-  const teamLink = (rid) => `<a href="#/teams/${rid}">${esc(team(rid).display_name)}</a>`;
+  const teamLink = (rid) => `<a href="#/teams/${rid}">${esc(team(rid).name)}</a>`;
   const meter = (p, cls = '') => `<div class="meter-row"><div class="meter ${cls}"><i style="width:${Math.max(0, Math.min(100, (p || 0) * 100))}%"></i></div><span class="pct">${pct(p)}</span></div>`;
   const toast = (msg) => { let el = $('.toast'); if (!el) { el = document.createElement('div'); el.className = 'toast'; document.body.appendChild(el); } el.textContent = msg; el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2200); };
   const streakBadge = (s) => { if (!s || s === '—') return '<span class="dim">—</span>'; const cls = s[0] === 'W' ? 'good' : s[0] === 'L' ? 'bad' : ''; return `<span class="badge ${cls}">${esc(s)}</span>`; };
@@ -66,7 +66,7 @@
     const bw = (W - padL - padR) / weeks.length;
     const y = (v) => padT + (H - padT - padB) * (1 - v / max);
     const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => Math.round(max * f));
-    let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Weekly scores for ${esc(t.display_name)}">`;
+    let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Weekly scores for ${esc(t.name)}">`;
     ticks.forEach((tv) => { s += `<line class="axis" x1="${padL}" x2="${W - padR}" y1="${y(tv)}" y2="${y(tv)}"/><text x="${padL - 6}" y="${y(tv) + 4}" text-anchor="end">${tv}</text>`; });
     weeks.forEach((w, i) => {
       const v = t.scores[w]; const g = games[w];
@@ -74,7 +74,7 @@
       const cls = won === null ? '' : won ? 'win' : 'loss';
       const x = padL + i * bw + bw * 0.18, bwid = bw * 0.64;
       const opp = g ? (g.a === t.roster_id ? g.b : g.a) : null;
-      const tip = `Week ${w}: ${v}${g ? ` ${won ? 'W' : won === false ? 'L' : 'T'} vs ${team(opp).display_name} (${g.a === t.roster_id ? g.b_pts : g.a_pts})` : ''}`;
+      const tip = `Week ${w}: ${v}${g ? ` ${won ? 'W' : won === false ? 'L' : 'T'} vs ${team(opp).name} (${g.a === t.roster_id ? g.b_pts : g.a_pts})` : ''}`;
       s += `<rect class="bar ${cls}" x="${x.toFixed(1)}" y="${y(v).toFixed(1)}" width="${bwid.toFixed(1)}" height="${(H - padB - y(v)).toFixed(1)}" rx="3"><title>${esc(tip)}</title></rect>`;
       s += `<text x="${(x + bwid / 2).toFixed(1)}" y="${H - padB + 16}" text-anchor="middle">${w}</text>`;
     });
@@ -91,16 +91,16 @@
     const lb = d.shotguns.leaderboard;
     const owed = lb.reduce((a, r) => a + r.outstanding, 0);
     const rec = d.records || {};
-    const hi = rec.high_score ? `${fmt(rec.high_score.points)} · ${team(rec.high_score.roster_id).display_name} (wk ${rec.high_score.week})` : '—';
+    const hi = rec.high_score ? `${fmt(rec.high_score.points)} · ${team(rec.high_score.roster_id).name} (wk ${rec.high_score.week})` : '—';
     const headlines = d.articles.slice(0, 8);
     const po = d.playoffs.teams;
     return `
       <div class="page-h"><div><h1>${esc(L.name)}</h1><p>${L.status === 'complete' ? 'Season complete' : `Week ${L.current_week} · ${L.last_completed} week${L.last_completed === 1 ? '' : 's'} in the books`} · ${L.playoff_teams} playoff spots</p></div></div>
       <div class="tiles section">
-        <div class="tile"><div class="label">Leader</div><div class="value">${esc(top.display_name)}</div><div class="sub">${top.record} · ${fmt(top.pf, 1)} PF</div></div>
-        <div class="tile"><div class="label">Top score</div><div class="value">${rec.high_score ? fmt(rec.high_score.points, 1) : '—'}</div><div class="sub">${rec.high_score ? `${esc(team(rec.high_score.roster_id).display_name)}, week ${rec.high_score.week}` : ''}</div></div>
+        <div class="tile"><div class="label">Leader</div><div class="value">${esc(top.name)}</div><div class="sub">${top.record} · ${fmt(top.pf, 1)} PF</div></div>
+        <div class="tile"><div class="label">Top score</div><div class="value">${rec.high_score ? fmt(rec.high_score.points, 1) : '—'}</div><div class="sub">${rec.high_score ? `${esc(team(rec.high_score.roster_id).name)}, week ${rec.high_score.week}` : ''}</div></div>
         <div class="tile"><div class="label">League average</div><div class="value">${fmt(d.league_avg, 1)}</div><div class="sub">points per team-week</div></div>
-        <div class="tile"><div class="label">Shotguns owed</div><div class="value">${owed} <span class="beer">🍺</span></div><div class="sub">${lb[0] && lb[0].total ? `${esc(lb[0].display_name)} leads with ${lb[0].total}` : 'nobody yet'}</div></div>
+        <div class="tile"><div class="label">Shotguns owed</div><div class="value">${owed} <span class="beer">🍺</span></div><div class="sub">${lb[0] && lb[0].total ? `${esc(lb[0].name)} leads with ${lb[0].total}` : 'nobody yet'}</div></div>
       </div>
       <div class="grid grid-2 section">
         <div class="card"><div class="card-h"><h2>Headlines</h2><a href="#/news">All news →</a></div>
@@ -112,7 +112,7 @@
             ${d.standings.map((rid, i) => { const t = team(rid); return `<tr class="${i === cutIdx ? 'cut-line' : ''}"><td><span class="rank-pill ${i === 0 ? 'top' : ''}">${i + 1}</span></td><td>${teamCell(rid)}</td><td class="num">${t.record}</td><td class="num">${fmt(t.pf, 1)}</td><td class="num">${pct(po[rid]?.playoff_pct)}</td></tr>`; }).join('')}
             </tbody></table></div></div>
           <div class="card"><div class="card-h"><h2>Shotgun leaderboard</h2><a href="#/shotguns">Check them off →</a></div>
-            ${lb.slice(0, 6).map((r) => `<div class="hbar"><span>${esc(r.display_name)}</span><div class="meter warn"><i style="width:${lb[0].total ? (r.total / lb[0].total) * 100 : 0}%"></i></div><span class="num">${r.total} <span class="dim">(${r.outstanding} owed)</span></span></div>`).join('')}
+            ${lb.slice(0, 6).map((r) => `<div class="hbar"><span>${esc(r.name)}</span><div class="meter warn"><i style="width:${lb[0].total ? (r.total / lb[0].total) * 100 : 0}%"></i></div><span class="num">${r.total} <span class="dim">(${r.outstanding} owed)</span></span></div>`).join('')}
           </div>
         </div>
       </div>`;
@@ -157,7 +157,7 @@
     const cards = d.standings.map((rid) => {
       const t = team(rid);
       return `<a class="card" href="#/teams/${rid}" style="color:inherit">
-        <div class="team-cell" style="margin-bottom:8px">${avatar(t, 'lg')}<span class="names"><b style="font-size:1.05rem">${esc(t.team_name)}</b><small>${esc(t.display_name)}${t.nickname ? ` · “${esc(t.nickname)}”` : ''}</small></span></div>
+        <div class="team-cell" style="margin-bottom:8px">${avatar(t, 'lg')}<span class="names"><b style="font-size:1.05rem">${esc(t.team_name)}</b><small>${esc(t.name)} · <span class="handle">@${esc(t.display_name)}</span>${t.nickname ? ` · “${esc(t.nickname)}”` : ''}</small></span></div>
         <div class="kv"><dt>Record</dt><dd><b>${t.record}</b> (${ordinal(t.rank)})</dd><dt>Avg</dt><dd>${fmt(t.avg, 1)}</dd><dt>Streak</dt><dd>${streakBadge(t.streak)}</dd><dt>Playoffs</dt><dd>${pct(po[rid]?.playoff_pct)} ${statusBadge(po[rid]?.status)}</dd><dt>Top player</dt><dd>${t.top_player ? `${esc(t.top_player.name)} (${fmt(t.top_player.points, 1)})` : '—'}</dd></div>
         <div style="margin-top:8px">${sparkline(t.scores, d.league_avg)}</div></a>`;
     }).join('');
@@ -183,7 +183,7 @@
     const prof = t.profile || {};
     const seedDist = (po.seed_dist || []).map((p, i) => `<div class="hbar"><span>Seed ${i + 1}</span><div class="meter ${i < d.league.playoff_teams ? '' : 'bad'}"><i style="width:${p * 100}%"></i></div><span class="num">${pct(p)}</span></div>`).join('');
     return `
-      <div class="team-head">${avatar(t, 'lg')}<div><h1>${esc(t.team_name)}</h1><div class="muted">${esc(t.display_name)}${t.division_name ? ` · ${esc(t.division_name)}` : ''}${t.nickname ? ` · “${esc(t.nickname)}”` : ''}${prof.hometown ? ` · ${esc(prof.hometown)}` : ''}</div>${prof.bio ? `<div class="muted" style="margin-top:4px">${esc(prof.bio)}</div>` : ''}</div>
+      <div class="team-head">${avatar(t, 'lg')}<div><h1>${esc(t.team_name)}</h1><div class="muted">${esc(t.name)} <small class="handle">@${esc(t.display_name)}</small>${t.division_name ? ` · ${esc(t.division_name)}` : ''}${t.nickname ? ` · “${esc(t.nickname)}”` : ''}${prof.hometown ? ` · ${esc(prof.hometown)}` : ''}</div>${prof.bio ? `<div class="muted" style="margin-top:4px">${esc(prof.bio)}</div>` : ''}</div>
         <div style="margin-left:auto">${statusBadge(po.status)}</div></div>
       <div class="tiles section">
         <div class="tile"><div class="label">Record</div><div class="value">${t.record}</div><div class="sub">${ordinal(t.rank)} place · power #${t.power_rank}</div></div>
@@ -258,7 +258,7 @@
       groups = weeks.map((w) => ({ key: w, title: `<b>Week ${w}</b>`, items: items.filter((s) => s.week === w) }));
     }
     const special = (S.rules.special || []).filter((r) => r.owners && r.owners.length);
-    const ownerOpts = d.standings.map((rid) => `<option value="${rid}">${esc(team(rid).display_name)}</option>`).join('');
+    const ownerOpts = d.standings.map((rid) => `<option value="${rid}">${esc(team(rid).name)}</option>`).join('');
     const weekOpts = Array.from({ length: Math.max(1, L.last_completed) }, (_, i) => `<option value="${i + 1}">Week ${i + 1}</option>`).reverse().join('');
     return `
       <div class="page-h"><div><h1>Shotgun leaderboard 🍺</h1><p>Start a player who scores ${S.rules.threshold} or fewer, shotgun a beer.${S.rules.count_empty_slots ? ' Empty starting slots count.' : ''}${special.length ? ` Special rules: ${special.map((r) => `${esc(r.label)} (${r.owners.map(esc).join(', ')}${r.target ? ` vs ${esc(r.target)}` : ''})`).join('; ')}.` : ''}</p></div>
@@ -320,8 +320,8 @@
           <div>${teamCell(a, { sub: 'record' })}<div class="dim" style="margin-top:4px">${ordinal(ta.rank)} · ${fmt(ta.avg, 1)} avg · ${pct(d.playoffs.teams[a].playoff_pct)} playoffs</div></div>
           <div>${teamCell(b, { sub: 'record' })}<div class="dim" style="margin-top:4px">${ordinal(tb.rank)} · ${fmt(tb.avg, 1)} avg · ${pct(d.playoffs.teams[b].playoff_pct)} playoffs</div></div>
         </div>
-        <dl class="kv"><dt>Head to head</dt><dd><b>${esc(ta.display_name)} ${h2h.w}-${h2h.l}${h2h.t ? `-${h2h.t}` : ''}</b> this season</dd>
-          ${meetings.map((g) => `<dt>Week ${g.week}</dt><dd>${g.winner == null ? 'Tie' : `${esc(team(g.winner).display_name)} won`} ${fmt(Math.max(g.a_pts, g.b_pts))}–${fmt(Math.min(g.a_pts, g.b_pts))}</dd>`).join('')}</dl>
+        <dl class="kv"><dt>Head to head</dt><dd><b>${esc(ta.name)} ${h2h.w}-${h2h.l}${h2h.t ? `-${h2h.t}` : ''}</b> this season</dd>
+          ${meetings.map((g) => `<dt>Week ${g.week}</dt><dd>${g.winner == null ? 'Tie' : `${esc(team(g.winner).name)} won`} ${fmt(Math.max(g.a_pts, g.b_pts))}–${fmt(Math.min(g.a_pts, g.b_pts))}</dd>`).join('')}</dl>
         ${arts.length ? `<h3 style="margin-top:12px">Coverage</h3><ul class="clean headlines">${arts.map((x) => `<li><div class="kicker">${esc(x.type)} · week ${x.week}</div><a href="#/news/${esc(x.id)}">${esc(x.headline)}</a></li>`).join('')}</ul>` : ''}
       </div>`;
     }).join('');
@@ -329,7 +329,7 @@
     const cut = d.league.playoff_teams;
     const hot = [];
     for (let i = Math.max(0, cut - 3); i < Math.min(d.standings.length - 1, cut + 2); i++) hot.push([d.standings[i], d.standings[i + 1]]);
-    const hotCards = hot.map(([a, b]) => `<div class="card"><div class="card-h"><h3>${esc(team(a).display_name)} vs. ${esc(team(b).display_name)}</h3><span class="badge warn">${ordinal(team(a).rank)} / ${ordinal(team(b).rank)}</span></div><div class="dim">${team(a).record} vs ${team(b).record} · ${fmt(Math.abs(team(a).pf - team(b).pf), 1)} PF apart · playoff odds ${pct(d.playoffs.teams[a].playoff_pct)} vs ${pct(d.playoffs.teams[b].playoff_pct)}</div></div>`).join('');
+    const hotCards = hot.map(([a, b]) => `<div class="card"><div class="card-h"><h3>${esc(team(a).name)} vs. ${esc(team(b).name)}</h3><span class="badge warn">${ordinal(team(a).rank)} / ${ordinal(team(b).rank)}</span></div><div class="dim">${team(a).record} vs ${team(b).record} · ${fmt(Math.abs(team(a).pf - team(b).pf), 1)} PF apart · playoff odds ${pct(d.playoffs.teams[a].playoff_pct)} vs ${pct(d.playoffs.teams[b].playoff_pct)}</div></div>`).join('');
     return `
       <div class="page-h"><div><h1>Rivalries</h1><p>Configured in <code>config.yaml</code> under <code>rivalries</code>. The newsroom writes hype pieces when rivals meet.</p></div></div>
       ${cards ? `<div class="grid grid-2 section">${cards}</div>` : '<div class="card section"><div class="empty">No rivalries configured yet. Add them to config.yaml, then hit ↻.</div></div>'}

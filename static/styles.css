@@ -214,3 +214,4 @@ tr.cut-line td { border-bottom: 2px dashed var(--series-2); }
 ul.clean { list-style: none; padding: 0; margin: 0; }
 .rank-pill { display: inline-flex; width: 26px; height: 26px; align-items: center; justify-content: center; border-radius: 50%; background: var(--surface-2); font-weight: 700; font-size: .8rem; }
 .rank-pill.top { background: var(--series-4); color: #111; }
+.handle { color: var(--text-3); font-size: .82rem; font-family: var(--mono); }

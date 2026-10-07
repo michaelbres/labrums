@@ -2,7 +2,8 @@
 
 ## Right now
 - Running against the real league (Labrums and Lagers, 10 teams, 2 divisions, dynasty). Verified vs Sleeper: 10/10 records, 14/14 shotguns, 2025 playoff field. 78 tests green. Pushed to `claude/magical-edison-g0t0m1`.
-- Waiting on the owner: special-rule owners/target, owner profiles, rivalries (templates are in config.yaml with the real display names). Confirm division winners get the top-2 seeds (Sleeper default) or set `playoffs.division_winners_top_seeds: false`.
+- Config is filled: 10 owner profiles with real names, 5 rivalry bowls, the Nick rule (Michael/Patrick/Bowie owe a shotgun any week they score less than Nick). Division seeding confirmed by the owner. Articles and pages use real first names; Sleeper handles shown as secondary. 82 tests green.
+- Next for the owner: run it (README) or tell me where to host it; tweak catchphrases/traits in config.yaml as desired.
 
 ## Next
 - Fill `config.yaml` with the owner's real details (special rule owners/target, owner profiles, rivalries).

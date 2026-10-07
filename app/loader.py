@@ -162,6 +162,7 @@ def load_season(client, cfg: dict, league_id: str) -> dict[str, Any]:
             "roster_id": int(r["roster_id"]),
             "owner_id": u.get("user_id"),
             "display_name": display,
+            "name": str(prof.get("name") or display).strip() or display,
             "team_name": meta.get("team_name") or f"Team {display}",
             "avatar": avatar_url(meta.get("avatar") or u.get("avatar")) if not str(meta.get("avatar") or "").startswith("http") else meta.get("avatar"),
             "nickname": prof.get("nickname"),

@@ -152,11 +152,13 @@ def test_empty_owner_profiles_are_not_set(make_ctx):
     assert "” said " in text
 
 
-def test_config_yaml_has_blank_live_owners():
+def test_config_yaml_has_live_owner_names():
     cfg = config.load_config()
-    for name in ("michaelbreslow", "PatrickHanrahan", "JimmyWoods10", "bowieshreiber", "trottner",
-                 "asinagra25", "styerech", "cianmahoney", "ncarney7502", "colonbuns"):
-        assert name in cfg["owners"] and cfg["owners"][name] == {}
+    names = {"michaelbreslow": "Michael", "PatrickHanrahan": "Patrick", "JimmyWoods10": "Jimmy",
+             "bowieshreiber": "Bowie", "trottner": "Tom", "asinagra25": "Adam", "styerech": "Steven",
+             "cianmahoney": "Cian", "ncarney7502": "Nick", "colonbuns": "Colin"}
+    for handle, name in names.items():
+        assert cfg["owners"][handle]["name"] == name
     assert cfg["playoffs"]["division_winners_top_seeds"] == "auto"
 
 

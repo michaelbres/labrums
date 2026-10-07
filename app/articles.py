@@ -7,6 +7,7 @@ from __future__ import annotations
 import random
 from typing import Any
 
+from . import shotguns
 from .loader import is_offseason
 from .sleeper import player_label
 
@@ -186,13 +187,14 @@ class Newsroom:
         return random.Random(":".join(str(p) for p in (self.ctx["season"], *parts)))
 
     def name(self, rid: int) -> str:
-        return self.teams[rid]["display_name"]
+        t = self.teams[rid]
+        return t.get("name") or t["display_name"]
 
     def nick(self, rid: int, r: random.Random | None = None) -> str:
         t = self.teams[rid]
         if t.get("nickname") and (r is None or r.random() < 0.5):
             return t["nickname"]
-        return t["display_name"]
+        return t.get("name") or t["display_name"]
 
     def tname(self, rid: int) -> str:
         return self.teams[rid]["team_name"]
@@ -225,14 +227,12 @@ class Newsroom:
 
     def _resolve_rivalries(self) -> list[dict]:
         out = []
-        by_name = {t["display_name"].lower(): rid for rid, t in self.teams.items()}
-        by_name.update({str(t.get("owner_id")).lower(): rid for rid, t in self.teams.items()})
         for rv in self.cfg.get("rivalries") or []:
-            owners = [by_name.get(str(o).lower()) for o in rv.get("owners") or []]
+            owners = [shotguns.team_by_name({"teams": self.teams}, o) for o in rv.get("owners") or []]
             owners = [o for o in owners if o is not None]
             if len(owners) >= 2:
                 out.append({"name": rv.get("name") or f"{self.name(owners[0])} vs. {self.name(owners[1])}",
-                            "owners": owners[:2], "backstory": rv.get("backstory") or ""})
+                            "owners": owners[:2], "owner_names": [self.name(o) for o in owners[:2]], "backstory": rv.get("backstory") or ""})
         return out
 
     def rivalry_between(self, a: int, b: int) -> dict | None:
@@ -562,7 +562,7 @@ class Newsroom:
             parts = []
             for s in its:
                 if s["reason"] == "rule":
-                    parts.append(f"{s['label'].lower()} ({s.get('detail', '')})")
+                    parts.append(f"{s['label']} ({s.get('detail', '')})")
                 elif s["reason"] == "empty_slot":
                     parts.append(f"an empty {s['slot']} slot")
                 else:

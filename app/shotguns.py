@@ -14,15 +14,18 @@ def _slot_names(ctx: dict) -> list[str]:
     return [s for s in ctx["roster_positions"] if s not in ("BN", "IR", "TAXI")]
 
 
-def _team_by_name(ctx: dict, name: str) -> int | None:
+def team_by_name(ctx: dict, name: str) -> int | None:
     name = str(name or "").strip().lower()
     if not name:
         return None
     for rid, t in ctx["teams"].items():
         if name in {str(t["display_name"]).lower(), str(t.get("owner_id")).lower(),
-                    str(t.get("team_name", "")).lower(), str(rid)}:
+                    str(t.get("team_name", "")).lower(), str(t.get("name") or "").lower(), str(rid)}:
             return rid
     return None
+
+
+_team_by_name = team_by_name
 
 
 def detect(ctx: dict, st: dict) -> list[dict]:
@@ -76,14 +79,14 @@ def detect(ctx: dict, st: dict) -> list[dict]:
         if rule.get("season") and str(rule["season"]) != season:
             continue
         rtype = rule.get("type")
-        owners = [(_team_by_name(ctx, o), o) for o in rule.get("owners") or []]
+        owners = [(team_by_name(ctx, o), o) for o in rule.get("owners") or []]
         owners = [(rid, o) for rid, o in owners if rid is not None]
         seen_owners: set[int] = set()
         owners = [(rid, o) for rid, o in owners if not (rid in seen_owners or seen_owners.add(rid))]
         if not owners:
             continue
         label = rule.get("label") or rtype
-        target_rid = _team_by_name(ctx, rule.get("target")) if rtype == "score_less_than_team" else None
+        target_rid = team_by_name(ctx, rule.get("target")) if rtype == "score_less_than_team" else None
         if rtype == "score_less_than_team" and target_rid is None:
             continue
         for week in sorted(ctx["matchups"]):
@@ -97,7 +100,7 @@ def detect(ctx: dict, st: dict) -> list[dict]:
                     theirs = st["teams"][target_rid]["scores"].get(week)
                     if theirs is None or rid == target_rid or mine >= theirs:
                         continue
-                    tname = st["teams"][target_rid]["display_name"]
+                    tname = st["teams"][target_rid].get("name") or st["teams"][target_rid]["display_name"]
                     detail = f"Scored {mine:.2f}, {tname} scored {theirs:.2f}"
                     pkey = f"rule-{target_rid}"
                 elif rtype == "score_below":
@@ -129,7 +132,8 @@ def detect(ctx: dict, st: dict) -> list[dict]:
 def leaderboard(ctx: dict, items: list[dict], completed: dict[str, dict]) -> list[dict]:
     rows: dict[int, dict] = {}
     for rid, t in ctx["teams"].items():
-        rows[rid] = {"roster_id": rid, "display_name": t["display_name"], "team_name": t["team_name"],
+        rows[rid] = {"roster_id": rid, "display_name": t["display_name"], "name": t.get("name") or t["display_name"],
+                     "team_name": t["team_name"],
                      "avatar": t["avatar"], "total": 0, "completed": 0, "outstanding": 0,
                      "by_reason": {}, "worst_week": None}
     per_week: dict[tuple[int, int], int] = {}
@@ -150,7 +154,7 @@ def leaderboard(ctx: dict, items: list[dict], completed: dict[str, dict]) -> lis
         row = rows[rid]
         if row["worst_week"] is None or cnt > row["worst_week"]["count"]:
             row["worst_week"] = {"week": week, "count": cnt}
-    out = sorted(rows.values(), key=lambda r: (-r["total"], -r["outstanding"], r["display_name"]))
+    out = sorted(rows.values(), key=lambda r: (-r["total"], -r["outstanding"], r["name"].lower(), r["display_name"]))
     for i, r in enumerate(out):
         r["rank"] = i + 1
     return out
