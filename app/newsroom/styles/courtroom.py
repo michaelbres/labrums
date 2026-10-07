@@ -546,6 +546,114 @@ FAMILY = {
             "The record names {busiest} as the busiest trader.",
             "{busiest} led the offseason in trades.",
         ],
+        # ---------------- Sunday column ----------------
+        "h.c": [
+            "{a} v. {b}: statements entered into the record",
+            "Motion for contempt: {a} and {b} address the court",
+            "In re {a} and {b}: the parties' remarks",
+            "{a} and {b}: oral argument, as delivered",
+        ],
+        "h.c.rv": [
+            "{rv_name}: further argument from {a} and {b}",
+            "In the matter of {rv_name}, {a} and {b} supplement the record",
+            "{a} v. {b}, {rv_name}: a Sunday filing",
+        ],
+        "h.c.next": [
+            "{a} v. {b}, set for Week {nwk}: pretrial statements",
+            "Before the Week {nwk} hearing: {a} and {b} file remarks",
+            "Pretrial motions in {a} v. {b}, Week {nwk}",
+        ],
+        "c.lede": [
+            "The record reflects that, through {wl}, {a} stands {a_rank} at {a_rec} and {b} stands {b_rank} at {b_rec}.",
+            "Exhibit A is the standings through {wl}: {a}, {a_rank}, {a_rec}; {b}, {b_rank}, {b_rec}.",
+            "Through {wl}, the court notes that {a} ({a_rec}) is ranked {a_rank} and {b} ({b_rec}) is ranked {b_rank}.",
+        ],
+        "c.next": [
+            "The parties are set to appear against each other in Week {nwk}.",
+            "The matter is calendared for Week {nwk}, {a} against {b}.",
+            "The two are scheduled to meet in Week {nwk}, at which point the record may be supplemented.",
+        ],
+        "c.recent": [
+            "As to recent results, {a} {a_form}, and {b} {b_form}.",
+            "Exhibit B, recent margins: {a} {a_form}; {b} {b_form}.",
+            "The recent record shows that {a} {a_form}, and that {b} {b_form}.",
+        ],
+        "c.gap": [
+            "On the standings, {hi} ({hi_rank}, {hi_rec}) is ahead of {lo} ({lo_rank}, {lo_rec}), and the points-scored differential is {pf_gap}.",
+            "The court finds {hi} ranked {hi_rank} and {lo} ranked {lo_rank}, with {pf_gap} of scoring between them.",
+            "Entered into evidence: {hi}, {hi_rank}, {hi_rec}; {lo}, {lo_rank}, {lo_rec}; a points-scored differential of {pf_gap}.",
+        ],
+        "c.pick": [
+            "The presumption favors {fav} over {dog} on {fav_why}.",
+            "On {fav_why}, the court finds for {fav} over {dog}, subject to appeal.",
+            "This reporter's ruling is {fav} over {dog}, resting on {fav_why}.",
+        ],
+        "c.close": [
+            "The parties {a} and {b} are advised that nothing herein is binding.",
+            "No settlement has been reached between {a} and {b}; the matter is adjourned.",
+            "The record is closed for now, subject to further filings by {a} and {b}.",
+        ],
+        # ---------------- Monday analytics ----------------
+        "h.a.luck": [
+            "Findings on fortune: {lucky} benefited ({lucky_luck}), {unlucky} was wronged ({unlucky_luck})",
+            "Luck index entered: {lucky} {lucky_luck}, {unlucky} {unlucky_luck}",
+            "The court finds {unlucky} unlucky at {unlucky_luck} and {lucky} fortunate at {lucky_luck}",
+        ],
+        "h.a.eff": [
+            "Lineup efficiency, per the record: {best_n} {best_pct}, {worst_n} {worst_pct}",
+            "The court finds {best_n} most efficient ({best_pct}) and {worst_n} least ({worst_pct})",
+            "On the matter of lineups: {worst_n} at {worst_pct}, {best_n} at {best_pct}",
+        ],
+        "h.a.bench": [
+            "Exhibit: {bench_n} left {bench_pts} on the bench",
+            "The bench, entered into evidence: {bench_n}, {bench_pts}",
+            "{bench_n} stands accused of leaving {bench_pts} on the bench",
+        ],
+        "h.a.steady": [
+            "Consistency, as found: {steady_n} steady, {wild_n} erratic",
+            "Weekly rank: the court finds {steady_n} consistent and {wild_n} not",
+            "{wild_n} v. consistency: {steady_n} testifies for the other side",
+        ],
+        "a.lede": [
+            "The following findings of fact are drawn from results through {wl}, {gp} per team.",
+            "Entered into the record, through {wl} and {gp} for each team, are the following exhibits.",
+            "The court's weekly findings, through {wl}, rest on {gp} per team.",
+        ],
+        "a.luck": [
+            "Finding of fact on fortune: {lucky} holds a record of {lucky_rec} against an expected {lucky_exp} wins, a luck index of {lucky_luck}. {unlucky} holds {unlucky_rec} against an expected {unlucky_exp}, an index of {unlucky_luck}.",
+            "Exhibit C, the luck index (actual wins less all-play expected wins): {lucky}, {lucky_luck} ({lucky_rec}, expected {lucky_exp}); {unlucky}, {unlucky_luck} ({unlucky_rec}, expected {unlucky_exp}).",
+            "{lucky} is the beneficiary of fortune, at {lucky_luck} ({lucky_rec} on {lucky_exp} expected wins). {unlucky} is its victim, at {unlucky_luck} ({unlucky_rec} on {unlucky_exp}).",
+        ],
+        "a.eff": [
+            "On lineup efficiency, being points scored over the best possible lineup, the court finds {best_n} highest at {best_pct} and {worst_n} lowest at {worst_pct}, against a league figure of {lg_pct}.",
+            "Efficiency, per the record: {best_n}, {best_pct}; {worst_n}, {worst_pct}; the league as a whole, {lg_pct}.",
+            "{best_n} captured {best_pct} of available points. {worst_n} captured {worst_pct}. The league captured {lg_pct}. The court so finds.",
+        ],
+        "a.bench": [
+            "As to the bench, measured against each team's best possible lineup, {bench_n} left {bench_pts} unused, the most in the league. {bench_low_n} left {bench_low_pts}, the fewest.",
+            "Exhibit D, points left on the bench: {bench_n}, {bench_pts}; {bench_low_n}, {bench_low_pts}.",
+            "{bench_n} is found to have left {bench_pts} on the bench. {bench_low_n} is found to have left {bench_low_pts}.",
+        ],
+        "a.blunder": [
+            "The single most costly week on record belongs to {bl_n}, in Week {bl_wk}: {bl_pts} below the best possible lineup. The highest score on that bench was {bl_player_pts}, by {bl_player} ({bl_pos}).",
+            "In Week {bl_wk}, {bl_n} finished {bl_pts} short of the best possible lineup, the largest such gap to date. {bl_player} ({bl_pos}) scored {bl_player_pts} on the bench.",
+            "Exhibit E: {bl_n}, Week {bl_wk}, {bl_pts} below optimal. The bench's top scorer was {bl_player} ({bl_pos}), with {bl_player_pts}.",
+        ],
+        "a.steady": [
+            "As to consistency, the court finds {steady_n} the steadiest, with an average weekly rank of {steady_avg}, ranging from {steady_band}, and {wild_n} the least steady, ranging from {wild_band}.",
+            "Weekly rank, per the record: {steady_n} (from {steady_band}, average {steady_avg}); {wild_n} (from {wild_band}).",
+            "{steady_n} has ranged from {steady_band}, averaging {steady_avg}. {wild_n} has ranged from {wild_band}. The distinction is entered.",
+        ],
+        "a.trade": [
+            "On the trade of Week {twk}, the record shows that the players {lead} received have scored {lead_pts} over {since_wk}, and the players {trail} received have scored {trail_pts}.",
+            "Early returns on the Week {twk} trade favor {lead}, {lead_pts} to {trail_pts}, over {since_wk}. The court reserves judgment as to {trail}.",
+            "Exhibit F: since the Week {twk} trade, {lead}'s incoming players have produced {lead_pts}, and {trail}'s have produced {trail_pts}, across {since_wk}.",
+        ],
+        "a.close": [
+            "The findings stand through {wl}. The court is adjourned until next Monday.",
+            "So ordered.",
+            "The record will be supplemented as results are entered.",
+        ],
         "x.sig": [
             "{n} then entered a familiar statement into the record: “{catch}”",
             "{n} concluded with the usual: “{catch}”",

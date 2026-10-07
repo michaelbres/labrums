@@ -23,9 +23,11 @@ class Book:
         self.rivalries = self._resolve_rivalries()
         self.commissioner = shotguns.team_by_name(ctx, self.cfg.get("commissioner")) if self.cfg.get("commissioner") else None
         self._snaps: dict[int, dict] = {}
+        self._bench: dict[tuple[int, int], tuple[float, dict | None]] = {}
         self.seen: Counter = Counter()        # normalized sentence -> times written in this build
         self.quote_use: Counter = Counter()   # (situation, variant) -> times quoted in this build
         self._norm_rx: re.Pattern | None = None
+        self._players_rx: re.Pattern | None = None
         self.games_by_week: dict[int, list[dict]] = {}
         for g in st["games"]:
             self.games_by_week.setdefault(g["week"], []).append(g)
@@ -96,6 +98,13 @@ class Book:
 
     def bench_left(self, week: int, rid: int) -> tuple[float, dict | None]:
         """(points the optimal lineup would have added, best scorer who sat) for that week."""
+        if (week, rid) in self._bench:
+            return self._bench[(week, rid)]
+        res = self._bench_left(week, rid)
+        self._bench[(week, rid)] = res
+        return res
+
+    def _bench_left(self, week: int, rid: int) -> tuple[float, dict | None]:
         row = self.week_row(week, rid)
         if not row:
             return 0.0, None
@@ -109,10 +118,12 @@ class Book:
             best = {**player_label(self.ctx["players"], pid), "points": round(v, 2)}
         return max(left, 0.0), best
 
-    def points_since(self, pid: str, after_week: int, rid: int) -> float:
+    def points_since(self, pid: str, after_week: int, rid: int, upto: int | None = None) -> float:
+        """Points `pid` scored for `rid` in weeks after `after_week`, through `upto` (default: last completed)."""
         total = 0.0
+        last = self.ctx["last_completed"] if upto is None else min(upto, self.ctx["last_completed"])
         for w, rows in self.ctx["matchups"].items():
-            if w <= after_week or w > self.ctx["last_completed"]:
+            if w <= after_week or w > last:
                 continue
             for r in rows:
                 if int(r["roster_id"]) == rid:
@@ -210,6 +221,22 @@ class Book:
             ordered = sorted(names, key=len, reverse=True)
             self._norm_rx = re.compile("|".join(re.escape(n) for n in ordered)) if ordered else re.compile(r"(?!x)x")
         return self._norm_rx
+
+    def scrub_players(self, text: str) -> str:
+        """`text` without player names: a player named Pat is not an owner nicknamed Pat."""
+        if self._players_rx is None:
+            names: set[str] = set()
+            players = self.ctx["players"]
+            for rows in self.ctx["matchups"].values():
+                for r in rows:
+                    for pid in r.get("players") or []:
+                        lab = players.get(str(pid)) or {}
+                        n = " ".join(str(x) for x in (lab.get("first_name"), lab.get("last_name")) if x)
+                        if n:
+                            names.add(n)
+            ordered = sorted(names, key=len, reverse=True)
+            self._players_rx = re.compile("|".join(re.escape(n) for n in ordered)) if ordered else re.compile(r"(?!x)x")
+        return self._players_rx.sub("", text)
 
     def sentence_keys(self, text: str) -> list[str]:
         """Sentences of `text` with names and numbers stripped, lowercased: two sentences are 'the same

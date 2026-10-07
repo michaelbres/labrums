@@ -546,6 +546,114 @@ FAMILY = {
             "{busiest} posted the highest trade volume of the offseason.",
             "{busiest} led the offseason in trade volume.",
         ],
+        # ---------------- Sunday column ----------------
+        "h.c": [
+            "{a} and {b} trade barbs: markets react",
+            "{a} short-sells {b}: a Sunday note",
+            "Sunday note: {a} and {b} in a public dispute",
+            "{a}, {b}: what the talk is worth",
+        ],
+        "h.c.rv": [
+            "{rv_name}: {a} and {b} reprice the feud",
+            "{a} and {b} reopen {rv_name}, volatility expected",
+            "Sunday note on {rv_name}: {a} and {b} talk their books",
+        ],
+        "h.c.next": [
+            "Ahead of Week {nwk}: {a} and {b} talk their books",
+            "{a} vs. {b} in Week {nwk}: the pre-game price discovery",
+            "Week {nwk} preview: {a} and {b} issue guidance",
+        ],
+        "c.lede": [
+            "Through {wl}, {a} is {a_rec} and rated {a_rank}, and {b} is {b_rec} and rated {b_rank}.",
+            "Opening prices through {wl}: {a}, {a_rank}, {a_rec}; {b}, {b_rank}, {b_rec}.",
+            "{a} ({a_rec}) closed {wl} ranked {a_rank}. {b} ({b_rec}) closed ranked {b_rank}.",
+        ],
+        "c.next": [
+            "The two meet in Week {nwk}, where positions will be settled.",
+            "{a} and {b} are scheduled to meet in Week {nwk}; expect volume.",
+            "Week {nwk} is the catalyst, with {a} facing {b}.",
+        ],
+        "c.recent": [
+            "Recent trading: {a} {a_form}, and {b} {b_form}.",
+            "Over the trailing few games, {a} {a_form}, while {b} {b_form}.",
+            "On the recent tape, {a} {a_form}, and {b} {b_form}.",
+        ],
+        "c.gap": [
+            "{hi} ({hi_rank}, {hi_rec}) trades above {lo} ({lo_rank}, {lo_rec}), with a spread of {pf_gap} in points scored.",
+            "The spread in points scored between {hi} and {lo} is {pf_gap}, with {hi} rated {hi_rank} and {lo} rated {lo_rank}.",
+            "{hi} is rated {hi_rank} at {hi_rec}, {lo} is rated {lo_rank} at {lo_rec}, and {pf_gap} of scoring separates the two.",
+        ],
+        "c.pick": [
+            "Rating: overweight {fav}, underweight {dog}, on {fav_why}.",
+            "Our call is {fav} over {dog}, based on {fav_why}, with the usual caveats.",
+            "On {fav_why}, {fav} is the buy and {dog} is the sell.",
+        ],
+        "c.close": [
+            "We maintain a volatile outlook on {a} and {b}.",
+            "No resolution between {a} and {b} is priced in.",
+            "Neither {a} nor {b} has revised guidance. Past talk is no guarantee of future results.",
+        ],
+        # ---------------- Monday analytics ----------------
+        "h.a.luck": [
+            "Luck premium: {lucky} {lucky_luck}, {unlucky} {unlucky_luck}",
+            "{lucky} trades at a luck premium ({lucky_luck}); {unlucky} at a discount ({unlucky_luck})",
+            "Valuation check: {lucky} overvalued by {lucky_luck} wins, {unlucky} undervalued",
+        ],
+        "h.a.eff": [
+            "Efficiency ratings: {best_n} {best_pct}, {worst_n} {worst_pct}",
+            "{best_n} upgraded on {best_pct} efficiency; {worst_n} downgraded at {worst_pct}",
+            "Lineup efficiency: {best_n} leads the sector at {best_pct}, {worst_n} lags at {worst_pct}",
+        ],
+        "h.a.bench": [
+            "{bench_n} left {bench_pts} of capital idle on the bench",
+            "Bench impairment: {bench_n}, {bench_pts}",
+            "{bench_pts} in unrealized value: {bench_n}'s bench",
+        ],
+        "h.a.steady": [
+            "Low volatility for {steady_n}, high volatility for {wild_n}",
+            "Weekly rank volatility: {steady_n} stable, {wild_n} erratic",
+            "{wild_n} the most volatile name in the league; {steady_n} the least",
+        ],
+        "a.lede": [
+            "The Monday market summary, through {wl} and {gp} per team.",
+            "All figures are as of the close of {wl}, after {gp} for each team.",
+            "Here is the weekly scorecard through {wl}, {gp} per team.",
+        ],
+        "a.luck": [
+            "On luck, {lucky} trades at a premium: {lucky_rec} against an all-play valuation of {lucky_exp} wins, a premium of {lucky_luck}. {unlucky} trades at a discount: {unlucky_rec} against {unlucky_exp}, a discount of {unlucky_luck}.",
+            "Luck index (actual wins minus all-play expected wins): {lucky}, {lucky_luck} ({lucky_rec}, expected {lucky_exp}); {unlucky}, {unlucky_luck} ({unlucky_rec}, expected {unlucky_exp}).",
+            "{lucky} is overvalued by {lucky_luck} wins ({lucky_rec} on {lucky_exp} expected). {unlucky} is undervalued ({unlucky_rec} on {unlucky_exp}, {unlucky_luck}).",
+        ],
+        "a.eff": [
+            "Lineup efficiency, the share of available points captured: {best_n} leads at {best_pct}, {worst_n} lags at {worst_pct}, and the league index sits at {lg_pct}.",
+            "{best_n} is upgraded at {best_pct} efficiency. {worst_n} is downgraded at {worst_pct}. The league benchmark is {lg_pct}.",
+            "Efficiency ratings: {best_n}, {best_pct}; {worst_n}, {worst_pct}; league benchmark, {lg_pct}.",
+        ],
+        "a.bench": [
+            "On idle capital, measured against each team's best possible lineup, {bench_n} left {bench_pts} on the bench, the most in the league. {bench_low_n} left {bench_low_pts}, the least.",
+            "Bench impairment: {bench_n}, {bench_pts}; {bench_low_n}, {bench_low_pts}.",
+            "{bench_n} wrote down {bench_pts} in unused bench value. {bench_low_n} wrote down {bench_low_pts}.",
+        ],
+        "a.blunder": [
+            "The largest single-week write-down belongs to {bl_n}, in Week {bl_wk}: {bl_pts} below the best possible lineup. The top bench score was {bl_player_pts}, by {bl_player} ({bl_pos}).",
+            "In Week {bl_wk}, {bl_n} finished {bl_pts} short of the best lineup, the biggest miss so far, while {bl_player} ({bl_pos}) posted {bl_player_pts} from the bench.",
+            "{bl_n}, Week {bl_wk}: a {bl_pts} shortfall against the optimal lineup. Best bench print: {bl_player} ({bl_pos}), {bl_player_pts}.",
+        ],
+        "a.steady": [
+            "On volatility, {steady_n} is the low-risk name, averaging a weekly rank of {steady_avg} and ranging from {steady_band}. {wild_n} is the high-risk name, ranging from {wild_band}.",
+            "Weekly rank volatility: {steady_n} (from {steady_band}, average {steady_avg}) against {wild_n} (from {wild_band}).",
+            "{steady_n} has held a narrow range, from {steady_band}. {wild_n} has traded from {wild_band}.",
+        ],
+        "a.trade": [
+            "On the Week {twk} trade: over {since_wk}, the players {lead} acquired have returned {lead_pts}, against {trail_pts} for the players {trail} acquired.",
+            "Early returns on the Week {twk} trade favor {lead}, {lead_pts} to {trail_pts}, after {since_wk}. {trail} is underwater, for now.",
+            "Since the Week {twk} deal, {lead}'s acquisitions have returned {lead_pts} and {trail}'s have returned {trail_pts}, over {since_wk}.",
+        ],
+        "a.close": [
+            "Ratings are as of the close of {wl} and are subject to change.",
+            "Past performance is not indicative of future lineups.",
+            "We will update the scorecard next Monday.",
+        ],
         "x.sig": [
             "And then, as always: “{catch}” The standard guidance from {n}.",
             "{n} ended the call with the standard disclaimer: “{catch}”",

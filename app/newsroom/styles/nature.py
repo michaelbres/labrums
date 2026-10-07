@@ -546,6 +546,114 @@ FAMILY = {
             "No creature traded more than {busiest}.",
             "{busiest} foraged hardest through the winter, in trades.",
         ],
+        # ---------------- Sunday column ----------------
+        "h.c": [
+            "{a} and {b}: the display of rivals",
+            "Territorial calls on the plains: {a} and {b}",
+            "{a} and {b} bare their teeth",
+            "Observed on a Sunday: {a} and {b} in conflict",
+        ],
+        "h.c.rv": [
+            "{rv_name}: the old rivalry, observed once more",
+            "{a} and {b}, and the ancient dispute of {rv_name}",
+            "In the habitat of {rv_name}: {a} and {b}",
+        ],
+        "h.c.next": [
+            "Before the clash in Week {nwk}: {a} and {b} display",
+            "{a} and {b} circle each other ahead of Week {nwk}",
+            "As Week {nwk} approaches, {a} and {b} announce themselves",
+        ],
+        "c.lede": [
+            "On this Sunday, through {wl}, the creature known as {a} holds {a_rank} place at {a_rec}. Nearby, {b} holds {b_rank} at {b_rec}.",
+            "Through {wl}, the standings show {a} at {a_rec} in {a_rank} place, and {b} at {b_rec} in {b_rank}. Each has noticed the other.",
+            "Our subjects are {a}, {a_rank} at {a_rec}, and {b}, {b_rank} at {b_rec}, as the season stood through {wl}.",
+        ],
+        "c.next": [
+            "They will meet in Week {nwk}, as such creatures always must.",
+            "The schedule brings them together in Week {nwk}, at the watering hole.",
+            "In Week {nwk}, the two will cross paths. What follows is nature's business.",
+        ],
+        "c.recent": [
+            "In recent games, {a} {a_form}, while {b} {b_form}. The herd has noticed.",
+            "Observe the recent form: {a} {a_form}, and {b} {b_form}.",
+            "Lately, {a} {a_form}. {b} {b_form}. Such things are not lost on a rival.",
+        ],
+        "c.gap": [
+            "In the table, {hi} ({hi_rank}, {hi_rec}) occupies higher ground than {lo} ({lo_rank}, {lo_rec}), and {pf_gap} of scoring lies between them like a river.",
+            "{hi} stands {hi_rank} and {lo} stands {lo_rank}. In points scored, {pf_gap} separate the pair, a modest distance for such animals.",
+            "The standings place {hi} {hi_rank} at {hi_rec} and {lo} {lo_rank} at {lo_rec}, with {pf_gap} in points scored between them.",
+        ],
+        "c.pick": [
+            "If the observer must wager, the wager is {fav} over {dog}, on {fav_why}.",
+            "By {fav_why}, {fav} is the stronger of the two, and {dog} knows it.",
+            "{fav} is favored over {dog}, on {fav_why}, though nature has overturned favorites before.",
+        ],
+        "c.close": [
+            "And so {a} and {b} continue their display, as they have, as they will.",
+            "The calls of {a} and {b} carry across the plain. We will listen for more.",
+            "Neither {a} nor {b} yields. The season is long, and the grass is tall.",
+        ],
+        # ---------------- Monday analytics ----------------
+        "h.a.luck": [
+            "Fortune and the herd: {lucky} blessed, {unlucky} not",
+            "{lucky} has been favored by the weather ({lucky_luck}); {unlucky} has not ({unlucky_luck})",
+            "A study in fortune: {lucky} at {lucky_luck}, {unlucky} at {unlucky_luck}",
+        ],
+        "h.a.eff": [
+            "{best_n} forages well, at {best_pct}; {worst_n} forages poorly, at {worst_pct}",
+            "Efficiency in the wild: {best_n} at {best_pct}, {worst_n} at {worst_pct}",
+            "{worst_n} leaves much of the harvest uncollected, at {worst_pct}",
+        ],
+        "h.a.bench": [
+            "{bench_n} and the points left uneaten on the bench",
+            "{bench_pts} unclaimed on the bench, the work of {bench_n}",
+            "In the shade of the bench, {bench_n} left {bench_pts}",
+        ],
+        "h.a.steady": [
+            "{steady_n}, the patient grazer, and {wild_n}, the restless one",
+            "Steady {steady_n}, erratic {wild_n}: a study in migration",
+            "{wild_n} wanders widely; {steady_n} keeps to the same ground",
+        ],
+        "a.lede": [
+            "The Monday survey: these figures were gathered through {wl}, after {gp} for each team in the territory.",
+            "Each week the observer counts what the league has done. Through {wl}, with {gp} per team, the count follows.",
+            "Field notes through {wl}, {gp} per team, taken at a respectful distance.",
+        ],
+        "a.luck": [
+            "Fortune is not shared evenly. {lucky}, at {lucky_rec}, holds {lucky_luck} wins above the {lucky_exp} that all-play would predict. {unlucky}, at {unlucky_rec}, sits at {unlucky_luck} against an expected {unlucky_exp}.",
+            "Observe {lucky}, favored by the season: {lucky_rec} on {lucky_exp} expected wins ({lucky_luck}). Observe {unlucky}, who was not: {unlucky_rec} on {unlucky_exp} ({unlucky_luck}).",
+            "The luck index records {lucky} at {lucky_luck} ({lucky_rec}, expected {lucky_exp}) and {unlucky} at {unlucky_luck} ({unlucky_rec}, expected {unlucky_exp}). The weather has favorites.",
+        ],
+        "a.eff": [
+            "Of the points a roster makes available, {best_n} collects {best_pct}, the most in the territory. {worst_n} collects {worst_pct}, the least. The league as a whole gathers {lg_pct}.",
+            "In efficiency, the best lineups belong to {best_n} ({best_pct}), the weakest to {worst_n} ({worst_pct}), and the herd average is {lg_pct}.",
+            "{best_n}: {best_pct}. {worst_n}: {worst_pct}. The league, taken together: {lg_pct}. Such is the harvest.",
+        ],
+        "a.bench": [
+            "Some of the harvest is left in the field. {bench_n} left {bench_pts} on the bench against the best possible lineup; {bench_low_n} left only {bench_low_pts}.",
+            "The bench holds what the starters did not use. For {bench_n} it is {bench_pts}, the most in the league. For {bench_low_n}, {bench_low_pts}, the least.",
+            "{bench_n} left {bench_pts} uncollected. {bench_low_n}, the tidiest forager, left {bench_low_pts}.",
+        ],
+        "a.blunder": [
+            "The largest single loss to the bench belongs to {bl_n}, in Week {bl_wk}: {bl_pts} below the best possible lineup. The best score on that bench came from {bl_player} ({bl_pos}), {bl_player_pts}.",
+            "In Week {bl_wk}, {bl_n} fell {bl_pts} short of the best lineup available, while {bl_player} ({bl_pos}) scored {bl_player_pts} in the shade of the bench.",
+            "{bl_n}, Week {bl_wk}: {bl_pts} left in the field. {bl_player} ({bl_pos}) had {bl_player_pts} from the bench.",
+        ],
+        "a.steady": [
+            "Of all the creatures here, {steady_n} is the most predictable, averaging a weekly rank of {steady_avg}, ranging from {steady_band}. {wild_n} ranges from {wild_band}, and is not to be predicted.",
+            "{steady_n} keeps to familiar ground, from {steady_band}, with an average of {steady_avg}. {wild_n} roams from {wild_band}.",
+            "In weekly rank, {steady_n} is the creature of habit (from {steady_band}, average {steady_avg}); {wild_n} is the wanderer (from {wild_band}).",
+        ],
+        "a.trade": [
+            "And the exchange of Week {twk}: over {since_wk}, the players {lead} acquired have scored {lead_pts}, and the players {trail} acquired have scored {trail_pts}. It is early, and the season is long.",
+            "The Week {twk} trade between {lead} and {trail} favors {lead} so far, {lead_pts} to {trail_pts}, after {since_wk}.",
+            "Early returns on the Week {twk} exchange: {lead}, {lead_pts}; {trail}, {trail_pts}; {since_wk} observed.",
+        ],
+        "a.close": [
+            "The survey concludes for now, through {wl}.",
+            "And so the count is entered. The league goes on.",
+            "We will return to the plain next Monday.",
+        ],
         "x.sig": [
             "And then, as {n} always does: “{catch}”",
             "{n} gave the familiar call: “{catch}”",

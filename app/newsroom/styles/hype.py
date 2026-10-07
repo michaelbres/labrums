@@ -546,6 +546,114 @@ FAMILY = {
             "{busiest} led the league in trades, and it wasn't close!",
             "Hat tip to {busiest}, the trade king of the offseason!",
         ],
+        # ---------------- Sunday column ----------------
+        "h.c": [
+            "{a} vs. {b}: THE TRASH TALK IS HERE!",
+            "{a} and {b} are NOT holding back!",
+            "Talk is cheap, and {a} and {b} are SPENDING!",
+            "Sunday sizzle: {a} and {b} go at it!",
+        ],
+        "h.c.rv": [
+            "{rv_name}: {a} and {b} are TALKING!",
+            "{a} and {b} bring {rv_name} to the mic!",
+            "It's {rv_name} season: {a} and {b} have WORDS!",
+        ],
+        "h.c.next": [
+            "{a} and {b} meet in Week {nwk}, and the TALK has started!",
+            "Week {nwk} is coming: {a} vs. {b}, and the gloves are OFF!",
+            "{a} and {b} are warming up for Week {nwk}, mouths first!",
+        ],
+        "c.lede": [
+            "Through {wl}, {a} is {a_rec} and ranked {a_rank}! {b} is {b_rec} and ranked {b_rank}! Here we go!",
+            "Check the table! {a} ({a_rec}) is {a_rank}, and {b} ({b_rec}) is {b_rank}!",
+            "{a} sits {a_rank} at {a_rec}. {b} sits {b_rank} at {b_rec}. That's the setup, and it's a GOOD one!",
+        ],
+        "c.next": [
+            "They meet in Week {nwk}, and you KNOW it matters!",
+            "Mark it down: {a} vs. {b}, Week {nwk}!",
+            "Week {nwk}! {a}! {b}! Be there!",
+        ],
+        "c.recent": [
+            "Look at the form! {a} {a_form}, and {b} {b_form}!",
+            "Recent results! {a} {a_form}. {b} {b_form}!",
+            "In their last games, {a} {a_form}, while {b} {b_form}!",
+        ],
+        "c.gap": [
+            "{hi} is {hi_rank} at {hi_rec}, and {lo} is {lo_rank} at {lo_rec}! In points scored they're {pf_gap} apart!",
+            "{pf_gap} separates {hi} ({hi_rank}) and {lo} ({lo_rank}) in points scored!",
+            "{hi} is ahead of {lo} in the table ({hi_rank} to {lo_rank}), and the points gap is {pf_gap}!",
+        ],
+        "c.pick": [
+            "My pick is {fav} over {dog}, going by {fav_why}, and I'm not sorry!",
+            "The call: {fav}! The reason: {fav_why}! Sorry, {dog}!",
+            "{fav} gets the nod over {dog} on {fav_why}!",
+        ],
+        "c.close": [
+            "Somebody's gonna eat those words, {a} and {b}!",
+            "You heard it here first, {a} and {b}!",
+            "It's on, {a}! It's on, {b}!",
+        ],
+        # ---------------- Monday analytics ----------------
+        "h.a.luck": [
+            "LUCK REPORT: {lucky} is {lucky_luck} and {unlucky} is {unlucky_luck}!",
+            "{lucky} has all the LUCK at {lucky_luck}! {unlucky} has NONE at {unlucky_luck}!",
+            "Horseshoes for {lucky} ({lucky_luck}), black cats for {unlucky} ({unlucky_luck})!",
+        ],
+        "h.a.eff": [
+            "{best_n} is the LINEUP KING at {best_pct}, and {worst_n} is at {worst_pct}!",
+            "{best_n} nails {best_pct} of the points! {worst_n} nails {worst_pct}!",
+            "Efficiency alert: {best_n} {best_pct}, {worst_n} {worst_pct}!",
+        ],
+        "h.a.bench": [
+            "{bench_n} left {bench_pts} on the BENCH!",
+            "Bench alert! {bench_n} wasted {bench_pts}!",
+            "{bench_pts} sat on {bench_n}'s bench, and it's the most in the league!",
+        ],
+        "h.a.steady": [
+            "{steady_n} is Mr. CONSISTENT, and {wild_n} is a ROLLER COASTER!",
+            "Steady {steady_n}, wild {wild_n}: the weekly rank report!",
+            "{wild_n} is all over the map while {steady_n} stays put!",
+        ],
+        "a.lede": [
+            "Time for the NUMBERS! Everything below covers {gp} per team, through {wl}!",
+            "Nerd hour! These stats run through {wl}, {gp} each!",
+            "Grab a calculator! We're {gp} deep, through {wl}!",
+        ],
+        "a.luck": [
+            "{lucky} is {lucky_rec}, but the all-play math says {lucky_exp} wins. That's {lucky_luck} of LUCK! {unlucky} is {unlucky_rec} when the math says {unlucky_exp}. That's {unlucky_luck}!",
+            "Luck index time! {lucky}: {lucky_rec}, expected {lucky_exp}, {lucky_luck}! {unlucky}: {unlucky_rec}, expected {unlucky_exp}, {unlucky_luck}!",
+            "{lucky} has been BLESSED ({lucky_rec} on {lucky_exp} expected wins, {lucky_luck})! {unlucky} has been CURSED ({unlucky_rec} on {unlucky_exp} expected, {unlucky_luck})!",
+        ],
+        "a.eff": [
+            "Lineup efficiency! {best_n} gets {best_pct} of the best possible points! {worst_n} gets {worst_pct}! The league average is {lg_pct}!",
+            "League-wide, lineups hit {lg_pct} of the max! {best_n} is on top at {best_pct}, and {worst_n} is at the bottom with {worst_pct}!",
+            "{best_n}: {best_pct}! {worst_n}: {worst_pct}! The league: {lg_pct}!",
+        ],
+        "a.bench": [
+            "Bench points! {bench_n} left {bench_pts} on the table! {bench_low_n} left just {bench_low_pts}!",
+            "The biggest bench crime? {bench_n}, with {bench_pts} unused! The cleanest sheet: {bench_low_n} at {bench_low_pts}!",
+            "{bench_n} has {bench_pts} in lineup regret! {bench_low_n} has only {bench_low_pts}!",
+        ],
+        "a.blunder": [
+            "The worst single week? {bl_n} in Week {bl_wk}: {bl_pts} left on the table! The top scorer on that bench was {bl_player} ({bl_pos}) with {bl_player_pts}!",
+            "Week {bl_wk} was a DISASTER for {bl_n}: {bl_pts} below the best possible lineup! {bl_player} ({bl_pos}) put up {bl_player_pts} from the bench!",
+            "{bl_n}, Week {bl_wk}, {bl_pts} short of perfection! The bench's best was {bl_player} ({bl_pos}), {bl_player_pts}!",
+        ],
+        "a.steady": [
+            "Weekly rank report! {steady_n} averages {steady_avg} and has ranged from {steady_band}! {wild_n} has ranged from {wild_band}!",
+            "Mr. Reliable: {steady_n}, from {steady_band}, averaging {steady_avg}! Mr. Chaos: {wild_n}, from {wild_band}!",
+            "{steady_n} is the model of consistency ({steady_avg} on average, from {steady_band})! {wild_n} is all over the map, from {wild_band}!",
+        ],
+        "a.trade": [
+            "Trade check! In the Week {twk} deal, the players {lead} got have scored {lead_pts} in the {since_wk} since! The players {trail} got have scored {trail_pts}!",
+            "Early returns on the Week {twk} trade: {lead} is up, {lead_pts} to {trail_pts}, over {trail}, in the {since_wk} since!",
+            "The Week {twk} trade grade is IN! {lead}'s haul: {lead_pts}. {trail}'s haul: {trail_pts}! That's {since_wk} of data!",
+        ],
+        "a.close": [
+            "That's the report! See you next week!",
+            "Numbers don't lie, and these ones are LOUD!",
+            "Go check your own lineup! Seriously! Go!",
+        ],
         "x.sig": [
             "And then, as always: “{catch}” That's {n}, folks!",
             "{n} signed off the only way {n} knows how: “{catch}”",

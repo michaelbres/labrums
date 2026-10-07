@@ -546,6 +546,114 @@ FAMILY = {
             "The trade winds blew hardest around {busiest}.",
             "{busiest} was the stormiest trader of the offseason.",
         ],
+        # ---------------- Sunday column ----------------
+        "h.c": [
+            "A front of trash talk moves between {a} and {b}",
+            "Sunday outlook: {a} and {b} bring the thunder",
+            "{a} and {b}: heated words, with gusts",
+            "The {a}-{b} system: remarks scattered throughout",
+        ],
+        "h.c.rv": [
+            "{rv_name}: a storm system over {a} and {b}",
+            "{a} and {b} bring {rv_name} back to the radar",
+            "Forecast for {rv_name}: {a} and {b}, with gusting remarks",
+        ],
+        "h.c.next": [
+            "A system builds ahead of {a} and {b} in Week {nwk}",
+            "Week {nwk} outlook: {a} against {b}, with heavy talk expected",
+            "Pressure drops before {a} meets {b} in Week {nwk}",
+        ],
+        "c.lede": [
+            "Good morning, everyone. Through {wl}, {a} is sitting {a_rank} at {a_rec}, and {b} is sitting {b_rank} at {b_rec}. Conditions are tense.",
+            "Our standings reading through {wl}: {a}, {a_rank}, {a_rec}; {b}, {b_rank}, {b_rec}.",
+            "Starting with the current conditions: {a} ({a_rec}) is {a_rank} and {b} ({b_rec}) is {b_rank}, through {wl}.",
+        ],
+        "c.next": [
+            "The two systems collide in Week {nwk}.",
+            "Look ahead to Week {nwk}, when {a} and {b} meet and the pressure peaks.",
+            "On the extended forecast, {a} and {b} meet in Week {nwk}.",
+        ],
+        "c.recent": [
+            "Recent readings: {a} {a_form}, while {b} {b_form}.",
+            "Over the last few days of play, {a} {a_form}, and {b} {b_form}.",
+            "Looking at the trend, {a} {a_form}, and {b} {b_form}.",
+        ],
+        "c.gap": [
+            "On the table, {hi} ({hi_rank}, {hi_rec}) sits above {lo} ({lo_rank}, {lo_rec}), with a {pf_gap} gradient in points scored.",
+            "{hi} reads {hi_rank} and {lo} reads {lo_rank}, and the points-scored gap measures {pf_gap}.",
+            "The pressure difference is clear: {hi} at {hi_rank} ({hi_rec}), {lo} at {lo_rank} ({lo_rec}), and {pf_gap} apart in points scored.",
+        ],
+        "c.pick": [
+            "My forecast is {fav} over {dog}, with the {fav_why} as the leading indicator.",
+            "Expect {fav} to come out ahead of {dog}, based on {fav_why}, though forecasts do change.",
+            "{fav} has the sunnier outlook against {dog} on {fav_why}.",
+        ],
+        "c.close": [
+            "Expect {a} and {b} to keep the front stalled over the weekend.",
+            "That's the outlook for {a} and {b}: unsettled, with a chance of more remarks.",
+            "No clearing is in sight for {a} and {b}. We'll keep an eye on the radar.",
+        ],
+        # ---------------- Monday analytics ----------------
+        "h.a.luck": [
+            "Fair weather for {lucky} ({lucky_luck}), foul for {unlucky} ({unlucky_luck})",
+            "The luck forecast: sunshine for {lucky}, clouds for {unlucky}",
+            "{lucky} at {lucky_luck}, {unlucky} at {unlucky_luck}: luck readings",
+        ],
+        "h.a.eff": [
+            "Lineup visibility: {best_n} at {best_pct}, {worst_n} at {worst_pct}",
+            "{best_n} has clear skies at {best_pct}; {worst_n} is socked in at {worst_pct}",
+            "Efficiency readings: {best_n} {best_pct}, {worst_n} {worst_pct}",
+        ],
+        "h.a.bench": [
+            "{bench_n}: {bench_pts} left to evaporate on the bench",
+            "Bench conditions: {bench_n} left {bench_pts} out in the rain",
+            "{bench_pts} of unused points, courtesy of {bench_n}",
+        ],
+        "h.a.steady": [
+            "Steady conditions for {steady_n}, a volatile front for {wild_n}",
+            "{wild_n} swings from high to low; {steady_n} holds steady",
+            "Weekly rank readings: {steady_n} calm, {wild_n} stormy",
+        ],
+        "a.lede": [
+            "Good morning, and welcome to the Monday readings, through {wl}, {gp} per team.",
+            "Here are the instrument readings through {wl}, with {gp} recorded for each team.",
+            "Let's check the barometers: results through {wl}, {gp} for every team.",
+        ],
+        "a.luck": [
+            "On fortune, {lucky} is {lucky_rec} where the all-play numbers predict {lucky_exp} wins, a luck reading of {lucky_luck}, and enjoying the sunshine. {unlucky} is {unlucky_rec} against an expected {unlucky_exp}, reading {unlucky_luck}, and standing in the rain.",
+            "The luck readings: {lucky}, {lucky_luck} ({lucky_rec}, expected {lucky_exp}); {unlucky}, {unlucky_luck} ({unlucky_rec}, expected {unlucky_exp}).",
+            "{lucky} has had the sunshine, {lucky_luck} wins above the all-play line ({lucky_rec} on {lucky_exp} expected). {unlucky} has had the rain, at {unlucky_luck} ({unlucky_rec} on {unlucky_exp}).",
+        ],
+        "a.eff": [
+            "On lineup efficiency, {best_n} reads {best_pct}, the clearest skies in the league, and {worst_n} reads {worst_pct}, the cloudiest. The league average is {lg_pct}.",
+            "Visibility on lineups: {best_n} at {best_pct}, {worst_n} at {worst_pct}, and {lg_pct} across the league.",
+            "{best_n} captures {best_pct} of the points available, {worst_n} captures {worst_pct}, and the league as a whole captures {lg_pct}.",
+        ],
+        "a.bench": [
+            "On the bench, measured against the best possible lineup, {bench_n} left {bench_pts} to blow away, the most in the league. {bench_low_n} left {bench_low_pts}, the least.",
+            "Bench readings: {bench_n}, {bench_pts}; {bench_low_n}, {bench_low_pts}.",
+            "{bench_n} has {bench_pts} of unused points sitting in the shade. {bench_low_n} has {bench_low_pts}.",
+        ],
+        "a.blunder": [
+            "The worst single-week reading belongs to {bl_n}, in Week {bl_wk}: {bl_pts} below the best possible lineup. The top bench score was {bl_player_pts}, from {bl_player} ({bl_pos}).",
+            "In Week {bl_wk}, {bl_n} finished {bl_pts} short of the best lineup, the biggest gap so far, while {bl_player} ({bl_pos}) put up {bl_player_pts} from the bench.",
+            "{bl_n}, Week {bl_wk}: a {bl_pts} shortfall against the best lineup. The bench's best reading was {bl_player} ({bl_pos}), {bl_player_pts}.",
+        ],
+        "a.steady": [
+            "On steadiness, {steady_n} has the calmest forecast, averaging a weekly rank of {steady_avg} and ranging from {steady_band}. {wild_n} has the stormiest, ranging from {wild_band}.",
+            "Weekly rank readings: {steady_n} from {steady_band} (average {steady_avg}); {wild_n} from {wild_band}.",
+            "{steady_n} stays in a narrow band, from {steady_band}, while {wild_n} swings from {wild_band}.",
+        ],
+        "a.trade": [
+            "A look at the trade of Week {twk}: over {since_wk}, the players {lead} received have scored {lead_pts}, and the players {trail} received have scored {trail_pts}.",
+            "The Week {twk} trade is giving {lead} the sunnier outlook over {trail}, {lead_pts} to {trail_pts}, across {since_wk}.",
+            "Early readings on the Week {twk} deal: {lead}, {lead_pts}; {trail}, {trail_pts}; {since_wk} recorded.",
+        ],
+        "a.close": [
+            "That's the forecast through {wl}. Have a great week.",
+            "Conditions will update next Monday.",
+            "Stay dry out there, and check your lineups.",
+        ],
         "x.sig": [
             "And then, as always: “{catch}” The usual from {n}.",
             "And the front moved through on {n}'s signature gust: “{catch}”",

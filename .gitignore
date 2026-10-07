@@ -7,3 +7,4 @@ data/*.db-journal
 .pytest_cache/
 .DS_Store
 *.egg-info/
+content/facts/

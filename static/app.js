@@ -294,7 +294,7 @@
 
   // Home page: the freshest story of each kind, in a fixed order of importance, instead of the first N by date.
   function pickHeadlines(arts, n) {
-    const order = ['preview', 'recap', 'standings', 'shotgun', 'rivalry', 'trade', 'waiver', 'feud', 'offseason'];
+    const order = ['preview', 'recap', 'standings', 'shotgun', 'rivalry', 'trade', 'waiver', 'feud', 'column', 'analytics', 'offseason'];
     const picked = [];
     for (const type of order) {
       const a = arts.find((x) => x.type === type);
@@ -302,6 +302,14 @@
     }
     for (const a of arts) if (picked.length < n && !picked.includes(a)) picked.push(a);
     return picked.slice(0, n);
+  }
+
+  // Where check-offs live: Redis (durable), local SQLite (durable on this machine), or ephemeral /tmp (lost on restart).
+  function storageBadge(p) {
+    if (p === 'redis') return '<span class="storage">storage: redis</span>';
+    if (p === 'sqlite') return '<span class="storage">storage: local</span>';
+    if (p === 'ephemeral') return '<span class="storage warn">storage: temporary (check-offs won\'t persist)</span>';
+    return `<span class="storage">storage: ${esc(p || 'unknown')}</span>`;
   }
 
   function bylineOf(a) {
@@ -318,7 +326,7 @@
 
   function articleCard(a, open = false) {
     return `<article class="card article type-${esc(a.type)} ${open ? 'open' : ''}" id="art-${esc(a.id)}">
-      <div class="kicker"><span>${esc(a.type)}</span><span>·</span><span>Week ${a.week}</span>${a.tags.includes('rivalry') ? '<span class="badge bad">rivalry</span>' : ''}</div>
+      <div class="kicker"><span>${esc(a.type)}</span><span>·</span><span>Week ${a.week}</span>${a.source === 'desk' ? '<span class="desk-mark" title="Written by hand at the editorial desk">✎ Desk</span>' : ''}${a.tags.includes('rivalry') ? '<span class="badge bad">rivalry</span>' : ''}</div>
       <h3>${esc(a.headline)}</h3><div class="dek">${esc(a.dek)}</div><div class="byline">${bylineOf(a)} · ${a.teams.map((rid) => teamLink(rid)).join(', ')}</div>
       <div class="body">${a.body.map((p) => `<p>${esc(p)}</p>`).join('')}</div>
       <span class="more" data-more>${open ? 'Collapse' : 'Read more'}</span></article>`;
@@ -459,7 +467,7 @@
       const L = state.data.league;
       $('#league-name').textContent = L.name || 'Labrums and Lagers';
       $('#league-sub').textContent = `/ ${L.season} · ${L.status === 'complete' ? 'Final' : `Week ${L.current_week}`}${state.data.meta.demo ? ' · Demo data' : ''}`;
-      $('#foot-meta').textContent = `Data via Sleeper · built ${new Date(state.data.meta.built_at * 1000).toLocaleString()} in ${state.data.meta.build_seconds}s · ${state.data.playoffs.sims.toLocaleString()} playoff sims${state.data.meta.demo ? ' · running on demo data' : ''}`;
+      $('#foot-meta').innerHTML = `${esc(`Data via Sleeper · built ${new Date(state.data.meta.built_at * 1000).toLocaleString()} in ${state.data.meta.build_seconds}s · ${state.data.playoffs.sims.toLocaleString()} playoff sims${state.data.meta.demo ? ' · running on demo data' : ''}`)} · ${storageBadge(state.data.meta.persistence)}`;
       document.title = `${L.name || 'League HQ'} · ${L.season}`;
       route();
     } catch (err) {

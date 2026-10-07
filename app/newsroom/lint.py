@@ -8,7 +8,7 @@ BLOW_RE = re.compile(r"massacre|\brout(?:ed|s)?\b|demoli|obliterat|annihilat|ste
 CLOSE_RE = re.compile(r"\bescap|thriller|nail-?bit|squeaker|photo finish|whisker|\bedged\b|\bedges\b|razor|"
                       r"survived|survives|heart-?stop|sweated|sweating|cliffhanger|knife-?edge|by a hair", re.I)
 PLAYOFF_BAD = re.compile(r"drops to|moved to|moves to|bylaws|alive for|\bstanding ovation\b", re.I)
-GENERIC_BAD = re.compile(r"\bassets\b|nothing of note|\bnan\b|(?<![\d.])1 (?:points|shotguns|players|picks|wins|games|trades)\b|"
+GENERIC_BAD = re.compile(r"\bassets\b|nothing of note|\bnan\b|(?<![\w.])1 (?:points|shotguns|players|picks|wins|games|trades)\b|"
                          r"\bLARP|\bkicker|\bpunter|\bundefined\b", re.I)
 CASE_BAD = re.compile(r"\bNone\b")
 
@@ -64,14 +64,26 @@ def check(a: dict, book=None) -> list[str]:
         for rid in a["teams"]:
             if book.name(rid) not in body_text and book.nickname(rid) not in body_text:
                 bad(f"team {book.name(rid)!r} in teams but not mentioned in the body")
+        owner_text = book.scrub_players(text)
         for rid, t in book.teams.items():
             nick = str(t.get("nickname") or "").strip()
-            if nick and nick != book.name(rid) and len(re.findall(rf"\b{re.escape(nick)}\b", text)) > 1:
+            if nick and nick != book.name(rid) and len(re.findall(rf"\b{re.escape(nick)}\b", owner_text)) > 1:
                 bad(f"nickname {nick!r} used more than once")
     facts = a.get("facts") or {}
     kind = a["type"]
     if kind == "recap":
         _lint_recap(a, facts, bad, {book.name(r): (book.nickname(r),) for r in book.teams} if book is not None else None)
+    if kind == "column":
+        for nm in facts.get("teams") or []:
+            if nm not in body_text and not (book is not None and any(book.nickname(r) in body_text for r in book.teams if book.name(r) == nm)):
+                bad(f"column does not mention {nm!r}")
+    if kind == "analytics":
+        for k in ("luck_index", "lineup_efficiency", "bench_points_left", "weekly_rank_consistency", "trade_early_returns", "biggest_bench_blunder"):
+            blob = facts.get(k)
+            if blob:
+                for v in blob.values():
+                    if isinstance(v, str) and book is not None and v in {book.name(r) for r in book.teams} and v not in body_text:
+                        bad(f"analytics fact {k} names {v!r} but the body does not")
     if kind == "preview":
         hf = facts.get("headline_favorite")
         if hf is not None and hf != facts.get("favorite"):

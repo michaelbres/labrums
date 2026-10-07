@@ -7,7 +7,7 @@ A fantasy football league site powered by the Sleeper API. It turns your league'
 - Standings, power rankings, luck (wins vs. all-play expected wins), lineup efficiency, league records.
 - Playoff odds from a Monte Carlo simulation, including "if you win / if you lose" odds for next week.
 - Shotgun leaderboard: every started player who scores zero or less (plus special rules) is a beer owed, with check-offs.
-- Fake news: game recaps, matchup previews, rivalry hype, standings watch, trades, waivers, and feuds.
+- Fake news: weekly roundups and previews, rivalry hype, standings watch, trades, waivers, feuds, a Sunday trash-talk column and a Monday analytics report, released daily at 6:00 am ET.
 - Past seasons are discovered automatically through Sleeper's previous league chain.
 - Demo mode with fake data, so you can try everything offline.
 
@@ -34,6 +34,10 @@ Try it without a Sleeper league (no network needed):
 ```bash
 LABRUMS_DEMO=1 uv run uvicorn app.main:app --reload
 ```
+
+## Editorial desk
+
+Template articles can be replaced by hand-written ones: drop a JSON file in `content/articles/{season}/week-{W}.json` whose entries name an article by its stable `key`, and the site shows your text (marked "✎ Desk") instead. `scripts/newsroom_facts.py --season 2026 --week 5` exports every article's key, assigned reporter voice card, facts packet and template text for the writer, and `scripts/newsroom_lint.py <file>` checks a desk file before you commit it. Articles post at 6:00 am Eastern on a daily calendar (Tue roundup and Beer Report, Wed waivers and trades, Thu preview, Fri feud, Sat standings, Sun column, Mon analytics). The writer's guide and weekly checklist are in [docs/newsroom.md](docs/newsroom.md).
 
 ## Configuring your league
 

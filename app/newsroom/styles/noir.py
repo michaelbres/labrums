@@ -546,6 +546,114 @@ FAMILY = {
             "{busiest} worked the winter harder than anyone.",
             "{busiest} did more business than anyone in town.",
         ],
+        # ---------------- Sunday column ----------------
+        "h.c": [
+            "{a} and {b}: words in a back alley",
+            "What {a} said about {b}, and what the table said back",
+            "{a}, {b}, and a Sunday that smelled like trouble",
+            "Two owners, one grudge: {a} and {b}",
+        ],
+        "h.c.rv": [
+            "{rv_name}: {a} and {b} do their talking in the dark",
+            "The night {a} and {b} brought {rv_name} up again",
+            "Old grudge, new whiskey: {a}, {b}, {rv_name}",
+        ],
+        "h.c.next": [
+            "{a} and {b} meet in Week {nwk}, and the talk is already cheap",
+            "Week {nwk}: {a}, {b}, and a lot of smoke before the fire",
+            "Before {a} faces {b} in Week {nwk}, a few words in the rain",
+        ],
+        "c.lede": [
+            "It was Sunday and the rain wouldn't quit. Through {wl}, {a} was {a_rec}, {a_rank} in the table. {b} was {b_rec}, {b_rank}.",
+            "The table through {wl} tells it plain. {a}, {a_rank}, {a_rec}. {b}, {b_rank}, {b_rec}. Everything else is talk.",
+            "I got the standings the way I get everything: late and wet. {a} was {a_rank} at {a_rec}. {b} was {b_rank} at {b_rec}. That was {wl}.",
+        ],
+        "c.next": [
+            "They meet in Week {nwk}. I'd put money on bad manners.",
+            "The schedule says {a} and {b} play in Week {nwk}. The schedule doesn't know what it's doing.",
+            "Week {nwk}. Same room, same two names, and one of them leaves unhappy.",
+        ],
+        "c.recent": [
+            "Lately, {a} {a_form}. {b} {b_form}. Form like that follows a person into a room.",
+            "The last few games tell a story. {a} {a_form}, and {b} {b_form}.",
+            "{a} {a_form}. {b} {b_form}. I've read worse evidence in front of better juries.",
+        ],
+        "c.gap": [
+            "{hi} was {hi_rank} at {hi_rec}, and {lo} was {lo_rank} at {lo_rec}. {pf_gap} of scoring stood between them like a closed door.",
+            "In the table, {hi} sat {hi_rank} and {lo} sat {lo_rank}. In points scored, {pf_gap} separated them, which is how far a grudge can travel.",
+            "{hi}, {hi_rank}, {hi_rec}. {lo}, {lo_rank}, {lo_rec}. {pf_gap} apart in points, and neither would admit it mattered.",
+        ],
+        "c.pick": [
+            "If I had to put a dollar down, and I always do, it goes on {fav} over {dog}, on {fav_why}.",
+            "The street says {fav}. The {fav_why} agrees. {dog} can take that up with the street.",
+            "I like {fav} over {dog}. {fav_why}, and a hunch I won't explain.",
+        ],
+        "c.close": [
+            "That's the file on {a} and {b}. I've seen worse. Not often.",
+            "{a} and {b} will go on talking. Talk's cheap in this town.",
+            "The rain kept falling, and {a} and {b} kept at it. I lit another one and watched.",
+        ],
+        # ---------------- Monday analytics ----------------
+        "h.a.luck": [
+            "The luck ledger: {lucky} had it, {unlucky} paid for it",
+            "{lucky} at {lucky_luck}. {unlucky} at {unlucky_luck}. Luck doesn't care who it lands on",
+            "Who got the breaks: {lucky}. Who got the bill: {unlucky}",
+        ],
+        "h.a.eff": [
+            "{best_n} read the board right at {best_pct}; {worst_n} didn't, at {worst_pct}",
+            "Lineup efficiency: {best_n}, {best_pct}. {worst_n}, {worst_pct}. The numbers don't blink",
+            "{worst_n} left money on the table, {worst_pct} of what was there",
+        ],
+        "h.a.bench": [
+            "{bench_n} left {bench_pts} sitting in the dark",
+            "The bench on {bench_n}: {bench_pts} that never saw the light",
+            "{bench_pts} on the bench, and {bench_n} had the keys",
+        ],
+        "h.a.steady": [
+            "{steady_n} never changes. {wild_n} never stays the same",
+            "A steady man and a restless one: {steady_n} and {wild_n}",
+            "{wild_n} runs hot and cold; {steady_n} just runs",
+        ],
+        "a.lede": [
+            "Monday. Coffee, a ledger, and {gp} per team through {wl}. The numbers don't care how you feel.",
+            "I spent Monday with the books. Through {wl}, {gp} played by each team, and the books were honest, which is more than I can say for most of you.",
+            "The figures run through {wl}, {gp} per team. I read them under a bad lamp, and they still made sense.",
+        ],
+        "a.luck": [
+            "Luck is a dame who picks favorites. {lucky} was {lucky_rec} where the all-play math said {lucky_exp} wins, a luck index of {lucky_luck}. {unlucky} was {unlucky_rec} where it said {unlucky_exp}, which came to {unlucky_luck}.",
+            "{lucky} had the luck: {lucky_rec} on {lucky_exp} expected wins, {lucky_luck}. {unlucky} had the bill: {unlucky_rec} on {unlucky_exp}, {unlucky_luck}.",
+            "Fortune walked in and sat down next to {lucky}, {lucky_luck} wins above the all-play line ({lucky_rec}, expected {lucky_exp}). It walked right past {unlucky}, at {unlucky_luck} ({unlucky_rec}, expected {unlucky_exp}).",
+        ],
+        "a.eff": [
+            "Points scored against the best lineup a roster could set. {best_n} took {best_pct} of what was there. {worst_n} took {worst_pct}. The league took {lg_pct}, and I've seen emptier tables.",
+            "{best_n} set the sharpest lineups at {best_pct}. {worst_n} set the dullest at {worst_pct}. The league ran at {lg_pct} on average.",
+            "Efficiency. {best_n}, {best_pct}. {worst_n}, {worst_pct}. League, {lg_pct}. Somebody out there knows how to set a lineup, and somebody doesn't.",
+        ],
+        "a.bench": [
+            "The bench is where good points go to die. {bench_n} left {bench_pts} there against the best possible lineup. {bench_low_n} left {bench_low_pts}.",
+            "{bench_n} left {bench_pts} on the bench, the most in the league. {bench_low_n} left only {bench_low_pts}. Clean hands, mostly.",
+            "Against the best lineup each roster could have set: {bench_n}, {bench_pts} short. {bench_low_n}, {bench_low_pts}.",
+        ],
+        "a.blunder": [
+            "The worst night of the season so far belongs to {bl_n}. Week {bl_wk}. {bl_pts} below the best lineup available, and {bl_player} ({bl_pos}) sat there with {bl_player_pts}.",
+            "In Week {bl_wk}, {bl_n} finished {bl_pts} short of the best lineup. {bl_player} ({bl_pos}) scored {bl_player_pts} from the bench. That's the kind of detail that keeps a man up.",
+            "{bl_n}, Week {bl_wk}, {bl_pts} short. The best of the bench was {bl_player} ({bl_pos}), {bl_player_pts}. I've seen men hanged on less.",
+        ],
+        "a.steady": [
+            "Then there's the quiet ones. {steady_n} averaged a weekly rank of {steady_avg}, from {steady_band}. {wild_n} ranged from {wild_band}, and you never knew which one would show up.",
+            "{steady_n}, from {steady_band}, averaging {steady_avg}: steady as a stopped clock. {wild_n}, from {wild_band}: nobody's idea of steady.",
+            "By weekly rank, {steady_n} stayed in a narrow lane, from {steady_band}, average {steady_avg}. {wild_n} ran from {wild_band}.",
+        ],
+        "a.trade": [
+            "And the trade from Week {twk}? Over {since_wk}, the players {lead} took in scored {lead_pts}. The players {trail} took in scored {trail_pts}. Somebody got the better end of the handshake.",
+            "The Week {twk} deal between {lead} and {trail} reads clear enough: {lead_pts} to {trail_pts}, in {lead}'s favor, after {since_wk}.",
+            "Early returns on the Week {twk} trade: {lead}, {lead_pts}. {trail}, {trail_pts}. {since_wk} in, and the ledger leans one way.",
+        ],
+        "a.close": [
+            "The numbers stand through {wl}. The rest is rain.",
+            "That's the ledger. Close the book and pour one.",
+            "Numbers don't lie. They just wait.",
+        ],
         "x.sig": [
             "Then {n} said the thing {n} always says: “{catch}”",
             "{n} had a line for every occasion, and this was the usual: “{catch}”",

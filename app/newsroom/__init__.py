@@ -12,14 +12,14 @@ import os
 import random
 from collections import Counter, defaultdict
 
-from . import lint
-from .beats_misc import Beats2
+from . import calendar, desk, lint
+from .beats_extra import Beats3
 from .voices import BY_ID, VOICES, Voice
 
 log = logging.getLogger("labrums.newsroom")
 
 TYPE_ORDER = {"preview": 0, "rivalry": 0, "recap": 1, "standings": 2, "shotgun": 3, "trade": 4, "offseason": 4,
-              "waiver": 5, "feud": 6}
+              "waiver": 5, "feud": 6, "column": 7, "analytics": 8}
 
 
 class Assigner:
@@ -52,12 +52,13 @@ class Assigner:
         self.week_used[week].add(v.id)
 
 
-class Newsroom(Beats2):
+class Newsroom(Beats3):
     def __init__(self, ctx: dict, st: dict, po: dict, shotgun_items: list[dict], *, debug: bool | None = None):
         super().__init__(ctx, st, po, shotgun_items)
         self.debug = (os.environ.get("LABRUMS_NEWSROOM_DEBUG", "") in ("1", "true", "yes")) if debug is None else debug
         self.assign = Assigner(self.season, VOICES)
         self._rv_voice: dict[str, Voice] = {}
+        self.desk_report: list[dict] = []
 
     def _try(self, label: str, fn):
         """One bad article must never take the site down: log it and move on (debug mode re-raises)."""
@@ -84,10 +85,11 @@ class Newsroom(Beats2):
             self._rv_voice[rv["name"]] = v
         return self._rv_voice[rv["name"]]
 
-    def generate(self) -> list[dict]:
+    def generate(self, use_desk: bool = True) -> list[dict]:
         out: list[dict] = []
         last = self.ctx["last_completed"]
         used_pairs: set = set()
+        feud_by_week: dict[int, frozenset | None] = {}
         for week in sorted(w for w in self.games_by_week if w <= last):
             art = self._build("recap", week, lambda v, wk=week: self.roundup(wk, v))
             if art:
@@ -106,6 +108,7 @@ class Newsroom(Beats2):
                 if art:
                     out.append(art)
             pair = self.feud_pair(week, used_pairs, self.rng("feudpair", week))
+            feud_by_week[week] = frozenset(pair[:2]) if pair else None
             if pair:
                 a, b, rv = pair
                 if rv:
@@ -140,14 +143,52 @@ class Newsroom(Beats2):
                     art = self._try(f"rivalry week {nxt}", lambda: self.rivalry_hype(nxt, g, v))
                     if art:
                         out.append(art)
+        # Sunday column and Monday analytics: a second pass so the casting of every older article type is untouched.
+        used_cols: set = set()
+        for week in sorted(w for w in self.games_by_week if w <= last):
+            cp = self.column_pair(week, feud_by_week.get(week), used_cols, self.rng("columnpair", week))
+            if cp:
+                ca, cb, crv, cnext = cp
+                if crv:
+                    v = self.rivalry_voice(crv)
+                    art = self._try(f"column week {week}", lambda: self.column(week, ca, cb, crv, cnext, v))
+                    if art:
+                        self.assign.commit("column", week, v)
+                else:
+                    art = self._build("column", week, lambda v: self.column(week, ca, cb, crv, cnext, v))
+                if art:
+                    used_cols.add(frozenset((ca, cb)))
+                    out.append(art)
+            art = self._build("analytics", week, lambda v, wk=week: self.analytics(wk, v))
+            if art:
+                out.append(art)
         out.sort(key=lambda a: (-a["week"], TYPE_ORDER.get(a["type"], 9), a["id"]))
+        self._finish(out, use_desk)
+        return out
+
+    def _finish(self, out: list[dict], use_desk: bool) -> None:
+        """Stable keys, release dates, lint, then the editorial desk's overrides."""
+        groups: dict[str, list[dict]] = defaultdict(list)
+        for a in out:
+            groups[a["key"]].append(a)
+        for key, grp in groups.items():
+            if len(grp) > 1:   # two trades between the same pair in one week: numbered by transaction id, not build order
+                for i, a in enumerate(sorted(grp, key=lambda x: x.get("_txid", "")), 1):
+                    if i > 1:
+                        a["key"] = f"{key}#{i}"
+        for a in out:
+            a.pop("_txid", None)
+        start = calendar.season_start(self.ctx)
+        for a in out:
+            a["publish_on"] = calendar.publish_on(a["type"], a["week"], start, tx_created_ms=a.pop("_created", None))
         problems = [p for a in out for p in lint.check(a, self)]
         if problems:
             if self.debug:
                 raise AssertionError("newsroom lint:\n" + "\n".join(problems))
             for p in problems:
                 log.warning("newsroom lint: %s", p)
-        return out
+        if use_desk:
+            self.desk_report = desk.apply(out, self.season, self)
 
     def _is_off(self, t: dict) -> bool:
         from ..loader import is_offseason
@@ -158,5 +199,6 @@ class Newsroom(Beats2):
         return [v.card() for v in VOICES]
 
 
-def generate(ctx: dict, st: dict, po: dict, shotgun_items: list[dict], *, debug: bool | None = None) -> list[dict]:
-    return Newsroom(ctx, st, po, shotgun_items, debug=debug).generate()
+def generate(ctx: dict, st: dict, po: dict, shotgun_items: list[dict], *, debug: bool | None = None,
+             use_desk: bool = True) -> list[dict]:
+    return Newsroom(ctx, st, po, shotgun_items, debug=debug).generate(use_desk=use_desk)

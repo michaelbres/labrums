@@ -546,6 +546,114 @@ FAMILY = {
             "No one traded more than {busiest}.",
             "{busiest} led the winter in trades.",
         ],
+        # ---------------- Sunday column ----------------
+        "h.c": [
+            "Sunday thoughts on {a} and {b}",
+            "What {a} and {b} say, and what the standings say back",
+            "{a}, {b}, and the old art of talking big",
+            "On the fine tradition of {a} and {b} insulting each other",
+        ],
+        "h.c.rv": [
+            "{rv_name}, and what {a} and {b} owe each other",
+            "A Sunday with {a} and {b}, and the long shadow of {rv_name}",
+            "Some things never change: {a}, {b}, and {rv_name}",
+        ],
+        "h.c.next": [
+            "Before Week {nwk}: {a}, {b}, and a great deal of talk",
+            "The quiet before {a} and {b} meet in Week {nwk}",
+            "Sunday, and {a} and {b} have a game coming in Week {nwk}",
+        ],
+        "c.lede": [
+            "It is Sunday, which is the day for taking stock, and through {wl} {a} stands {a_rank} at {a_rec} while {b} stands {b_rank} at {b_rec}.",
+            "The table through {wl} has {a} ({a_rec}) at {a_rank} and {b} ({b_rec}) at {b_rank}, and I find I have opinions.",
+            "Through {wl}, {a} is {a_rec} and {a_rank}, and {b} is {b_rec} and {b_rank}. Every argument in this column starts there.",
+        ],
+        "c.next": [
+            "They meet in Week {nwk}, and I suspect each has been rehearsing for it.",
+            "The schedule has {a} and {b} meeting in Week {nwk}, which is how these things usually get settled.",
+            "Week {nwk} will have them across from each other, and the talk will be tested.",
+        ],
+        "c.recent": [
+            "Lately, {a} {a_form}, and {b} {b_form}. A few games do not make a character, but they make a mood.",
+            "In recent weeks {a} {a_form}, while {b} {b_form}, and I leave the reader to draw the moral.",
+            "Look at how they have been playing: {a} {a_form}, and {b} {b_form}.",
+        ],
+        "c.gap": [
+            "The table has {hi} {hi_rank} at {hi_rec} and {lo} {lo_rank} at {lo_rec}, with {pf_gap} between them in points scored, which is the distance between talking and doing.",
+            "{hi} stands {hi_rank} and {lo} stands {lo_rank}, and in points scored there are {pf_gap} between them. I would not call that nothing.",
+            "{hi} ({hi_rec}) is above {lo} ({lo_rec}) in the standings, {hi_rank} to {lo_rank}, and {pf_gap} of scoring comes between them.",
+        ],
+        "c.pick": [
+            "If I must pick, and I am told I must, I pick {fav} over {dog}, going by {fav_why}.",
+            "My pick is {fav}, on {fav_why}, and I make it without enthusiasm for {dog}'s prospects.",
+            "I will take {fav} over {dog}, going by {fav_why}, and it is a hard thing to argue with.",
+        ],
+        "c.close": [
+            "I expect {a} and {b} to say it all again next week, and I will be glad to hear it.",
+            "That is how it stands between {a} and {b}, and it is how it has always stood.",
+            "Say what you like, {a} and {b}. The standings are patient, and so am I.",
+        ],
+        # ---------------- Monday analytics ----------------
+        "h.a.luck": [
+            "A Monday word on luck: {lucky} has it, {unlucky} does not",
+            "Fortune and its favorites: {lucky} at {lucky_luck}, {unlucky} at {unlucky_luck}",
+            "{unlucky} deserved better, and {lucky} knows it",
+        ],
+        "h.a.eff": [
+            "On setting lineups: {best_n} at {best_pct}, {worst_n} at {worst_pct}",
+            "A Monday lesson in lineups, with {best_n} as teacher and {worst_n} as pupil",
+            "The craft of the lineup: {best_n} has it, {worst_n} is still looking",
+        ],
+        "h.a.bench": [
+            "{bench_n} and the points left on the bench",
+            "What {bench_n} left on the bench: {bench_pts}",
+            "A Monday reckoning with the bench, and {bench_n} first in line",
+        ],
+        "h.a.steady": [
+            "In praise of the steady hand: {steady_n}, and the restless {wild_n}",
+            "{steady_n} keeps a level head; {wild_n} does not",
+            "Consistency, and who has it: {steady_n} yes, {wild_n} no",
+        ],
+        "a.lede": [
+            "Monday is for the numbers, and these run through {wl}, {gp} to a team, which is enough to say something and not enough to say everything.",
+            "I keep a little ledger on Mondays. Through {wl}, with {gp} played by each team, here is what it says.",
+            "The figures below come through {wl}, after {gp} for every team, and I have tried to read them fairly.",
+        ],
+        "a.luck": [
+            "Fortune has been uneven. {lucky} is {lucky_rec} where the all-play numbers say {lucky_exp} wins, a luck index of {lucky_luck}, while {unlucky} is {unlucky_rec} where they say {unlucky_exp}, which is {unlucky_luck}.",
+            "I have never trusted a record without asking what luck had to do with it. {lucky} is {lucky_rec} on {lucky_exp} expected wins ({lucky_luck}); {unlucky} is {unlucky_rec} on {unlucky_exp} ({unlucky_luck}).",
+            "{lucky} has been the beneficiary, {lucky_luck} wins above what the all-play record deserves ({lucky_rec}, expected {lucky_exp}). {unlucky} has paid for it, at {unlucky_luck} ({unlucky_rec}, expected {unlucky_exp}).",
+        ],
+        "a.eff": [
+            "A lineup is a small act of judgment made every week, and judged by points scored against the best possible lineup, {best_n} makes it best at {best_pct} and {worst_n} worst at {worst_pct}. The league as a whole manages {lg_pct}.",
+            "Taking the points scored as a share of the points that were there to be had, {best_n} leads at {best_pct}, {worst_n} trails at {worst_pct}, and the whole league sits at {lg_pct}.",
+            "{best_n} gets {best_pct} of what a roster offers. {worst_n} gets {worst_pct}. The league, on average, gets {lg_pct}, and I find that humbling.",
+        ],
+        "a.bench": [
+            "Nothing teaches regret like the bench. {bench_n} has left {bench_pts} there, measured against the best possible lineup, and {bench_low_n} only {bench_low_pts}.",
+            "The bench keeps its own score. {bench_n} leads in points left on it ({bench_pts}); {bench_low_n} has left the fewest ({bench_low_pts}).",
+            "Against the best lineup each roster could have set, {bench_n} fell {bench_pts} short and {bench_low_n} just {bench_low_pts}.",
+        ],
+        "a.blunder": [
+            "The worst single afternoon belongs to {bl_n}, in Week {bl_wk}, when the lineup finished {bl_pts} below the best one available, and the bench's top scorer, {bl_player} ({bl_pos}), had {bl_player_pts}.",
+            "In Week {bl_wk}, {bl_n} gave up {bl_pts} against the best possible lineup, the biggest such week yet, and I note that {bl_player} ({bl_pos}) scored {bl_player_pts} from the bench.",
+            "Every owner has one week they would like back. For {bl_n} it was Week {bl_wk}: {bl_pts} short of the best lineup, with {bl_player} ({bl_pos}) at {bl_player_pts} on the bench.",
+        ],
+        "a.steady": [
+            "Then there is consistency, which I admire more than I should. {steady_n} has averaged a weekly rank of {steady_avg}, ranging from {steady_band}, while {wild_n} has ranged from {wild_band}.",
+            "By weekly rank, {steady_n} is the steady hand (average {steady_avg}, from {steady_band}), and {wild_n} the restless one, from {wild_band}.",
+            "Some owners are weather and some are climate. {steady_n} is climate, from {steady_band} and averaging {steady_avg}; {wild_n} is weather, from {wild_band}.",
+        ],
+        "a.trade": [
+            "And the trade of Week {twk}, since you ask: over {since_wk}, the players {lead} took in have scored {lead_pts}, and the players {trail} took in have scored {trail_pts}. Early days, but it is something.",
+            "I have been watching the Week {twk} trade between {lead} and {trail}. In the {since_wk} since, {lead}'s side has the better of it, {lead_pts} to {trail_pts}.",
+            "The early returns on the Week {twk} deal favor {lead}, {lead_pts} to {trail}'s {trail_pts}, across {since_wk}. Trades are judged slowly.",
+        ],
+        "a.close": [
+            "That is the ledger through {wl}, and I will open it again next Monday.",
+            "Numbers explain a good deal, and excuse nothing.",
+            "Put the figures away for now, and enjoy the week.",
+        ],
         "x.sig": [
             "Then {n} said what {n} always says: “{catch}”",
             "And {n}, as is the custom, added: “{catch}”",

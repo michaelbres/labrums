@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from . import articles, playoffs, shotguns, stats
+from .newsroom import calendar as release_calendar, desk
 from .config import DATA_DIR, ROOT, load_config, on_vercel, redis_settings
 from .db import Store, manual_to_items
 from .loader import LeagueNotFound, discover_seasons, load_season
@@ -127,8 +128,24 @@ def store_writes():
         raise HTTPException(503, "check-off storage unavailable") from e
 
 
-def serialize(season: str, m: dict) -> dict[str, Any]:
+def split_by_release(season: str, ctx: dict, arts: list[dict], preview: bool = False) -> tuple[list[dict], list[dict]]:
+    """(visible, upcoming): articles post at 6:00 am America/New_York on their publish_on date. Past seasons (and
+    `preview`, which the caller has already checked against the admin pin) show everything."""
+    past = ctx["league"].get("status") == "complete" or season != str(state.cfg.get("current_season") or season)
+    if preview or past:
+        return list(arts), []
+    today = release_calendar.effective_today()
+    visible = [a for a in arts if release_calendar.is_visible(a.get("publish_on"), today)]
+    hidden = [a for a in arts if not release_calendar.is_visible(a.get("publish_on"), today)]
+    return visible, sorted(({"type": a["type"], "week": a["week"], "publish_on": a["publish_on"]} for a in hidden),
+                           key=lambda x: (x["publish_on"], x["week"], x["type"]))
+
+
+def serialize(season: str, m: dict, preview: bool = False) -> dict[str, Any]:
     ctx, st = m["ctx"], m["stats"]
+    visible, upcoming = split_by_release(season, ctx, m["articles"], preview)
+    # The facts packets stay on the in-memory articles (the desk export reads them) but never go over the wire.
+    wire_articles = [{k: v for k, v in a.items() if k != "facts"} for a in visible]
     store_error = None
     try:
         completed = state.store.completed(season)
@@ -169,11 +186,13 @@ def serialize(season: str, m: dict) -> dict[str, Any]:
         "shotguns": {"items": items, "leaderboard": board,
                      "rules": {**ctx["config"]["shotguns"],
                                "special": [r for r in ctx["config"].get("special_rules", []) if not r.get("season") or r["season"] == season]}},
-        "articles": m["articles"],
+        "articles": wire_articles,
         "rivalries": articles.Newsroom(ctx, st, m["playoffs"], m["shotgun_items"]).rivalries,
         "reporters": articles.reporters(),
         "meta": {"demo": state.demo, "built_at": m["built_at"], "build_seconds": m["build_seconds"],
                  "admin_locked": bool(state.admin_pin), "persistence": state.persistence,
+                 "desk": {"weeks_covered": sorted({a["week"] for a in m["articles"] if a.get("source") == "desk"}),
+                          "upcoming": upcoming},
                  **({"store_error": store_error} if store_error else {})},
     }
 
@@ -189,13 +208,16 @@ def seasons():
 
 
 @app.get("/api/season/{season}")
-def season(season: str):
-    return serialize(season, state.base_model(season))
+def season(season: str, preview: int = 0, x_admin_pin: str | None = Header(default=None)):
+    if preview:   # unreleased articles: admin only
+        require_admin(x_admin_pin)
+    return serialize(season, state.base_model(season), preview=bool(preview))
 
 
 @app.post("/api/season/{season}/refresh", dependencies=[Depends(require_admin)])
 def refresh(season: str):
     state.reload_config()
+    desk.clear_cache()
     state.client.clear_cache(keep_players=True, league_id=state.league_id_for(season))
     m = state.base_model(season, force=True)
     return {"ok": True, "build_seconds": m["build_seconds"]}

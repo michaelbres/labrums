@@ -546,6 +546,114 @@ FAMILY = {
             "{busiest} is the outlier in trade volume.",
             "{busiest} sits at the top of the trade-count histogram.",
         ],
+        # ---------------- Sunday column ----------------
+        "h.c": [
+            "{a} and {b}: a rhetorical analysis of the trash talk",
+            "Measuring the bluster of {a} and {b}",
+            "{a} versus {b}, claims and evidence",
+            "On the empirical content of what {a} and {b} are saying",
+        ],
+        "h.c.rv": [
+            "{rv_name}: testing the claims of {a} and {b}",
+            "{a} and {b}, {rv_name}, and what the data permits them to say",
+            "A fact check of {rv_name}: {a} and {b}",
+        ],
+        "h.c.next": [
+            "Week {nwk}, {a} versus {b}: the talk, checked against the data",
+            "Before {a} meets {b} in Week {nwk}: what the numbers support",
+            "{a} and {b} meet in Week {nwk}, and the evidence is mixed",
+        ],
+        "c.lede": [
+            "Through {wl}, {a} is {a_rec} and ranks {a_rank}, while {b} is {b_rec} and ranks {b_rank} (a snapshot, not a trend).",
+            "The table through {wl} has {a} ({a_rec}) at {a_rank} and {b} ({b_rec}) at {b_rank}, which is the only fixed point in what follows.",
+            "Start with the standings: {a} is {a_rank} at {a_rec}, {b} is {b_rank} at {b_rec}, through {wl}.",
+        ],
+        "c.next": [
+            "They meet in Week {nwk}, which will add one data point to a very small sample.",
+            "{a} and {b} play in Week {nwk} (n = 1, as always).",
+            "The pair meet again in Week {nwk}; one more observation is on the way.",
+        ],
+        "c.recent": [
+            "In recent games (a small window, so treat with care), {a} {a_form}, and {b} {b_form}.",
+            "Recent margins, for what a handful of games is worth: {a} {a_form}; {b} {b_form}.",
+            "Over the last few games, {a} {a_form} (high variance, as usual), while {b} {b_form}.",
+        ],
+        "c.gap": [
+            "{hi} ({hi_rank}, {hi_rec}) sits above {lo} ({lo_rank}, {lo_rec}), and the gap in points scored is {pf_gap} (which may or may not be signal).",
+            "In points scored, {hi} and {lo} are {pf_gap} apart; in the table, {hi} is {hi_rank} and {lo} is {lo_rank}.",
+            "The table puts {hi} {hi_rank} at {hi_rec} and {lo} {lo_rank} at {lo_rec}, with {pf_gap} of scoring between them (a small difference, on a small sample).",
+        ],
+        "c.pick": [
+            "If forced to choose, and on {fav_why} alone, {fav} is the pick over {dog} (with wide error bars).",
+            "The model, such as it is, takes {fav} over {dog} on {fav_why}.",
+            "{fav} is the favorite on {fav_why}, which is a statement about probability and not about {dog}'s character.",
+        ],
+        "c.close": [
+            "Nothing here settles anything between {a} and {b}; the sample is, again, small.",
+            "{a} and {b} are free to disagree with the data, and probably will.",
+            "More games will tighten the estimate for {a} and {b}, though not their opinions.",
+        ],
+        # ---------------- Monday analytics ----------------
+        "h.a.luck": [
+            "The luck index through {wl}: {lucky} at {lucky_luck}, {unlucky} at {unlucky_luck}",
+            "{lucky} is {lucky_luck} wins over expectation; {unlucky} is {unlucky_luck} (a regression candidate each)",
+            "Luck, quantified: {lucky} {lucky_luck}, {unlucky} {unlucky_luck}",
+        ],
+        "h.a.eff": [
+            "Lineup efficiency: {best_n} at {best_pct}, {worst_n} at {worst_pct}",
+            "{best_n} captures {best_pct} of the available points, {worst_n} only {worst_pct}",
+            "The efficiency spread runs from {worst_pct} ({worst_n}) to {best_pct} ({best_n})",
+        ],
+        "h.a.bench": [
+            "{bench_n} has left {bench_pts} on the bench (and the optimizer noticed)",
+            "Bench points left, ranked: {bench_n} first at {bench_pts}",
+            "The cost of the bench: {bench_pts} for {bench_n}",
+        ],
+        "h.a.steady": [
+            "Weekly rank variance: {steady_n} is the stable one, {wild_n} the noisy one",
+            "Consistency, measured: {steady_n} (low variance) versus {wild_n} (high variance)",
+            "{wild_n} has the widest weekly rank spread; {steady_n} the narrowest",
+        ],
+        "a.lede": [
+            "Every figure below is computed through {wl}, after {gp} per team (a modest sample, and worth saying so).",
+            "A methods note: results are through {wl}, {gp} per team, and all-play is used wherever luck is mentioned.",
+            "These estimates rest on {gp} per team through {wl}; read them as descriptions, not predictions.",
+        ],
+        "a.luck": [
+            "Luck is actual wins minus the wins an all-play schedule would predict. {lucky} is {lucky_rec} against an expected {lucky_exp}, for {lucky_luck}. {unlucky} is {unlucky_rec} against an expected {unlucky_exp}, for {unlucky_luck}.",
+            "Against all-play expectation, {lucky} (expected {lucky_exp} wins, actual record {lucky_rec}) is at {lucky_luck}; {unlucky} (expected {unlucky_exp}, actual record {unlucky_rec}) is at {unlucky_luck}.",
+            "The extremes of the luck index: {lucky}, {lucky_luck} ({lucky_rec} versus {lucky_exp} expected), and {unlucky}, {unlucky_luck} ({unlucky_rec} versus {unlucky_exp} expected). Schedule variance, mostly.",
+        ],
+        "a.eff": [
+            "Lineup efficiency (points scored over the points of the optimal lineup) is {best_pct} for {best_n} and {worst_pct} for {worst_n}, against {lg_pct} league-wide.",
+            "The league as a whole captured {lg_pct} of the points its rosters made available. {best_n} was the high at {best_pct} (it set the best lineups); {worst_n} was the low at {worst_pct}.",
+            "{best_n} ({best_pct}) and {worst_n} ({worst_pct}) bracket the efficiency range, with the league mean at {lg_pct}.",
+        ],
+        "a.bench": [
+            "Bench points left (the optimal lineup's total minus actual points) sum to {bench_pts} for {bench_n}, the most, and {bench_low_pts} for {bench_low_n}, the fewest.",
+            "{bench_n} has left {bench_pts} unused against the optimal lineup; {bench_low_n} has left only {bench_low_pts}.",
+            "At the two ends of bench points left: {bench_n}, {bench_pts}, and {bench_low_n}, {bench_low_pts}.",
+        ],
+        "a.blunder": [
+            "The single largest weekly bench loss belongs to {bl_n}: {bl_pts} below the optimal lineup in Week {bl_wk}, when {bl_player} ({bl_pos}) scored {bl_player_pts} on the bench (one week, not a pattern).",
+            "In Week {bl_wk}, {bl_n} finished {bl_pts} short of the optimal lineup, the largest such gap so far; the best bench score that week was {bl_player_pts}, from {bl_player} ({bl_pos}).",
+            "The outlier is Week {bl_wk} for {bl_n}: {bl_pts} below optimal, with {bl_player} ({bl_pos}) putting up {bl_player_pts} on the bench.",
+        ],
+        "a.steady": [
+            "Weekly-rank consistency (standard deviation of weekly scoring rank): {steady_n} is the tightest, averaging {steady_avg} and ranging from {steady_band}, while {wild_n} is the loosest, ranging from {wild_band}.",
+            "{steady_n} averages a weekly rank of {steady_avg} and has ranged from {steady_band}; {wild_n} has ranged from {wild_band}, which is the widest spread in the league.",
+            "Variance in weekly rank is lowest for {steady_n} (from {steady_band}, mean {steady_avg}) and highest for {wild_n} (from {wild_band}).",
+        ],
+        "a.trade": [
+            "Trade early returns, Week {twk} deal: the players {lead} received have scored {lead_pts} over {since_wk}, against {trail_pts} for the players {trail} received (a small sample, and positions are not adjusted).",
+            "The Week {twk} trade between {lead} and {trail} favors {lead} so far, {lead_pts} to {trail_pts}, across {since_wk}; take that as a first look.",
+            "Over {since_wk} since the Week {twk} trade, {lead}'s incoming players have produced {lead_pts} and {trail}'s have produced {trail_pts}.",
+        ],
+        "a.close": [
+            "All figures are current through {wl}, and will move.",
+            "Methodological caveats are listed above and are not exhaustive.",
+            "The numbers update weekly, and so should your priors.",
+        ],
         "x.sig": [
             "{n}'s standard sign-off, which the model treats as noise: “{catch}”",
             "{n} added the usual: “{catch}”",

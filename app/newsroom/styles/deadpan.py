@@ -546,6 +546,114 @@ FAMILY = {
             "Most trades: {busiest}.",
             "{busiest} led in trades.",
         ],
+        # ---------------- Sunday column ----------------
+        "h.c": [
+            "{a} and {b} have said things",
+            "{a} on {b}. {b} on {a}.",
+            "Remarks: {a}, {b}",
+            "{a} and {b} discuss each other",
+        ],
+        "h.c.rv": [
+            "{rv_name}: {a} and {b} have spoken",
+            "{a}, {b}, and {rv_name}",
+            "More on {rv_name}",
+        ],
+        "h.c.next": [
+            "{a} plays {b} in Week {nwk}. Both spoke.",
+            "Week {nwk}: {a}, {b}, remarks",
+            "Before Week {nwk}, {a} and {b} talked",
+        ],
+        "c.lede": [
+            "{a} is {a_rec}. Ranked {a_rank}. {b} is {b_rec}. Ranked {b_rank}. Through {wl}.",
+            "Through {wl}: {a}, {a_rank}, {a_rec}. {b}, {b_rank}, {b_rec}.",
+            "The table through {wl} has {a} {a_rank}. It has {b} {b_rank}.",
+        ],
+        "c.next": [
+            "They play in Week {nwk}.",
+            "Week {nwk}. {a} and {b} meet.",
+            "The schedule has them together in Week {nwk}.",
+        ],
+        "c.recent": [
+            "Recently, {a} {a_form}. {b} {b_form}.",
+            "{a} {a_form} lately. {b} {b_form}.",
+            "Last few games: {a} {a_form}. {b} {b_form}.",
+        ],
+        "c.gap": [
+            "{hi} is {hi_rank} at {hi_rec}. {lo} is {lo_rank} at {lo_rec}. {pf_gap} apart in points.",
+            "In points scored, {hi} and {lo} are {pf_gap} apart. The table has {hi} {hi_rank}.",
+            "{hi}, {hi_rank}. {lo}, {lo_rank}. The points gap is {pf_gap}.",
+        ],
+        "c.pick": [
+            "Pick: {fav} over {dog}. Basis: {fav_why}.",
+            "{fav} is favored. {fav_why}. {dog} is not.",
+            "I pick {fav} over {dog}. The basis is {fav_why}.",
+        ],
+        "c.close": [
+            "{a} and {b} will play on.",
+            "Nothing else was said by {a} or {b}.",
+            "That covers {a} and {b}.",
+        ],
+        # ---------------- Monday analytics ----------------
+        "h.a.luck": [
+            "Luck: {lucky} {lucky_luck}, {unlucky} {unlucky_luck}",
+            "{lucky} is lucky. {unlucky} is not.",
+            "Luck index: {lucky} first, {unlucky} last",
+        ],
+        "h.a.eff": [
+            "Efficiency: {best_n} {best_pct}, {worst_n} {worst_pct}",
+            "{worst_n} is least efficient. {best_n} is most.",
+            "Lineups: {best_n} best, {worst_n} worst",
+        ],
+        "h.a.bench": [
+            "{bench_n} left {bench_pts} on the bench",
+            "Bench: {bench_n}, {bench_pts}",
+            "The bench cost {bench_n} {bench_pts}",
+        ],
+        "h.a.steady": [
+            "Consistency: {steady_n} high, {wild_n} low",
+            "{steady_n} is steady. {wild_n} is not.",
+            "Weekly rank: {steady_n} narrow, {wild_n} wide",
+        ],
+        "a.lede": [
+            "Figures through {wl}. {gp} per team.",
+            "Numbers follow. They run through {wl}, {gp} each.",
+            "Through {wl}. {gp} each. Here are the numbers.",
+        ],
+        "a.luck": [
+            "{lucky} is {lucky_rec}. Expected: {lucky_exp} wins. Luck: {lucky_luck}. {unlucky} is {unlucky_rec}. Expected: {unlucky_exp}. Luck: {unlucky_luck}.",
+            "Luckiest: {lucky}, {lucky_luck} ({lucky_rec} on {lucky_exp} expected). Unluckiest: {unlucky}, {unlucky_luck} ({unlucky_rec} on {unlucky_exp} expected).",
+            "{lucky} has {lucky_luck}. {unlucky} has {unlucky_luck}. Records: {lucky_rec} and {unlucky_rec}.",
+        ],
+        "a.eff": [
+            "{best_n} used {best_pct} of the available points. {worst_n} used {worst_pct}. The league used {lg_pct}.",
+            "Efficiency. {best_n}: {best_pct}. {worst_n}: {worst_pct}. League: {lg_pct}.",
+            "Best lineups: {best_n}, {best_pct}. Worst: {worst_n}, {worst_pct}. League average: {lg_pct}.",
+        ],
+        "a.bench": [
+            "{bench_n} left {bench_pts} on the bench. {bench_low_n} left {bench_low_pts}.",
+            "Points left on the bench. Most: {bench_n}, {bench_pts}. Fewest: {bench_low_n}, {bench_low_pts}.",
+            "The bench cost {bench_n} {bench_pts}. It cost {bench_low_n} {bench_low_pts}.",
+        ],
+        "a.blunder": [
+            "Worst week: {bl_n}, Week {bl_wk}. {bl_pts} below the best lineup. {bl_player} ({bl_pos}) scored {bl_player_pts} on the bench.",
+            "In Week {bl_wk}, {bl_n} finished {bl_pts} short of the best lineup. {bl_player} ({bl_pos}) was on the bench. {bl_player_pts}.",
+            "{bl_n}, Week {bl_wk}. {bl_pts} short. The bench's best: {bl_player} ({bl_pos}), {bl_player_pts}.",
+        ],
+        "a.steady": [
+            "Most consistent: {steady_n}. Average rank {steady_avg}. Range: from {steady_band}. Least: {wild_n}, from {wild_band}.",
+            "{steady_n} ranged from {steady_band}. Average {steady_avg}. {wild_n} ranged from {wild_band}.",
+            "Weekly rank. {steady_n}: from {steady_band}, average {steady_avg}. {wild_n}: from {wild_band}.",
+        ],
+        "a.trade": [
+            "Week {twk} trade. {lead}'s players: {lead_pts} over {since_wk}. {trail}'s players: {trail_pts}.",
+            "{lead} leads the Week {twk} trade, {lead_pts} to {trail_pts}. {since_wk} have passed. {trail} trails.",
+            "Since the Week {twk} trade: {lead}, {lead_pts}. {trail}, {trail_pts}. {since_wk}.",
+        ],
+        "a.close": [
+            "Those are the numbers.",
+            "Figures are through {wl}.",
+            "That is all.",
+        ],
         "x.sig": [
             "{n} added: “{catch}”",
             "{n} also said: “{catch}”",

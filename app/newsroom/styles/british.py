@@ -213,7 +213,7 @@ FAMILY = {
         ],
         "p.h2h_none": [
             "They haven't met this season, so it's all to play for.",
-            "{a} and {b} is yet to face each other this term.",
+            "{a} and {b} have yet to face each other this term.",
             "This is the first meeting of the season for {a} and {b}.",
         ],
         "p.stakes": [
@@ -545,6 +545,114 @@ FAMILY = {
             "{busiest} made the most trades. Busy, busy.",
             "Nobody traded more than {busiest}.",
             "{busiest} led the window in trades.",
+        ],
+        # ---------------- Sunday column ----------------
+        "h.c": [
+            "{a} and {b} trade barbs: the post-match, before the match",
+            "Handbags at dawn: {a} and {b}",
+            "{a} and {b} have a few words",
+            "Sunday sermon from the touchline: {a} and {b}",
+        ],
+        "h.c.rv": [
+            "{rv_name}: {a} and {b} are at it again",
+            "{a} and {b}, and the grudge of {rv_name}",
+            "Bad blood in {rv_name}: {a} and {b} have a go",
+        ],
+        "h.c.next": [
+            "{a} and {b} meet in Week {nwk}, and the lads are already chirping",
+            "Week {nwk} derby: {a} against {b}, and the talk's started",
+            "Pre-match chat: {a} and {b} before Week {nwk}",
+        ],
+        "c.lede": [
+            "Right then, the table through {wl}: {a} is {a_rank} on {a_rec}, and {b} is {b_rank} on {b_rec}, and neither is happy about it.",
+            "Through {wl}, {a} ({a_rec}) sits {a_rank} and {b} ({b_rec}) sits {b_rank}, and that's where it all begins.",
+            "{a} is {a_rank} at {a_rec}. {b} is {b_rank} at {b_rec}. That's the league table through {wl}, and it's got everybody talking.",
+        ],
+        "c.next": [
+            "And they meet in Week {nwk}, which is going to be proper.",
+            "The fixture list has {a} and {b} down for Week {nwk}. Lovely stuff.",
+            "Week {nwk}, {a} against {b}: put it in the diary.",
+        ],
+        "c.recent": [
+            "On recent form, {a} {a_form}, and {b} {b_form}.",
+            "Look at the last few results: {a} {a_form}, and {b} {b_form}!",
+            "Lately {a} {a_form}, while {b} {b_form}, and the pundits have noticed.",
+        ],
+        "c.gap": [
+            "In the table, {hi} ({hi_rank}, {hi_rec}) is above {lo} ({lo_rank}, {lo_rec}), and there's {pf_gap} in points scored between them.",
+            "{hi} sits {hi_rank}, {lo} sits {lo_rank}, and it's {pf_gap} apart on points scored, which is a proper gap.",
+            "The table's got {hi} {hi_rank} on {hi_rec} and {lo} {lo_rank} on {lo_rec}, with {pf_gap} of scoring in it.",
+        ],
+        "c.pick": [
+            "My pick? {fav} over {dog}, on {fav_why}, though football's a funny old game.",
+            "I'll take {fav} over {dog} on {fav_why}, and I'll live with it.",
+            "{fav} is the favourite over {dog}, going by {fav_why}, and that's the way it looks from the gantry.",
+        ],
+        "c.close": [
+            "And {a} and {b} won't let it lie, will they?",
+            "That's a feud that'll run and run, {a} and {b}.",
+            "We'll see what {a} and {b} have to say next. Back to you in the studio.",
+        ],
+        # ---------------- Monday analytics ----------------
+        "h.a.luck": [
+            "Luck of the draw: {lucky} has had it, {unlucky} hasn't",
+            "{lucky} at {lucky_luck}, {unlucky} at {unlucky_luck}: the luck table",
+            "Who's had the bounce of the ball? {lucky} ({lucky_luck}), and not {unlucky}",
+        ],
+        "h.a.eff": [
+            "Team selection: {best_n} at {best_pct}, {worst_n} at {worst_pct}",
+            "{best_n} picks the best XI at {best_pct}; {worst_n} doesn't, at {worst_pct}",
+            "The selection report: {worst_n} left {worst_pct} on the table",
+        ],
+        "h.a.bench": [
+            "{bench_n} left {bench_pts} on the bench, and has questions to answer",
+            "Bench warmers: {bench_n} and the {bench_pts} that never played",
+            "{bench_pts} on the bench, and it's {bench_n}'s call",
+        ],
+        "h.a.steady": [
+            "{steady_n} is steady, {wild_n} is all over the shop",
+            "Consistency, lads: {steady_n} has it, {wild_n} doesn't",
+            "{wild_n} is up and down like a yo-yo; {steady_n} just keeps ticking over",
+        ],
+        "a.lede": [
+            "Right, the Monday numbers, and they run through {wl}, {gp} played by each side.",
+            "Time for the stats package, lads. Through {wl}, with {gp} on the board for every side.",
+            "Here's the data through {wl}, {gp} per side, and it makes for interesting reading.",
+        ],
+        "a.luck": [
+            "{lucky} is {lucky_rec} where the all-play numbers say it should be about {lucky_exp} wins, so that's {lucky_luck} of pure luck. {unlucky} is {unlucky_rec} where it says {unlucky_exp}, which is {unlucky_luck}, and has been robbed.",
+            "On the luck index, {lucky} ({lucky_rec}, expected {lucky_exp}) is at {lucky_luck}, and {unlucky} ({unlucky_rec}, expected {unlucky_exp}) is at {unlucky_luck}.",
+            "{lucky} has had every bounce of the ball ({lucky_rec} on {lucky_exp} expected wins, {lucky_luck}). {unlucky} has had none ({unlucky_rec} on {unlucky_exp}, {unlucky_luck}).",
+        ],
+        "a.eff": [
+            "On team selection, {best_n} gets {best_pct} of the points that were there, and {worst_n} gets {worst_pct}. The league as a whole's at {lg_pct}.",
+            "Lineup efficiency, then: {best_n}, {best_pct}, top of the table. {worst_n}, {worst_pct}, propping it up. League average, {lg_pct}.",
+            "{best_n} picks the strongest side at {best_pct}, {worst_n} the weakest at {worst_pct}, and the league sits at {lg_pct}.",
+        ],
+        "a.bench": [
+            "Now, the bench. {bench_n} left {bench_pts} on it against the best side they could have fielded. {bench_low_n} left just {bench_low_pts}.",
+            "{bench_n} has left {bench_pts} sitting on the bench, the most in the league, and {bench_low_n} has left {bench_low_pts}, the fewest.",
+            "Points left on the bench: {bench_n}, {bench_pts}; {bench_low_n}, {bench_low_pts}.",
+        ],
+        "a.blunder": [
+            "And the worst afternoon of the season so far belongs to {bl_n}, in Week {bl_wk}: {bl_pts} short of the best side available, with {bl_player} ({bl_pos}) scoring {bl_player_pts} on the bench!",
+            "In Week {bl_wk}, {bl_n} finished {bl_pts} below the best lineup they could've named, and {bl_player} ({bl_pos}) had {bl_player_pts} from the bench. Extraordinary.",
+            "{bl_n}, Week {bl_wk}, {bl_pts} short of the perfect XI. The best of the bench was {bl_player} ({bl_pos}), {bl_player_pts}.",
+        ],
+        "a.steady": [
+            "And on consistency, {steady_n} is rock solid, averaging a weekly rank of {steady_avg} and ranging from {steady_band}. {wild_n} has been all over the shop, from {wild_band}.",
+            "{steady_n} has ranged from {steady_band}, averaging {steady_avg} a week. {wild_n} has ranged from {wild_band}.",
+            "By weekly rank, it's {steady_n} for reliability (from {steady_band}, average {steady_avg}) and {wild_n} for chaos (from {wild_band}).",
+        ],
+        "a.trade": [
+            "And that Week {twk} trade: over {since_wk}, the players {lead} signed have scored {lead_pts}, and the ones {trail} signed have scored {trail_pts}. Early days, lads.",
+            "Early returns on the Week {twk} deal between {lead} and {trail}: {lead} leads it, {lead_pts} to {trail_pts}, after {since_wk}.",
+            "The Week {twk} swap is going {lead}'s way so far, {lead_pts} to {trail}'s {trail_pts}, over {since_wk}.",
+        ],
+        "a.close": [
+            "That's the numbers through {wl}. Back to you in the studio.",
+            "Stats don't lie, lads, though they do sulk.",
+            "We'll do it all again next Monday.",
         ],
         "x.sig": [
             "And then, as always: “{catch}” Classic {n}.",

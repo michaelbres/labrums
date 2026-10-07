@@ -546,6 +546,114 @@ FAMILY = {
             "{busiest} led the offseason in trade activity.",
             "Recognition goes to {busiest} for the highest trade volume.",
         ],
+        # ---------------- Sunday column ----------------
+        "h.c": [
+            "Interpersonal communications update: {a} and {b}",
+            "Feedback exchange between {a} and {b}: summary and next steps",
+            "{a} and {b}: alignment on messaging",
+            "Weekend communications summary: {a} and {b}",
+        ],
+        "h.c.rv": [
+            "{rv_name}: {a} and {b} issue statements",
+            "{a} and {b} reopen {rv_name}: communications summary",
+            "Open item {rv_name}: updated positions from {a} and {b}",
+        ],
+        "h.c.next": [
+            "Pre-read for Week {nwk}: {a} and {b} share positions",
+            "{a} and {b} meet in Week {nwk}; stakeholder messaging attached",
+            "Week {nwk} readiness: {a} and {b} align on their disagreement",
+        ],
+        "c.lede": [
+            "Executive summary: through {wl}, {a} is {a_rec} and ranked {a_rank}, and {b} is {b_rec} and ranked {b_rank}.",
+            "Current standing through {wl}: {a}, {a_rec} ({a_rank}); {b}, {b_rec} ({b_rank}).",
+            "For context, {a} ({a_rec}) is ranked {a_rank} and {b} ({b_rec}) is ranked {b_rank} as of {wl}.",
+        ],
+        "c.next": [
+            "Next milestone: {a} and {b} meet in Week {nwk}.",
+            "Action item: both parties are scheduled to play in Week {nwk}.",
+            "The two stakeholders meet in Week {nwk}, per the calendar.",
+        ],
+        "c.recent": [
+            "Recent performance: {a} {a_form}; {b} {b_form}.",
+            "Over the last few periods, {a} {a_form}, and {b} {b_form}.",
+            "Trailing results show {a} {a_form}, and {b} {b_form}.",
+        ],
+        "c.gap": [
+            "Variance to note: {hi} ({hi_rank}, {hi_rec}) is ahead of {lo} ({lo_rank}, {lo_rec}), with a points-scored differential of {pf_gap}.",
+            "{hi} is ranked {hi_rank} and {lo} is ranked {lo_rank}; the points-scored gap is {pf_gap}.",
+            "The standings show {hi} at {hi_rec} ({hi_rank}) and {lo} at {lo_rec} ({lo_rank}), with {pf_gap} of points-scored variance between them.",
+        ],
+        "c.pick": [
+            "Recommendation: favor {fav} over {dog}, based on {fav_why}.",
+            "On {fav_why}, {fav} is the projected favorite over {dog}. Risks are noted.",
+            "{fav} is recommended over {dog} on {fav_why}, pending further alignment.",
+        ],
+        "c.close": [
+            "Next steps: {a} and {b} to continue the conversation offline.",
+            "We will circle back with {a} and {b} as the situation develops.",
+            "This item remains open. Please direct feedback to {a} and {b}.",
+        ],
+        # ---------------- Monday analytics ----------------
+        "h.a.luck": [
+            "Variance report: {lucky} favorable at {lucky_luck}, {unlucky} unfavorable at {unlucky_luck}",
+            "Luck KPI: {lucky} ({lucky_luck}) outperforms forecast; {unlucky} ({unlucky_luck}) underperforms",
+            "Wins versus forecast: {lucky} {lucky_luck}, {unlucky} {unlucky_luck}",
+        ],
+        "h.a.eff": [
+            "Efficiency KPI: {best_n} at {best_pct}, {worst_n} at {worst_pct}",
+            "Lineup optimization: {best_n} leads at {best_pct}; {worst_n} has an opportunity at {worst_pct}",
+            "Growth area: {worst_n}'s lineup efficiency ({worst_pct})",
+        ],
+        "h.a.bench": [
+            "Resource utilization: {bench_n} left {bench_pts} idle",
+            "Bench points: {bench_n} has {bench_pts} of unrealized value",
+            "{bench_n} reports {bench_pts} of underutilized bench capacity",
+        ],
+        "h.a.steady": [
+            "Consistency report: {steady_n} on target, {wild_n} volatile",
+            "Weekly rank variance: {steady_n} low, {wild_n} high",
+            "{wild_n} shows high week-to-week variability; {steady_n} is steady",
+        ],
+        "a.lede": [
+            "This report covers key metrics through {wl}, based on {gp} per team.",
+            "Scope: results through {wl}, {gp} per team. All figures are final unless corrected.",
+            "Below is the weekly metrics review, through {wl} and {gp} per team.",
+        ],
+        "a.luck": [
+            "Wins versus forecast: {lucky} is {lucky_rec} against an expected {lucky_exp}, a favorable variance of {lucky_luck}. {unlucky} is {unlucky_rec} against an expected {unlucky_exp}, an unfavorable variance of {unlucky_luck}.",
+            "Luck index (actual wins minus all-play expected wins): {lucky} {lucky_luck} ({lucky_rec}, forecast {lucky_exp}); {unlucky} {unlucky_luck} ({unlucky_rec}, forecast {unlucky_exp}).",
+            "{lucky} has benefited from schedule variance ({lucky_rec} against a forecast of {lucky_exp}, {lucky_luck}). {unlucky} has not ({unlucky_rec} against {unlucky_exp}, {unlucky_luck}).",
+        ],
+        "a.eff": [
+            "Lineup efficiency (points scored over the best possible lineup): {best_n} is highest at {best_pct}; {worst_n} is lowest at {worst_pct}. The league KPI stands at {lg_pct}.",
+            "Efficiency KPI: {best_n}, {best_pct} (above target); {worst_n}, {worst_pct} (below target); league, {lg_pct}.",
+            "{best_n} captured {best_pct} of available points, {worst_n} captured {worst_pct}, and the league captured {lg_pct}. Opportunity identified.",
+        ],
+        "a.bench": [
+            "Resource utilization: {bench_n} left {bench_pts} on the bench against the best possible lineup, the highest in the league. {bench_low_n} left {bench_low_pts}, the lowest.",
+            "Bench points left: {bench_n}, {bench_pts}; {bench_low_n}, {bench_low_pts}. Leadership may wish to review lineup processes.",
+            "{bench_n} reported {bench_pts} of unrealized bench value. {bench_low_n} reported {bench_low_pts}.",
+        ],
+        "a.blunder": [
+            "Incident of note: in Week {bl_wk}, {bl_n} finished {bl_pts} below the best possible lineup, the largest single-week gap to date. The top bench score was {bl_player_pts}, by {bl_player} ({bl_pos}).",
+            "Largest single-week variance: {bl_n}, Week {bl_wk}, {bl_pts} below optimal. {bl_player} ({bl_pos}) contributed {bl_player_pts} from the bench.",
+            "{bl_n} experienced a {bl_pts} shortfall against the best lineup in Week {bl_wk}. The bench's top contributor was {bl_player} ({bl_pos}) at {bl_player_pts}.",
+        ],
+        "a.steady": [
+            "Consistency: {steady_n} shows the lowest week-to-week variance, averaging a weekly rank of {steady_avg} and ranging from {steady_band}. {wild_n} shows the highest, ranging from {wild_band}.",
+            "Weekly rank variance is lowest for {steady_n} (from {steady_band}, average {steady_avg}) and highest for {wild_n} (from {wild_band}).",
+            "{steady_n} remains on target (from {steady_band}). {wild_n} has been volatile, ranging from {wild_band}.",
+        ],
+        "a.trade": [
+            "Trade performance review, Week {twk} deal: the players {lead} received have produced {lead_pts} over {since_wk}, against {trail_pts} for the players {trail} received.",
+            "Early returns on the Week {twk} trade favor {lead}, {lead_pts} to {trail_pts}, after {since_wk}. {trail} will be notified of the gap.",
+            "The Week {twk} trade between {lead} and {trail} is tracking ahead for {lead} ({lead_pts}) and behind for {trail} ({trail_pts}) over {since_wk}.",
+        ],
+        "a.close": [
+            "Metrics are current through {wl}. Next review: next Monday.",
+            "Please reach out with any questions about methodology.",
+            "This report is for internal circulation only.",
+        ],
         "x.sig": [
             "{n} then added the standard sign-off: “{catch}”",
             "As usual, {n} concluded: “{catch}”",

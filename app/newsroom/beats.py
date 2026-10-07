@@ -23,7 +23,7 @@ class Beats(Book):
         return random.Random(":".join(str(p) for p in (self.season, *parts)))
 
     def _article(self, w: Writer, kind: str, week: int, headline: str, dek: str, cand_teams: list[int],
-                 tags: list[str], facts: dict) -> dict:
+                 tags: list[str], facts: dict, key_teams: list[int] | None = None) -> dict:
         body, metas = w.finish()
         text = " ".join(body)
         teams: list[int] = []
@@ -36,9 +36,12 @@ class Beats(Book):
         facts["beats"] = list(w.beats)
         facts["paras"] = metas
         facts["quotes"] = list(w.quote_log)
-        return {"id": f"{self.season}-{kind}-{week}-{self._id}", "type": kind, "week": week, "headline": headline,
-                "dek": dek, "byline": f"{v.name}, {v.outlet}", "reporter": v.card(), "body": body,
-                "teams": teams, "tags": tags, "facts": facts}
+        # Stable key (desk overrides are matched on it): data only, never the reporter, the text or the build order.
+        # One-per-week pieces (roundup, preview, Beer Report, ...) use "all"; pair pieces use the two roster ids.
+        kt = "all" if key_teams is None else "-".join(sorted(map(str, key_teams)))
+        return {"id": f"{self.season}-{kind}-{week}-{self._id}", "key": f"{self.season}:{kind}:{week}:{kt}", "type": kind,
+                "week": week, "headline": headline, "dek": dek, "byline": f"{v.name}, {v.outlet}", "reporter": v.card(),
+                "body": body, "teams": teams, "tags": tags, "facts": facts, "source": "template"}
 
     # ======================================================================
     # Weekly roundup
@@ -477,4 +480,4 @@ class Beats(Book):
         facts = {"type": "rivalry", "week": week, "rivalry": rv["name"], "backstory": rv["backstory"],
                  "teams": [A["name"], B["name"]], "records": [A["rec"], B["rec"]], "avg_ppg": [A["avg"], B["avg"]],
                  "favorite": fav["name"] if fav else None}
-        return self._article(w, "rivalry", week, headline, rv["name"], [a, b], ["rivalry", f"week-{week}"], facts)
+        return self._article(w, "rivalry", week, headline, rv["name"], [a, b], ["rivalry", f"week-{week}"], facts, key_teams=[a, b])

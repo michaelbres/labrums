@@ -115,7 +115,10 @@ class Beats2(Beats):
                  "points_since": {self.name(a): T["since"][a], self.name(b): T["since"][b]}, "weeks_since": T["weeks"],
                  "graded": T["graded"], "better_early_return": self.name(T["lead"]) if T["lead"] else None,
                  "trade_counts": {self.name(x): counts[x] for x in (a, b)}}
-        return self._article(w, "trade", week, headline, dek, [a, b], ["trade", f"week-{week}"], facts)
+        art = self._article(w, "trade", week, headline, dek, [a, b], ["trade", f"week-{week}"], facts, key_teams=[a, b])
+        art["_created"] = tx.get("created")   # generate() turns this into publish_on and removes it
+        art["_txid"] = str(tx.get("transaction_id") or "")
+        return art
 
     # ======================================================================
     # Waivers
@@ -458,7 +461,8 @@ class Beats2(Beats):
         dek = self._feud_dek(primary, inc[primary], a, b)
         facts = {"type": "feud", "week": week, "teams": [nm(a), nm(b)], "incidents": {k: {kk: vv for kk, vv in inc[k].items()} for k in chosen},
                  "primary": primary, "rivalry": rv["name"] if rv else None}
-        return self._article(w, "feud", week, headline, dek, [a, b], ["feud"] + (["rivalry"] if rv else []) + [f"week-{week}"], facts)
+        return self._article(w, "feud", week, headline, dek, [a, b], ["feud"] + (["rivalry"] if rv else []) + [f"week-{week}"], facts,
+                             key_teams=[a, b])
 
     def _feud_dek(self, kind: str, d: dict, a: int, b: int) -> str:
         n = self.name

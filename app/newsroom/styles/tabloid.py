@@ -546,6 +546,114 @@ FAMILY = {
             "Nobody wheeled and dealed like {busiest}. Nobody.",
             "{busiest} led the offseason in trades. Naturally.",
         ],
+        # ---------------- Sunday column ----------------
+        "h.c": [
+            "SUNDAY SCANDAL: {a} and {b} are talking",
+            "Did {a} REALLY say that about {b}?",
+            "{a} vs. {b}: the trash talk, ranked",
+            "The things {a} and {b} said about each other",
+        ],
+        "h.c.rv": [
+            "{rv_name} gets NASTY: {a} and {b}",
+            "{a} and {b}: {rv_name}, the sequel",
+            "Inside {rv_name}: what {a} and {b} won't say on the record",
+        ],
+        "h.c.next": [
+            "{a} and {b} meet in Week {nwk}, and the claws are OUT",
+            "Week {nwk} showdown: {a} vs. {b}, and they are NOT being nice",
+            "Trouble brewing before {a} meets {b} in Week {nwk}",
+        ],
+        "c.lede": [
+            "Pour yourself something, because through {wl} {a} is {a_rec} and {a_rank}, and {b} is {b_rec} and {b_rank}. Oh, there's tea.",
+            "Let's start with the table, darlings: through {wl}, {a} ({a_rec}) is {a_rank} and {b} ({b_rec}) is {b_rank}.",
+            "{a} is {a_rank} at {a_rec}. {b} is {b_rank} at {b_rec}. Through {wl}. Now, to the dish...",
+        ],
+        "c.next": [
+            "And they meet in Week {nwk}. Popcorn, anyone?",
+            "The schedule says {a} and {b} play in Week {nwk}. The schedule has a sense of humor.",
+            "Week {nwk}. {a} and {b}. Mark your calendars, gossips.",
+        ],
+        "c.recent": [
+            "Recent form, and it's JUICY: {a} {a_form}, and {b} {b_form}.",
+            "Lately, {a} {a_form}. And {b}? {b} {b_form}. Draw your own conclusions...",
+            "In their last games, {a} {a_form}, while {b} {b_form}. Hmm.",
+        ],
+        "c.gap": [
+            "In the table, {hi} ({hi_rec}, {hi_rank}) is looking down at {lo} ({lo_rec}, {lo_rank}), with {pf_gap} between them in points scored. Awkward.",
+            "{pf_gap}! That's the points gap between {hi} ({hi_rank}) and {lo} ({lo_rank}). Somebody's feeling it.",
+            "{hi} sits {hi_rank} at {hi_rec}, {lo} sits {lo_rank} at {lo_rec}, and {pf_gap} of scoring sits between them.",
+        ],
+        "c.pick": [
+            "Our pick? {fav} over {dog}, going by {fav_why}. Sorry, {dog}, darling.",
+            "The numbers whisper {fav} over {dog}, on {fav_why}.",
+            "{fav} gets our vote on {fav_why}. {dog} may want to sit down.",
+        ],
+        "c.close": [
+            "Neither {a} nor {b} is backing down. More as the group chat develops.",
+            "You heard it here first, {a} and {b}. Kisses.",
+            "Stay tuned, because {a} and {b} are just getting started.",
+        ],
+        # ---------------- Monday analytics ----------------
+        "h.a.luck": [
+            "LUCKY or LOADED? {lucky} is {lucky_luck}, {unlucky} is {unlucky_luck}",
+            "The luck scandal: {lucky} has it, {unlucky} has the bill",
+            "Who's been getting away with it? {lucky} ({lucky_luck}), that's who",
+        ],
+        "h.a.eff": [
+            "Lineup LIES: {best_n} at {best_pct}, {worst_n} at {worst_pct}",
+            "{worst_n} is leaving points EVERYWHERE, at just {worst_pct}",
+            "Efficiency exposed: {best_n} {best_pct}, {worst_n} {worst_pct}",
+        ],
+        "h.a.bench": [
+            "{bench_n}'s BENCH SECRET: {bench_pts} left behind",
+            "Benchgate: {bench_n} left {bench_pts} on the pine",
+            "{bench_pts} wasted on the bench, and {bench_n} did it",
+        ],
+        "h.a.steady": [
+            "Steady {steady_n}, scandalous {wild_n}: the weekly rank files",
+            "{wild_n} is ALL OVER THE PLACE, and {steady_n} is suspiciously calm",
+            "{steady_n} is suspiciously consistent and {wild_n} suspiciously not",
+        ],
+        "a.lede": [
+            "Monday. The numbers. Through {wl}, {gp} per team, and they are not kind to everyone...",
+            "Grab the smelling salts, darlings, because these figures cover {gp} per team through {wl}.",
+            "We pulled the receipts, {gp} per team, through {wl}. Brace yourselves.",
+        ],
+        "a.luck": [
+            "{lucky} is {lucky_rec}, but the all-play math says it should be around {lucky_exp} wins. That's {lucky_luck} of pure luck. Meanwhile {unlucky} is {unlucky_rec} and should be at {unlucky_exp}, a luck index of {unlucky_luck}. Unfair? Very.",
+            "The luck index doesn't lie, and neither do we: {lucky}, {lucky_luck} ({lucky_rec}, expected {lucky_exp}). {unlucky}, {unlucky_luck} ({unlucky_rec}, expected {unlucky_exp}).",
+            "Somebody's been blessed. {lucky} is {lucky_rec} on {lucky_exp} expected wins ({lucky_luck}). Somebody's been cursed. {unlucky} is {unlucky_rec} on {unlucky_exp} ({unlucky_luck}).",
+        ],
+        "a.eff": [
+            "On lineups: {best_n} squeezes out {best_pct} of the points that were there. {worst_n}? Just {worst_pct}. The whole league is at {lg_pct}. Yikes.",
+            "Efficiency tea: {best_n} at {best_pct}, {worst_n} at {worst_pct}, and a league average of {lg_pct}. Somebody should check their lineup.",
+            "{worst_n} left a LOT behind at {worst_pct}, while {best_n} got {best_pct}. League average: {lg_pct}.",
+        ],
+        "a.bench": [
+            "The bench is where secrets go to score. {bench_n} left {bench_pts} there, and {bench_low_n} left only {bench_low_pts}.",
+            "{bench_n}: {bench_pts} left on the bench against the best lineup. {bench_low_n}: {bench_low_pts}. Tidy, darling.",
+            "Bench confessions: {bench_n} wasted {bench_pts}, and {bench_low_n} wasted just {bench_low_pts}.",
+        ],
+        "a.blunder": [
+            "THE BIGGEST BENCH BLUNDER of the season so far? {bl_n}, Week {bl_wk}, a whopping {bl_pts} below the best possible lineup, with {bl_player} ({bl_pos}) scoring {bl_player_pts} on the bench. Ouch.",
+            "Week {bl_wk} was a nightmare for {bl_n}: {bl_pts} short of the best lineup, and {bl_player} ({bl_pos}) had {bl_player_pts} just sitting there...",
+            "Oh, {bl_n}. Week {bl_wk}. {bl_pts} below perfection. {bl_player} ({bl_pos}) managed {bl_player_pts} from the bench.",
+        ],
+        "a.steady": [
+            "And the consistency files! {steady_n} averages a weekly rank of {steady_avg}, ranging from {steady_band}. {wild_n}? Ranging from {wild_band}. Chaos, darling.",
+            "{steady_n} is the picture of calm (average {steady_avg}, from {steady_band}), while {wild_n} is a mess, from {wild_band}.",
+            "Who's reliable? {steady_n}, from {steady_band}. Who isn't? {wild_n}, from {wild_band}.",
+        ],
+        "a.trade": [
+            "And that Week {twk} trade? Over {since_wk}, the players {lead} got have scored {lead_pts}, while the ones {trail} got have managed {trail_pts}. Somebody got fleeced...",
+            "The trade report card for Week {twk}: {lead} is ahead, {lead_pts} to {trail_pts}, over {since_wk}. {trail} is not telling.",
+            "Early returns on the Week {twk} deal: {lead} {lead_pts}, {trail} {trail_pts}, after {since_wk}. Whoops.",
+        ],
+        "a.close": [
+            "That's the tea through {wl}, darlings.",
+            "Receipts don't lie. Kisses.",
+            "More numbers, more scandal, next Monday.",
+        ],
         "x.sig": [
             "And then, because of course: “{catch}” Pure {n}.",
             "{n} just had to add: “{catch}”",

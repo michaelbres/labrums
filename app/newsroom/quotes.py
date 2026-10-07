@@ -83,7 +83,7 @@ BANK: dict[str, list[str]] = {
         "A game like that doesn't need a quote. It needs a hug.",
         "{m} points. I can almost feel the ones I left on the bench.",
         "I lost by {m}. Somewhere, a player I benched is feeling very good about it.",
-        "A loss by {m} is worse than a blowout because I have to think about it.",
+        "A loss by {m} is worse than a big loss because I have to think about it.",
         "I'll take the moral victory over {opp}. It's the only one on offer.",
         "Down by {m} and still sure I outplayed {opp}. The scoreboard disagrees.",
         "{m} points. I've lost bets by more and slept better.",

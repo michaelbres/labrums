@@ -396,9 +396,10 @@ def test_names_are_consistent_one_nickname_per_article(live25_arts):
     nicks = {rid: str(t.get("nickname") or "").strip() for rid, t in nr.teams.items()}
     for a in arts:
         text = " ".join([a["headline"], a["dek"], *a["body"]])
+        owner_text = nr.scrub_players(text)   # a player named Pat is not an owner named Pat
         for rid, nick in nicks.items():
             if nick and nick != nr.name(rid):
-                assert len(re.findall(rf"\b{re.escape(nick)}\b", text)) <= 1, (a["id"], nick)
+                assert len(re.findall(rf"\b{re.escape(nick)}\b", owner_text)) <= 1, (a["id"], nick)
         assert "Ja’Mario Kart  " not in text and "  " not in text
 
 

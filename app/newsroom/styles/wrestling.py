@@ -546,6 +546,114 @@ FAMILY = {
             "{busiest} wore out the tag rope with the most trades, by a mile!",
             "Hat tip to {busiest}, the dealmaker of the offseason!",
         ],
+        # ---------------- Sunday column ----------------
+        "h.c": [
+            "{a} vs. {b}: THE PROMO IS LIVE!",
+            "{a} grabs the mic on {b}!",
+            "Trash talk at ringside: {a} and {b}!",
+            "{a} and {b} cut PROMOS on each other!",
+        ],
+        "h.c.rv": [
+            "{rv_name}: {a} and {b} cut a PROMO!",
+            "The blood feud continues: {a}, {b}, {rv_name}!",
+            "{rv_name} heats up as {a} and {b} grab the mic!",
+        ],
+        "h.c.next": [
+            "{a} and {b} are signed for Week {nwk}, and the promos are FLYING!",
+            "Week {nwk} main event: {a} vs. {b}, and they're talking!",
+            "The contract is signed! {a} faces {b} in Week {nwk}!",
+        ],
+        "c.lede": [
+            "Ladies and gentlemen, through {wl}, {a} stands {a_rank} at {a_rec}, and {b} stands {b_rank} at {b_rec}! That's the card!",
+            "Look at the rankings! {a} is {a_rank} ({a_rec}), and {b} is {b_rank} ({b_rec}), through {wl}!",
+            "{a}: {a_rank}, {a_rec}! {b}: {b_rank}, {b_rec}! That's how they enter the ring through {wl}!",
+        ],
+        "c.next": [
+            "They meet in Week {nwk}, and the crowd goes WILD!",
+            "The bell rings in Week {nwk}, {a} and {b}, no disqualification!",
+            "Week {nwk}! {a}! {b}! Somebody's getting pinned!",
+        ],
+        "c.recent": [
+            "The recent matches! {a} {a_form}, and {b} {b_form}!",
+            "Look at the tale of the tape! {a} {a_form}, while {b} {b_form}!",
+            "Their last bouts: {a} {a_form}, and {b} {b_form}!",
+        ],
+        "c.gap": [
+            "In the rankings, {hi} is {hi_rank} at {hi_rec} and {lo} is {lo_rank} at {lo_rec}, and {pf_gap} of scoring separates them! That's a gap you could drive a folding chair through!",
+            "{hi} holds the higher ranking over {lo} ({hi_rank} to {lo_rank}), and the points gap is {pf_gap}!",
+            "{pf_gap} in points scored between {hi} ({hi_rank}) and {lo} ({lo_rank})! That's the distance between a title shot and a ring rat!",
+        ],
+        "c.pick": [
+            "My pick is {fav} over {dog}, on the {fav_why}!",
+            "The call at ringside: {fav}! The reason: {fav_why}! Sorry, {dog}!",
+            "{fav} gets the nod over {dog} on {fav_why}, but anything can happen!",
+        ],
+        "c.close": [
+            "Neither {a} nor {b} is leaving this ring without a fight!",
+            "You heard it here, {a} and {b}! No take-backs!",
+            "The ref can't stop {a} and {b}! Nobody can!",
+        ],
+        # ---------------- Monday analytics ----------------
+        "h.a.luck": [
+            "The ref LOOKED AWAY: {lucky} is {lucky_luck}, {unlucky} is {unlucky_luck}!",
+            "{lucky} got the lucky roll-up at {lucky_luck}! {unlucky} got the chair at {unlucky_luck}!",
+            "Luck report! {lucky} {lucky_luck}, {unlucky} {unlucky_luck}!",
+        ],
+        "h.a.eff": [
+            "{best_n} lands {best_pct} of the available points! {worst_n} whiffs at {worst_pct}!",
+            "Technique ratings! {best_n} at {best_pct}, {worst_n} at {worst_pct}!",
+            "{worst_n} is leaving it all in the ring! Just {worst_pct}!",
+        ],
+        "h.a.bench": [
+            "{bench_n} left {bench_pts} in the locker room!",
+            "The bench report! {bench_n} wasted {bench_pts}!",
+            "{bench_pts} sat on {bench_n}'s bench! That's the most in the league!",
+        ],
+        "h.a.steady": [
+            "{steady_n} is the STEADY champ, and {wild_n} is a LOOSE CANNON!",
+            "Steady {steady_n}, wild {wild_n}: the weekly rank report!",
+            "{wild_n} swings like a wrecking ball while {steady_n} holds the line!",
+        ],
+        "a.lede": [
+            "It's Monday, which means it's time for the STATS! They run through {wl}, {gp} per team!",
+            "Time for the tale of the tape! Through {wl}, {gp} each!",
+            "Grab your clipboard! The numbers run through {wl}, {gp} per team!",
+        ],
+        "a.luck": [
+            "{lucky} is {lucky_rec}, but the all-play math says {lucky_exp} wins! That's {lucky_luck} of pure luck! {unlucky} is {unlucky_rec} when the math says {unlucky_exp}! That's {unlucky_luck}!",
+            "The referee has been missing things! {lucky}: {lucky_rec}, expected {lucky_exp}, {lucky_luck}! {unlucky}: {unlucky_rec}, expected {unlucky_exp}, {unlucky_luck}!",
+            "{lucky} got every lucky break ({lucky_rec} on {lucky_exp} expected wins, {lucky_luck})! {unlucky} got none ({unlucky_rec} on {unlucky_exp}, {unlucky_luck})!",
+        ],
+        "a.eff": [
+            "Lineup efficiency! {best_n} lands {best_pct} of the points that were there! {worst_n} lands {worst_pct}! The league lands {lg_pct}!",
+            "{best_n} is the efficiency champion at {best_pct}! {worst_n} is the cellar dweller at {worst_pct}! The league average: {lg_pct}!",
+            "{best_n}: {best_pct}! {worst_n}: {worst_pct}! League: {lg_pct}! That's a lot of dropped finishers!",
+        ],
+        "a.bench": [
+            "Bench points! {bench_n} left {bench_pts} in the locker room against the best possible lineup! {bench_low_n} left just {bench_low_pts}!",
+            "The biggest bench blunder: {bench_n} with {bench_pts}! The cleanest card: {bench_low_n} at {bench_low_pts}!",
+            "{bench_n} left {bench_pts} unused! {bench_low_n} left {bench_low_pts}! One of them needs a new trainer!",
+        ],
+        "a.blunder": [
+            "The worst night in the ring so far? {bl_n}, Week {bl_wk}: {bl_pts} below the best possible lineup! {bl_player} ({bl_pos}) scored {bl_player_pts} on the bench!",
+            "Week {bl_wk} was a DISASTER for {bl_n}, {bl_pts} short of the best lineup! {bl_player} ({bl_pos}) put up {bl_player_pts} from the bench!",
+            "{bl_n}, Week {bl_wk}, {bl_pts} short! The bench's best was {bl_player} ({bl_pos}), {bl_player_pts}!",
+        ],
+        "a.steady": [
+            "The weekly rank report! {steady_n} averages {steady_avg} and has ranged from {steady_band}! {wild_n} has ranged from {wild_band}!",
+            "The steady champ: {steady_n}, from {steady_band}, averaging {steady_avg}! The loose cannon: {wild_n}, from {wild_band}!",
+            "{steady_n} holds the line, from {steady_band} at {steady_avg} on average! {wild_n} is all over the ring, from {wild_band}!",
+        ],
+        "a.trade": [
+            "Trade check! In the Week {twk} deal, the players {lead} got have scored {lead_pts} in the {since_wk} since! The players {trail} got have scored {trail_pts}!",
+            "Early returns on the Week {twk} trade: {lead} is ahead, {lead_pts} to {trail_pts}, over {trail}, after {since_wk}!",
+            "The Week {twk} trade verdict is IN! {lead}'s side: {lead_pts}. {trail}'s side: {trail_pts}! {since_wk} on the clock!",
+        ],
+        "a.close": [
+            "That's the card! See you next Monday!",
+            "The numbers don't lie, and neither does the ref!",
+            "Go check your own lineup! Seriously, go!",
+        ],
         "x.sig": [
             "And the crowd knew it was coming, because {n} hits the finisher: “{catch}”",
             "{n} hit the catchphrase: “{catch}”",
