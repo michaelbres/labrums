@@ -81,7 +81,7 @@ FAMILY = {
             "{w_team} ({w}) {verb} {l_team} ({l}), {wp} to {lp}, as the light faded.",
             "{w} {verb} {l}, {wp}-{lp}: {noun}.",
             "By the end of {wl}, {w_nick} had {verb} {l}, {wp} to {lp}.",
-            "{l_nick} could not hold its ground against {w}, {lp} to {wp}. It was {noun}.",
+            "{l_nick} could not hold their ground against {w}, {lp} to {wp}. It was {noun}.",
             "The result: {w}, {wp}; {l}, {lp}. A margin of {m}, {noun}.",
             "{w} met {l} in {wl}, and prevailed, {wp} to {lp}.",
             "{l} could not match {w}'s {wp}, falling {lp} to {wp}.",
@@ -98,6 +98,8 @@ FAMILY = {
             "The strongest of {w}'s lineup was {star} ({spos}), contributing {spts}, some {sshare} of the {wp}.",
             "{star} ({spos}) led the pack for {w}, with {spts}.",
             "Observe {star}, the {spos}: {spts} for {w}, {sshare} of the team total.",
+            "{star} ({spos}) stood tallest in {w}'s lineup with {spts}.",
+            "{w}'s strongest display came from {star} ({spos}): {spts}.",
         ],
         "g.goat": [
             "{l}'s weakest member was {gname} ({gpos}), who produced only {gpts}.",
@@ -106,8 +108,17 @@ FAMILY = {
         ],
         "g.bench": [
             "{l} left {bench_left} unclaimed on the bench, among them {bench_pts} from {bench_name} ({bench_pos}).",
-            "On {l}'s bench, {bench_name} ({bench_pos}) scored {bench_pts}, unobserved. A better lineup was worth {bench_left}.",
+            "On {l}'s bench, {bench_name} ({bench_pos}) scored {bench_pts}, unobserved. An optimal lineup was worth {bench_left} more.",
             "{bench_left} lay unclaimed on {l}'s bench; {bench_name} ({bench_pos}) accounted for {bench_pts}.",
+            "On {l}'s bench, {bench_name} ({bench_pos}) produced {bench_pts}, and the best lineup would have claimed {bench_left}.",
+            "{l} kept {bench_name} ({bench_pos}) out of the field, and {bench_pts} went uncollected.",
+        ],
+        "g.bench_total": [
+            "{l} left {bench_left} unclaimed on the bench.",
+            "{bench_left} lay unclaimed on {l}'s bench, unobserved.",
+            "A better lineup was worth {bench_left} to {l}, and the bench kept it.",
+            "{l}'s bench kept {bench_left} out of reach.",
+            "{bench_left} went uncollected on {l}'s bench.",
         ],
         "g.streak_w": [
             "{w} has now prevailed {k} times in succession, and stands {w_rank} at {w_rec}.",
@@ -125,24 +136,24 @@ FAMILY = {
             "The hierarchy now reads {w}, {w_rec}, and {l}, {l_rec}.",
         ],
         "g.top": [
-            "{w}'s {wp} was the largest display of {wl}. The league average was {wavg}.",
-            "No creature stood taller in {wl} than {w}, with {wp}. The average was {wavg}.",
+            "{w}'s {wp} was the largest display of {wl}. The pack averaged {wavg}.",
+            "No creature stood taller in {wl} than {w}, with {wp}. The herd as a whole averaged {wavg}.",
             "{wp} for {w}, the highest ground of the week. The average: {wavg}.",
         ],
         "g.low": [
-            "{l}'s {lp} was the smallest display of {wl}. The league average was {wavg}.",
-            "No creature stood lower in {wl} than {l}, with {lp}. The average was {wavg}.",
+            "{l}'s {lp} was the smallest display of {wl}. Across the territory, the mean was {wavg}.",
+            "No creature stood lower in {wl} than {l}, with {lp}. The pack averaged {wavg}.",
             "{lp} for {l}, the lowest ground of the week. The average: {wavg}.",
         ],
         "g.luck_up": [
-            "{n} ({n_rec}) has {luck} wins more than its foraging deserves, as the all-play numbers show. Fortune is, in nature, never permanent.",
-            "By all-play, {n} is {luck} wins ahead at {n_rec}. A fortunate territory.",
-            "{n}: {n_rec}, and {luck} wins above expectation. A blessed habitat.",
+            "{n} ({n_rec}) has {luck_abs} wins more than their foraging deserves, as the all-play numbers show. Fortune is, in nature, never permanent.",
+            "By all-play, {n} is {luck_abs} wins ahead at {n_rec}. A fortunate territory.",
+            "{n}: {n_rec}, and {luck_abs} wins above expectation. A blessed habitat.",
         ],
         "g.luck_down": [
-            "{n} ({n_rec}) has {luck} wins fewer than its foraging deserves, as the all-play numbers show. Fortune, in nature, is never fair.",
-            "By all-play, {n} is {luck} wins behind at {n_rec}. A harsh territory.",
-            "{n}: {n_rec}, and {luck} wins below expectation. A difficult habitat.",
+            "{n} ({n_rec}) has {luck_abs} wins fewer than their foraging deserves, as the all-play numbers show. Fortune, in nature, is never fair.",
+            "By all-play, {n} is {luck_abs} wins behind at {n_rec}. A harsh territory.",
+            "{n}: {n_rec}, and {luck_abs} wins below expectation. A difficult habitat.",
         ],
         "g.upset": [
             "Entering the contest, {l} stood {l_rank0} in the hierarchy and {w} stood {w_rank0}.",
@@ -200,6 +211,8 @@ FAMILY = {
             "{a} stands at {a_rec}, scoring {a_avg} a game. {b} stands at {b_rec}, scoring {b_avg}.",
             "Here, a pair of contenders: {a} ({a_rec}, {a_avg}) and {b} ({b_rec}, {b_avg}).",
             "{b_team} ({b}, {b_rec}, {b_avg} per game) approaches {a_team} ({a}, {a_rec}, {a_avg} per game) in {wl}.",
+            "{a} ({a_rec}, {a_avg}) and {b} ({b_rec}, {b_avg}) are due to meet in {wl}.",
+            "In {wl}, two contenders meet: {a} at {a_rec}, {a_avg} a game, and {b} at {b_rec}, {b_avg}.",
         ],
         "p.h2h_split": [
             "The two have already met this season and divided the spoils, {h2h_rec}.",
@@ -217,7 +230,7 @@ FAMILY = {
             "This will be the first encounter of the season between {a} and {b}.",
         ],
         "p.stakes": [
-            "Should {a} win, its playoff odds rise to {a_win}; should it lose, they fall to {a_loss}. For {b}, the figures are {b_win} and {b_loss}.",
+            "Should {a} win, their playoff odds rise to {a_win}; should {a} lose, they fall to {a_loss}. For {b}, the figures are {b_win} and {b_loss}.",
             "The stakes for {a}: {a_win} with a victory, {a_loss} with a defeat. For {b}: {b_win} and {b_loss}.",
             "Survival odds for {a} range between {a_loss} and {a_win}; for {b}, between {b_loss} and {b_win}.",
         ],
@@ -232,7 +245,7 @@ FAMILY = {
             "{dog} is the weaker contender at {dog_odds}, while {fav} stands at {fav_odds}.",
         ],
         "p.vol": [
-            "{vol_n} is unpredictable, its weekly scoring swinging {vol_std} points, while {other}'s is steadier at {other_std}.",
+            "{vol_n} is unpredictable, their weekly scoring swinging {vol_std} points, while {other}'s is steadier at {other_std}.",
             "Note the temperament: {vol_n} varies by {vol_std} points a week, and {other} by {other_std}.",
             "{other} is a creature of habit ({other_std} points of swing); {vol_n} is far less so ({vol_std}).",
         ],
@@ -264,9 +277,9 @@ FAMILY = {
             "After {since_wk}, {a}'s side of the exchange has yielded {a_pts}, and {b}'s {b_pts}. {lead} is ahead.",
         ],
         "t.pending": [
-            "{pk_side} received {pk_got}, and {pl_side} received {pl_got}. Picks are seeds, not yet fruit; the exchange cannot be judged.",
-            "{pl_side} took the established players ({pl_got}); {pk_side} took the seeds ({pk_got}). It is too early to say which will thrive.",
-            "A trade of picks for players: {pl_side} holds {pl_got}, {pk_side} holds {pk_got}. The yield is yet to be observed.",
+            "Picks are seeds, not yet fruit; the exchange cannot be judged.",
+            "It is too early to say which of {pk_side} or {pl_side} will thrive.",
+            "A trade of picks for players: the yield is yet to be observed.",
         ],
         "t.fresh": [
             "It is too early to observe the results of the exchange.",
@@ -330,7 +343,7 @@ FAMILY = {
         ],
         "w.budget": [
             "{n} has used {spent} of a {budget} FAAB reserve.",
-            "Of its {budget} reserve, {n} has spent {spent}.",
+            "Of their {budget} reserve, {n} has spent {spent}.",
             "{n}'s FAAB stores stand at {spent} spent of {budget}.",
         ],
         "w.close": [
@@ -346,7 +359,7 @@ FAMILY = {
         ],
         "s.total": [
             "In Week {wk}, the ritual ledger lists {total_n} across {owners_n}.",
-            "In Week {wk}, {owners_n} observe the ritual {total_n} times over.",
+            "In Week {wk}, the ritual claims {total_n} from {owners_n}.",
             "Week {wk} leaves {total_n} to be settled by {owners_n}.",
         ],
         "s.owner": [
@@ -416,7 +429,7 @@ FAMILY = {
         ],
         "n.eff": [
             "In lineup efficiency, {best_n} captures {best_pct} of available points; {worst_n} captures {worst_pct}.",
-            "{best_n} makes the most of its resources ({best_pct}); {worst_n} the least ({worst_pct}).",
+            "{best_n} makes the most of their resources ({best_pct}); {worst_n} the least ({worst_pct}).",
             "Efficiency: {best_n}, {best_pct}; {worst_n}, {worst_pct}.",
         ],
         "n.records": [
@@ -474,6 +487,7 @@ FAMILY = {
             "Memories are long on the plains. In Week {gwk}, {w} {verb} {l}, {wp} to {lp}, by {m} points.",
             "In Week {gwk}, {w} overpowered {l}, {wp}-{lp}, by {m}.",
             "{w}'s {m}-point victory over {l} in Week {gwk} ({wp}-{lp}) is the kind of margin a rival remembers.",
+            "In Week {gwk}, {w} prevailed over {l} by {m}, {wp} to {lp}.",
         ],
         "f.sg": [
             "By the ritual ledger, {a} owes {a_sg} and {b} owes {b_sg}.",
@@ -665,6 +679,12 @@ FAMILY = {
             "“{qc}” {n} said, unbothered.",
             "From {n}, a response: “{qp}”",
             "“{qc}” {n} remarked, and moved on.",
+            "“{qc}” {n} said, from a safe distance.",
+            "{n}, undisturbed, replied: “{qp}”",
+            "“{qc}” {n} said, and the field fell quiet.",
+            "“{qc}” {n} called out, to no one in particular.",
+            "Observed in the wild, {n} said: “{qp}”",
+            "“{qc}” {n} said, and returned to the shade.",
         ],
     },
 }

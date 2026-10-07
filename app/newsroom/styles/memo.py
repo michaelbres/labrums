@@ -70,7 +70,7 @@ FAMILY = {
         "r.lede.top": [
             "Executive summary: the highest individual output of {wl} was {w}'s {wp} (league average: {wavg}), which delivered a win over {l} ({lp}).",
             "Key takeaway: {w_team} ({w}) led all teams with {wp} in {wl}, against a league average of {wavg}. {l} produced {lp}.",
-            "Team, please note the top performance of {wl}: {w}, {wp}. The league average was {wavg}. {l} delivered {lp}.",
+            "Team, please note the top performance of {wl}: {w}, {wp}. The league benchmark was {wavg}. {l} delivered {lp}.",
         ],
         "r.lede.tie": [
             "Executive summary: {a_team} ({a}) and {b_team} ({b}) tied at {pts} each in {wl}. Both teams met the other's target exactly.",
@@ -98,6 +98,8 @@ FAMILY = {
             "Top individual contributor for {w}: {star} ({spos}), {spts}, or {sshare} of the {wp} total.",
             "{star} ({spos}) delivered {spts} for {w}, representing {sshare} of team output.",
             "Please recognize {star} ({spos}), who produced {spts} toward {w}'s {wp}.",
+            "{star} ({spos}) was {w}'s highest-scoring contributor at {spts}.",
+            "Please note {star} ({spos}) as {w}'s top performer this week: {spts}.",
         ],
         "g.goat": [
             "Of concern: {gname} ({gpos}) delivered {gpts} in a starting role for {l}.",
@@ -108,6 +110,15 @@ FAMILY = {
             "Resource allocation note: {l} left {bench_left} on the bench, including {bench_pts} from {bench_name} ({bench_pos}).",
             "{bench_name} ({bench_pos}) delivered {bench_pts} while unassigned on {l}'s bench. Optimal staffing would have added {bench_left}.",
             "Opportunity cost for {l}: {bench_left} on the bench, {bench_pts} of them from {bench_name} ({bench_pos}).",
+            "{l} did not deploy {bench_name} ({bench_pos}), who produced {bench_pts}; the best lineup would have added {bench_left}.",
+            "Staffing note for {l}: {bench_name} ({bench_pos}) delivered {bench_pts} while unassigned, and {bench_left} went unused.",
+        ],
+        "g.bench_total": [
+            "Resource allocation note: {l} left {bench_left} on the bench.",
+            "Optimal staffing would have added {bench_left} for {l}.",
+            "Opportunity cost for {l}: {bench_left} on the bench.",
+            "The bench represents {bench_left} of unrealized output for {l}.",
+            "Lineup variance for {l}: {bench_left} below the optimum.",
         ],
         "g.streak_w": [
             "{w} has now delivered {k} consecutive wins and stands {w_rank} at {w_rec}.",
@@ -126,23 +137,23 @@ FAMILY = {
         ],
         "g.top": [
             "{w}'s {wp} was the highest output of {wl}, against a league average of {wavg}.",
-            "No team exceeded {w}'s {wp} in {wl}. League average: {wavg}.",
-            "{wp}: top performance of {wl}, from {w}. The league average was {wavg}.",
+            "No team exceeded {w}'s {wp} in {wl}. The league averaged {wavg}, which is the benchmark.",
+            "{wp}: top performance of {wl}, from {w}. For reference, the benchmark was {wavg}.",
         ],
         "g.low": [
             "{l}'s {lp} was the lowest output of {wl}, against a league average of {wavg}.",
-            "No team delivered less than {l}'s {lp} in {wl}. League average: {wavg}.",
-            "{lp}: bottom performance of {wl}, from {l}. The league average was {wavg}.",
+            "No team delivered less than {l}'s {lp} in {wl}. The league average of {wavg} is the benchmark.",
+            "{lp}: bottom performance of {wl}, from {l}. The league baseline stood at {wavg}.",
         ],
         "g.luck_up": [
-            "{n} ({n_rec}) is {luck} wins above its expected-wins forecast, a favorable variance that may not repeat.",
-            "Year-to-date, {n} has {luck} wins more than all-play output supports, at {n_rec}.",
-            "{n}: {n_rec}, with {luck} wins of favorable variance.",
+            "{n} ({n_rec}) is {luck_abs} wins above their expected-wins forecast, a favorable variance that may not repeat.",
+            "Year-to-date, {n} has {luck_abs} wins more than all-play output supports, at {n_rec}.",
+            "{n}: {n_rec}, with {luck_abs} wins of favorable variance.",
         ],
         "g.luck_down": [
-            "{n} ({n_rec}) is {luck} wins below its expected-wins forecast, an unfavorable variance that may reverse.",
-            "Year-to-date, {n} has {luck} wins fewer than all-play output supports, at {n_rec}.",
-            "{n}: {n_rec}, with {luck} wins of unfavorable variance.",
+            "{n} ({n_rec}) is {luck_abs} wins below their expected-wins forecast, an unfavorable variance that may reverse.",
+            "Year-to-date, {n} has {luck_abs} wins fewer than all-play output supports, at {n_rec}.",
+            "{n}: {n_rec}, with {luck_abs} wins of unfavorable variance.",
         ],
         "g.upset": [
             "For context, {w} was ranked {w_rank0} and {l} was ranked {l_rank0} going into the period.",
@@ -200,6 +211,8 @@ FAMILY = {
             "{a}: {a_rec}, {a_avg} ppg. {b}: {b_rec}, {b_avg} ppg. Both are included in the {wl} schedule.",
             "Matchup profile: {a} ({a_rec}, {a_avg}) against {b} ({b_rec}, {b_avg}).",
             "In {wl}, {b_team} ({b}, {b_rec}, {b_avg}) is scheduled against {a_team} ({a}, {a_rec}, {a_avg}).",
+            "Matchup summary for {wl}: {a} ({a_rec}, {a_avg}) and {b} ({b_rec}, {b_avg}).",
+            "{a} and {b} are paired in {wl}; records {a_rec} and {b_rec}, averages {a_avg} and {b_avg}.",
         ],
         "p.h2h_split": [
             "The teams are {h2h_rec} against each other this season, a split.",
@@ -250,7 +263,7 @@ FAMILY = {
             "Transaction notice: {a} sends {gave_s} to {b} for {got_s}",
             "{a} and {b} finalize trade: {gave_s} for {got_s}",
             "Transaction summary: {b} receives {gave_s} from {a}; {a} receives {got_s}",
-            "Asset reallocation: {gave_s} moves from {a} to {b}, {got_s} returns",
+            "Asset reallocation: {a} transfers {gave_s} to {b} and receives {got_s}",
         ],
         "t.sides": [
             "Please be advised that {a} and {b} completed a trade in {wl}. {a} received {a_got}. {b} received {b_got}.",
@@ -264,9 +277,9 @@ FAMILY = {
             "Post-trade output over {since_wk}: {a}, {a_pts}; {b}, {b_pts}. {lead} holds the early advantage.",
         ],
         "t.pending": [
-            "{pk_side} received {pk_got}; {pl_side} received {pl_got}. As one side received picks only, a performance review is not yet possible.",
-            "A trade of picks for players: {pl_side} has {pl_got}, and {pk_side} has {pk_got}. Evaluation is deferred.",
-            "{pl_side} took delivery of {pl_got}; {pk_side} took delivery of {pk_got}. Deliverables from picks are not yet available.",
+            "As one side received picks only, a performance review is not yet possible.",
+            "Evaluation of the picks-for-players deal is deferred for {pk_side} and {pl_side}.",
+            "Deliverables from picks are not yet available.",
         ],
         "t.fresh": [
             "A performance review is premature at this time.",
@@ -280,7 +293,7 @@ FAMILY = {
         ],
         "t.rec": [
             "At the time of the trade, {a} was {a_rec} ({a_rank}) and {b} was {b_rec} ({b_rank}).",
-            "Entering that week, {a} held {a_rank} at {a_rec}; {b} held {b_rank} at {b_rec}.",
+            "Going into the deal, {a} held {a_rank} at {a_rec}; {b} held {b_rank} at {b_rec}.",
             "Status prior to the transaction: {a}, {a_rec}, {a_rank}; {b}, {b_rec}, {b_rank}.",
         ],
         "t.close": [
@@ -324,7 +337,7 @@ FAMILY = {
             "Also noted: {others_text}.",
         ],
         "w.total": [
-            "In total, {total_owners} made {total_n} in {wl}.",
+            "In total, {total_owners} claimed {total_n} in {wl}.",
             "{total_n} were onboarded by {total_owners} in {wl}.",
             "{wl} saw {total_n} acquired across {total_owners}.",
         ],
@@ -463,7 +476,7 @@ FAMILY = {
         "f.trade": [
             "A relevant transaction: in Week {twk}, {a} acquired {a_got} and {b} acquired {b_got}.",
             "The two parties completed a trade in Week {twk}. {a} took {a_got}; {b} took {b_got}.",
-            "In Week {twk}, {b_got} was transferred to {b} and {a_got} to {a}.",
+            "In Week {twk}, {b} took delivery of {b_got}, and {a} of {a_got}.",
         ],
         "f.adj": [
             "In the standings, {hi} ({hi_rec}, {hi_rank}) is adjacent to {lo} ({lo_rec}, {lo_rank}), with {pf_gap} separating them in points scored.",
@@ -474,6 +487,7 @@ FAMILY = {
             "A contributing factor is Week {gwk}: {w} {verb} {l}, {wp} to {lp}, by {m} points.",
             "In Week {gwk}, {w} defeated {l}, {wp}-{lp}, by {m} points, a variance that remains on the record.",
             "{w}'s {m}-point result over {l} in Week {gwk} ({wp}-{lp}) is among the widest margins of the period.",
+            "In Week {gwk}, {w} won by {m} over {l}, {wp}-{lp}, a variance worth noting.",
         ],
         "f.sg": [
             "Compliance record: {a} has {a_sg}; {b} has {b_sg}.",
@@ -637,7 +651,7 @@ FAMILY = {
         "a.blunder": [
             "Incident of note: in Week {bl_wk}, {bl_n} finished {bl_pts} below the best possible lineup, the largest single-week gap to date. The top bench score was {bl_player_pts}, by {bl_player} ({bl_pos}).",
             "Largest single-week variance: {bl_n}, Week {bl_wk}, {bl_pts} below optimal. {bl_player} ({bl_pos}) contributed {bl_player_pts} from the bench.",
-            "{bl_n} experienced a {bl_pts} shortfall against the best lineup in Week {bl_wk}. The bench's top contributor was {bl_player} ({bl_pos}) at {bl_player_pts}.",
+            "{bl_n} experienced a shortfall of {bl_pts} against the best lineup in Week {bl_wk}. The bench's top contributor was {bl_player} ({bl_pos}) at {bl_player_pts}.",
         ],
         "a.steady": [
             "Consistency: {steady_n} shows the lowest week-to-week variance, averaging a weekly rank of {steady_avg} and ranging from {steady_band}. {wild_n} shows the highest, ranging from {wild_band}.",
@@ -665,6 +679,12 @@ FAMILY = {
             "“{qc}” {n} wrote in a follow-up.",
             "In {n}'s words: “{qp}”",
             "“{qc}” {n} added.",
+            "“{qc}” {n} said in a reply-all.",
+            "{n} noted: “{qp}”",
+            "“{qc}” {n} said in a follow-up message.",
+            "Per {n}: “{qp}”",
+            "“{qc}” {n} replied to the thread.",
+            "“{qc}” {n} stated, for alignment purposes.",
         ],
     },
 }

@@ -68,9 +68,9 @@ FAMILY = {
             "You could have slid a playing card between them. {w_team} ({w}) won by {m} over {l}, {wp} to {lp}, and the week's closest game was in the books.",
         ],
         "r.lede.top": [
-            "{wp} points. That's the number I couldn't stop looking at. {w} put it up in {wl}, best on the board by a mile, and {l} had {lp} to answer. The league average was {wavg}.",
+            "{wp} points. That's the number I couldn't stop looking at. {w} put it up in {wl}, best on the board by a mile, and {l} had {lp} to answer. The room averaged {wavg}.",
             "Somebody turned up the lights in {wl}. {w_team} ({w}) scored {wp}, the top number of the week, against a {wavg} average. {l} scored {lp} and went home.",
-            "The week's big money was {w}'s {wp}. {l} came up with {lp}. The average was {wavg}. The math was never in question.",
+            "The week's big money was {w}'s {wp}. {l} came up with {lp}. The average sat at {wavg}. The math was never in question.",
         ],
         "r.lede.tie": [
             "Nobody won. {a_team} ({a}) and {b_team} ({b}) both scored {pts} in {wl}, and that kind of ending leaves a sour taste.",
@@ -81,7 +81,7 @@ FAMILY = {
             "{w_team} ({w}) {verb} {l_team} ({l}). The tape said {wp}-{lp}.",
             "{w} {verb} {l}, {wp} to {lp}. Call it {noun}.",
             "By the end of {wl}, {w_nick} had {verb} {l}: {wp}-{lp}.",
-            "{l_nick} lost to {w}, {lp}-{wp}. {noun}.",
+            "{l_nick} went down to {w}, {lp}-{wp}. {noun}.",
             "The scoreboard read {wp}-{lp}. {w} over {l} by {m}. {noun}.",
             "{w} and {l} met under the lights. {w} walked out, {wp} to {lp}.",
             "{l} came up short against {w}, {lp} to {wp}.",
@@ -98,6 +98,8 @@ FAMILY = {
             "{star} ({spos}) was the one with the gun: {spts} for {w}, {sshare} of the {wp}.",
             "{w}'s best man was {star} ({spos}), who dropped {spts} like it was nothing.",
             "{star} ({spos}) went for {spts}, {sshare} of {w}'s total. Clean work.",
+            "{star} ({spos}) did the job for {w}: {spts}, no questions asked.",
+            "If you wanted a name for {w}'s week, it was {star} ({spos}), at {spts}.",
         ],
         "g.goat": [
             "{l} had a hole in the lineup: {gname} ({gpos}), {gpts}.",
@@ -106,8 +108,17 @@ FAMILY = {
         ],
         "g.bench": [
             "{bench_left} stayed on {l}'s bench, and {bench_name} ({bench_pos}) scored {bench_pts} watching from the pine.",
-            "The evidence was on {l}'s bench: {bench_name} ({bench_pos}), {bench_pts}. A better lineup was worth {bench_left}.",
+            "The evidence was on {l}'s bench: {bench_name} ({bench_pos}), {bench_pts}. The best lineup was worth {bench_left}.",
             "{bench_left} sat on {l}'s bench, {bench_pts} of them from {bench_name} ({bench_pos}). Somebody made a bad call.",
+            "{l} left {bench_name} ({bench_pos}) on the bench, and {bench_name} put up {bench_pts} anyway. {bench_left} went to waste.",
+            "The player on {l}'s bench was {bench_name} ({bench_pos}). The player put up {bench_pts} with nobody watching.",
+        ],
+        "g.bench_total": [
+            "{bench_left} stayed on {l}'s bench. Somebody made a bad call.",
+            "The evidence was on {l}'s bench: {bench_left} that never got a chance.",
+            "A better lineup was worth {bench_left} to {l}. Nobody picked it.",
+            "{bench_left} sat unused on {l}'s bench. It's the kind of mistake that follows a person.",
+            "{l} left {bench_left} in the dark.",
         ],
         "g.streak_w": [
             "{w} has won {k} straight. {w_rec}, {w_rank}. That kind of run makes people nervous.",
@@ -125,24 +136,24 @@ FAMILY = {
             "The result puts {w} at {w_rec} and {l} at {l_rec}.",
         ],
         "g.top": [
-            "{w}'s {wp} was the best score of {wl}. League average: {wavg}. Nobody else was close.",
+            "{w}'s {wp} was the best score of {wl}. Everybody together came to {wavg} a head. Nobody else was close.",
             "Nobody put up more than {w} in {wl}: {wp}. The room averaged {wavg}.",
             "{wp} for {w}, top of the board. The average sat at {wavg}.",
         ],
         "g.low": [
-            "{l}'s {lp} was the worst number on the board in {wl}. League average: {wavg}.",
+            "{l}'s {lp} was the worst number on the board in {wl}. The league average ran {wavg}.",
             "Nobody dragged less than {l} in {wl}: {lp}. The room averaged {wavg}.",
             "{lp} for {l}, the bottom of the board. The average sat at {wavg}.",
         ],
         "g.luck_up": [
-            "{n} is {n_rec} and {luck} wins ahead of what the all-play numbers say. Somebody up there likes them.",
-            "By all-play, {n} owes the universe {luck} wins at {n_rec}. The universe hasn't called yet.",
-            "{n}: {n_rec}, and {luck} wins above the line. Luck like that always comes with a bill.",
+            "{n} is {n_rec} and {luck_abs} wins ahead of what the all-play numbers say. Somebody up there likes them.",
+            "By all-play, {n} owes the universe {luck_abs} wins at {n_rec}. The universe hasn't called yet.",
+            "{n}: {n_rec}, and {luck_abs} wins above the line. Luck like that always comes with a bill.",
         ],
         "g.luck_down": [
-            "{n} is {n_rec} and {luck} wins behind what the all-play numbers say. The schedule has a grudge.",
-            "By all-play, the universe owes {n} {luck} wins at {n_rec}. It's slow to pay.",
-            "{n}: {n_rec}, and {luck} wins under the line. Bad luck never knocks first.",
+            "{n} is {n_rec} and {luck_abs} wins behind what the all-play numbers say. The schedule has a grudge.",
+            "By all-play, the universe owes {n} {luck_abs} wins at {n_rec}. It's slow to pay.",
+            "{n}: {n_rec}, and {luck_abs} wins under the line. Bad luck never knocks first.",
         ],
         "g.upset": [
             "Going in, {l} stood {l_rank0} and {w} stood {w_rank0}. The streets had other ideas.",
@@ -200,6 +211,8 @@ FAMILY = {
             "{a}: {a_rec}, {a_avg} a game. {b}: {b_rec}, {b_avg} a game. That's the file on both of them.",
             "{b} walks in at {b_rec} and {b_avg} a game, and {a} walks in at {a_rec} and {a_avg}.",
             "In {wl}, {a} ({a_rec}, {a_avg}) meets {b} ({b_rec}, {b_avg}). Both of them know it.",
+            "{a} comes in at {a_rec}, {a_avg} a game. {b} comes in at {b_rec}, {b_avg}. {wl} will sort it out.",
+            "Two files for {wl}: {a}, {a_rec}, {a_avg}; {b}, {b_rec}, {b_avg}.",
         ],
         "p.h2h_split": [
             "They've met this season, and it was a split, {h2h_rec}. Nobody got the last word.",
@@ -264,9 +277,9 @@ FAMILY = {
             "{a}'s end of the deal is worth {a_pts}. {b}'s end is worth {b_pts}. {lead} is up.",
         ],
         "t.pending": [
-            "{pk_side} took {pk_got}. {pl_side} took {pl_got}. Picks for players. Nobody can say who won until the picks play.",
-            "It's picks for players: {pl_side} got {pl_got}, {pk_side} got {pk_got}. The verdict's on ice.",
-            "{pl_side} walked off with the players ({pl_got}), {pk_side} with the picks ({pk_got}). It can't be graded yet.",
+            "Picks for players. Nobody can say who won until the picks play.",
+            "The verdict's on ice, for {pk_side} and {pl_side} alike.",
+            "{pl_side} has the players, {pk_side} has the picks. It can't be graded yet.",
         ],
         "t.fresh": [
             "Too early to tell who got the better end.",
@@ -275,13 +288,13 @@ FAMILY = {
         ],
         "t.count": [
             "It's {n}'s {nth} trade of the season. That's a lot of handshakes.",
-            "That makes the {nth} trade of the year for {n}, and the year has some way to go.",
-            "The {nth} trade for {n}, and the season still young.",
+            "That makes the {nth} trade of the year for {n}.",
+            "The {nth} trade of the season for {n}.",
         ],
         "t.rec": [
             "Before the handshake, {a} stood {a_rec} ({a_rank}) and {b} stood {b_rec} ({b_rank}).",
-            "By the books that week, {a} was {a_rank} at {a_rec}, {b} was {b_rank} at {b_rec}.",
-            "Entering that week: {a}, {a_rec}, {a_rank}. {b}, {b_rec}, {b_rank}.",
+            "By the books before the deal, {a} was {a_rank} at {a_rec}, {b} was {b_rank} at {b_rec}.",
+            "Going into the deal: {a}, {a_rec}, {a_rank}. {b}, {b_rec}, {b_rank}.",
         ],
         "t.close": [
             "The league log has it: the deal is done.",
@@ -474,6 +487,7 @@ FAMILY = {
             "There's Week {gwk} to think about: {w} {verb} {l}, {wp} to {lp}, by {m}.",
             "In Week {gwk}, {w} put {m} points on {l}, {wp}-{lp}. That kind of number lingers.",
             "{w}'s {m}-point win over {l} in Week {gwk} ({wp}-{lp}) is the kind of margin people carry around.",
+            "{w} won by {m} over {l} in Week {gwk}, {wp}-{lp}, and the memory stuck.",
         ],
         "f.sg": [
             "The tab at the bar read {a_sg} for {a} and {b_sg} for {b}.",
@@ -665,6 +679,12 @@ FAMILY = {
             "“{qc}” {n} told me, not looking up.",
             "{n}'s answer: “{qp}”",
             "“{qc}” {n} said, and lit another one.",
+            "“{qc}” {n} said, looking at the door.",
+            "{n} didn't blink: “{qp}”",
+            "“{qc}” {n} said, and let it hang there.",
+            "“{qc}” {n} growled, and meant it.",
+            "I asked {n} once. The answer was: “{qp}”",
+            "“{qc}” {n} said, and poured another.",
         ],
     },
 }

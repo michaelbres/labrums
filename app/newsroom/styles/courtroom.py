@@ -69,7 +69,7 @@ FAMILY = {
         ],
         "r.lede.top": [
             "Entered into evidence: {w}'s {wp} in {wl}, the highest score of the week (league average: {wavg}), which carried judgment against {l}, who scored {lp}.",
-            "The highest figure in the record for {wl} is {wp}, scored by {w_team} ({w}). The opposing party, {l}, scored {lp}. The league average was {wavg}.",
+            "The highest figure in the record for {wl} is {wp}, scored by {w_team} ({w}). The opposing party, {l}, scored {lp}. The court notes a league average of {wavg}.",
             "The court notes that {w} posted the week's top score, {wp}, against a league average of {wavg}, in judgment over {l} ({lp}).",
         ],
         "r.lede.tie": [
@@ -98,6 +98,8 @@ FAMILY = {
             "Exhibit: {star} ({spos}) produced {spts} for {w}, {sshare} of the {wp} total.",
             "The strongest witness for {w} was {star} ({spos}), who contributed {spts}.",
             "{star} ({spos}) accounted for {spts} of {w}'s {wp}, a {sshare} share.",
+            "The leading witness for {w} was {star} ({spos}), at {spts}.",
+            "{w}'s case rested on {star} ({spos}), who produced {spts}.",
         ],
         "g.goat": [
             "The court notes that {gname} ({gpos}) produced only {gpts} for {l}.",
@@ -108,6 +110,15 @@ FAMILY = {
             "In mitigation, {l} left {bench_left} on the bench; {bench_name} ({bench_pos}) scored {bench_pts} without starting.",
             "The record reflects {bench_left} on {l}'s bench, including {bench_pts} from {bench_name} ({bench_pos}).",
             "{l}'s case is undermined by the bench: {bench_name} ({bench_pos}), {bench_pts}, unused. The optimal lineup was worth {bench_left} more.",
+            "The record shows {l} benched {bench_name} ({bench_pos}), who scored {bench_pts}; the optimal lineup was {bench_left} better.",
+            "Exhibit B for {l}'s defense: {bench_name} ({bench_pos}) sat, and {bench_pts} went unused.",
+        ],
+        "g.bench_total": [
+            "In mitigation, {l} left {bench_left} on the bench.",
+            "The record reflects {bench_left} on {l}'s bench that an optimal lineup would have used.",
+            "{l}'s case is undermined by the bench: {bench_left} went unused.",
+            "The bench cost {l} {bench_left}, which the court notes for the record.",
+            "{l}'s optimal lineup was {bench_left} better, and the bench is the evidence.",
         ],
         "g.streak_w": [
             "{w} has now prevailed {k} consecutive times and stands {w_rank} at {w_rec}.",
@@ -125,24 +136,24 @@ FAMILY = {
             "After {wl}, the record stands: {w}, {w_rec}; {l}, {l_rec}.",
         ],
         "g.top": [
-            "{w}'s {wp} was the highest score of {wl}. League average: {wavg}.",
-            "No party scored more than {w} in {wl}: {wp}. The league average was {wavg}.",
-            "{wp}: the week's high mark, entered by {w}. The average was {wavg}.",
+            "{w}'s {wp} was the highest score of {wl}. The league average was {wavg}, for context.",
+            "No party scored more than {w} in {wl}: {wp}. The record shows an average of {wavg}.",
+            "{wp}: the week's high mark, entered by {w}. The average on the docket was {wavg}.",
         ],
         "g.low": [
-            "{l}'s {lp} was the lowest score of {wl}. League average: {wavg}.",
-            "No party scored less than {l} in {wl}: {lp}. The league average was {wavg}.",
-            "{lp}: the week's low mark, entered by {l}. The average was {wavg}.",
+            "{l}'s {lp} was the lowest score of {wl}. The court notes a league average of {wavg}.",
+            "No party scored less than {l} in {wl}: {lp}. The court notes a league average of {wavg}.",
+            "{lp}: the week's low mark, entered by {l}. The record shows an average of {wavg}.",
         ],
         "g.luck_up": [
-            "The court notes that {n} ({n_rec}) enjoys {luck} wins above its all-play expectation, a favorable circumstance.",
-            "By all-play, {n} is {luck} wins to the good at {n_rec}, a fact the record does not dispute.",
-            "{n}: {n_rec}, with {luck} wins above expectation. Fortune has been found in its favor.",
+            "The court notes that {n} ({n_rec}) enjoys {luck_abs} wins above their all-play expectation, a favorable circumstance.",
+            "By all-play, {n} is {luck_abs} wins to the good at {n_rec}, a fact the record does not dispute.",
+            "{n}: {n_rec}, with {luck_abs} wins above expectation. Fortune has been found in their favor.",
         ],
         "g.luck_down": [
-            "The court notes that {n} ({n_rec}) suffers {luck} wins below its all-play expectation, an unfavorable circumstance.",
-            "By all-play, {n} is {luck} wins behind at {n_rec}, a fact the record does not dispute.",
-            "{n}: {n_rec}, with {luck} wins below expectation. Fortune has been found against it.",
+            "The court notes that {n} ({n_rec}) suffers {luck_abs} wins below their all-play expectation, an unfavorable circumstance.",
+            "By all-play, {n} is {luck_abs} wins behind at {n_rec}, a fact the record does not dispute.",
+            "{n}: {n_rec}, with {luck_abs} wins below expectation. Fortune has been found against it.",
         ],
         "g.upset": [
             "For the record, {w} was ranked {w_rank0} and {l} was ranked {l_rank0} entering the game.",
@@ -200,6 +211,8 @@ FAMILY = {
             "{a} appears at {a_rec}, scoring {a_avg} per game. {b} appears at {b_rec}, scoring {b_avg}.",
             "Facts of the case: {a} ({a_rec}, {a_avg}) against {b} ({b_rec}, {b_avg}) in {wl}.",
             "{b_team} ({b}, {b_rec}, {b_avg}) is set against {a_team} ({a}, {a_rec}, {a_avg}) in {wl}.",
+            "In {wl}, {a} ({a_rec}, {a_avg}) answers {b} ({b_rec}, {b_avg}).",
+            "The docket pairs {a_team} ({a_rec}, {a_avg}) with {b_team} ({b_rec}, {b_avg}) for {wl}.",
         ],
         "p.h2h_split": [
             "The prior record between the parties is split, {h2h_rec}.",
@@ -264,9 +277,9 @@ FAMILY = {
             "After {since_wk}, {a}'s side has {a_pts} and {b}'s has {b_pts}. The court finds early advantage for {lead}.",
         ],
         "t.pending": [
-            "{pk_side} received {pk_got}; {pl_side} received {pl_got}. Picks have no production, and the court reserves judgment.",
-            "A trade of picks for players: {pl_side} holds {pl_got}, and {pk_side} holds {pk_got}. The matter is not yet ripe.",
-            "{pl_side} took {pl_got}; {pk_side} took {pk_got}. Judgment is deferred until the picks produce.",
+            "Picks have no production, and the court reserves judgment.",
+            "The matter is not yet ripe for {pk_side} and {pl_side}.",
+            "Judgment is deferred until the picks produce.",
         ],
         "t.fresh": [
             "The matter is not yet ripe for judgment.",
@@ -280,7 +293,7 @@ FAMILY = {
         ],
         "t.rec": [
             "At the time of the agreement, {a} was {a_rec} ({a_rank}) and {b} was {b_rec} ({b_rank}).",
-            "The standings entering that week: {a}, {a_rank}, {a_rec}; {b}, {b_rank}, {b_rec}.",
+            "The standings before the agreement: {a}, {a_rank}, {a_rec}; {b}, {b_rank}, {b_rec}.",
             "For the record, {a} stood {a_rank} at {a_rec}, and {b} stood {b_rank} at {b_rec}.",
         ],
         "t.close": [
@@ -346,13 +359,13 @@ FAMILY = {
         ],
         "s.total": [
             "The Week {wk} ledger lists {total_n} against {owners_n}.",
-            "{owners_n} are liable for a combined {total_n} for Week {wk}.",
+            "The court finds liability of {total_n} for Week {wk}, divided among {owners_n}.",
             "Judgment for Week {wk}: {total_n}, owed by {owners_n}.",
         ],
         "s.owner": [
             "{n} is liable for {sgn}: {list}.",
             "{sgn} against {n}, on the grounds of {list}.",
-            "{n}: {sgn}. Grounds: {list}.",
+            "Against {n}: {sgn}. Grounds: {list}.",
             "The court finds {n} owes {sgn} ({list}).",
         ],
         "s.low": [
@@ -397,7 +410,7 @@ FAMILY = {
         "n.luck": [
             "Fortune, as entered: {lucky} is {lucky_luck} wins above all-play expectation, and {unlucky} is {unlucky_luck}.",
             "By all-play, {lucky} holds {lucky_luck} wins it has not earned; {unlucky} holds {unlucky_luck}.",
-            "{lucky} ({lucky_luck}) is the beneficiary of fortune; {unlucky} ({unlucky_luck}) is its victim.",
+            "{lucky} ({lucky_luck}) is the beneficiary of fortune; {unlucky} ({unlucky_luck}) is their victim.",
         ],
         "n.clinch": [
             "Having clinched, the following are admitted: {names}.",
@@ -474,6 +487,8 @@ FAMILY = {
             "Exhibit A is Week {gwk}: {w} {verb} {l}, {wp} to {lp}, by {m} points.",
             "In Week {gwk}, {w} beat {l}, {wp}-{lp}, by {m} points, a margin the record does not forgive.",
             "{w}'s {m}-point judgment against {l} in Week {gwk} ({wp}-{lp}) is among the largest margins on the record.",
+            "In Week {gwk}, {w} prevailed by {m} over {l}, {wp}-{lp}, a judgment entered into the record.",
+            "The record shows {w} won by {m} over {l} in Week {gwk}, {wp}-{lp}.",
         ],
         "f.sg": [
             "On the shotgun docket, {a} owes {a_sg} and {b} owes {b_sg}.",
@@ -622,7 +637,7 @@ FAMILY = {
         "a.luck": [
             "Finding of fact on fortune: {lucky} holds a record of {lucky_rec} against an expected {lucky_exp} wins, a luck index of {lucky_luck}. {unlucky} holds {unlucky_rec} against an expected {unlucky_exp}, an index of {unlucky_luck}.",
             "Exhibit C, the luck index (actual wins less all-play expected wins): {lucky}, {lucky_luck} ({lucky_rec}, expected {lucky_exp}); {unlucky}, {unlucky_luck} ({unlucky_rec}, expected {unlucky_exp}).",
-            "{lucky} is the beneficiary of fortune, at {lucky_luck} ({lucky_rec} on {lucky_exp} expected wins). {unlucky} is its victim, at {unlucky_luck} ({unlucky_rec} on {unlucky_exp}).",
+            "{lucky} is the beneficiary of fortune, at {lucky_luck} ({lucky_rec} on {lucky_exp} expected wins). {unlucky} is their victim, at {unlucky_luck} ({unlucky_rec} on {unlucky_exp}).",
         ],
         "a.eff": [
             "On lineup efficiency, being points scored over the best possible lineup, the court finds {best_n} highest at {best_pct} and {worst_n} lowest at {worst_pct}, against a league figure of {lg_pct}.",
@@ -665,6 +680,12 @@ FAMILY = {
             "“{qc}” {n} said from the stand.",
             "{n}, in a statement: “{qp}”",
             "“{qc}” {n} told the court.",
+            "“{qc}” {n} testified.",
+            "{n} offered this testimony: “{qp}”",
+            "“{qc}” {n} said under oath.",
+            "“{qc}” {n} replied, over objection.",
+            "Cross-examined, {n} said: “{qp}”",
+            "“{qc}” {n} said, and rested.",
         ],
     },
 }

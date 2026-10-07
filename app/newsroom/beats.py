@@ -10,7 +10,7 @@ from typing import Any
 
 from .book import Book
 from .engine import Writer
-from .util import fmt, fmt1, join_and, mclass, ordinal, plural, pts, signed, pct
+from .util import fmt, fmt1, join_and, mclass, ordinal, plural, polish, pts, signed, pct
 
 
 class Beats(Book):
@@ -25,6 +25,9 @@ class Beats(Book):
     def _article(self, w: Writer, kind: str, week: int, headline: str, dek: str, cand_teams: list[int],
                  tags: list[str], facts: dict, key_teams: list[int] | None = None) -> dict:
         body, metas = w.finish()
+        headline = polish(headline, self.protected_rx())
+        self.n_articles += 1
+        self.n_catch += 1 if w.catch_used else 0
         text = " ".join(body)
         teams: list[int] = []
         for r in cand_teams:
@@ -76,14 +79,23 @@ class Beats(Book):
                     f["_upset_gap"] = r0w - r0l
         star = self.best_starter(week, w)
         if star and wp > 0 and star["points"] > 0:
-            f.update(star=star["name"], spos=star["position"], spts=pts(star["points"]),
-                     sshare=f"{round(star['points'] / wp * 100)}%")
+            share = star["points"] / wp
+            f.update(star=star["name"], spos=star["position"], spts=pts(star["points"]), sshare=f"{round(share * 100)}%")
+            if share > 0.5:     # superlatives like "more than the rest of the roster combined" need a real majority
+                f["over_half"] = "more than the rest of the roster combined"
+            else:
+                f["part_note"] = "the biggest slice, with plenty left for the rest of the roster"
+            if share < 0.5:
+                f["elsewhere"] = "so most of the win came from elsewhere in the lineup"
         goat = self.worst_starter(week, l)
         if goat and goat["points"] <= 2:
             f.update(gname=goat["name"], gpos=goat["position"], gpts=pts(goat["points"]))
         left, best = self.bench_left(week, l)
-        if left >= 15 and best and best["points"] > 0:
-            f.update(bench_left=pts(left), bench_name=best["name"], bench_pos=best["position"], bench_pts=pts(best["points"]))
+        if left >= 15:
+            f["bench_total"] = pts(left)
+            # name a bench player only when his points fit inside the total the lineup left behind
+            if best and 0 < best["points"] <= left:
+                f.update(bench_left=pts(left), bench_name=best["name"], bench_pos=best["position"], bench_pts=pts(best["points"]))
         return f
 
     def _sg_phrase(self, items: list[dict]) -> str:
@@ -99,13 +111,13 @@ class Beats(Book):
             groups.append(join_and(rules))
         return ", plus ".join(groups)
 
-    def _extras(self, w: Writer, f: dict, week: int, budget: int) -> list[str]:
+    def _extras(self, w: Writer, f: dict, week: int, budget: int, skip_upset: bool = False, skip_top: bool = False) -> list[str]:
         """Context sentences for one game, most notable first, within a budget."""
         playoff = f.get("w_rec") is None
         tier0: list[tuple[str, dict]] = []
         tier1: list[tuple[str, dict]] = []
         tier2: list[tuple[str, dict]] = []
-        if f.get("w_rank0"):
+        if f.get("w_rank0") and not skip_upset:
             tier0.append(("g.upset", f))
         for key, rid in (("w", f["_w"]), ("l", f["_l"])):
             its = self.sg_week(week, rid)
@@ -113,7 +125,10 @@ class Beats(Book):
                 tier0.append(("g.shotgun", {**f, "n": f[key], "sgn": plural(len(its), "shotgun"), "why": self._sg_phrase(its)}))
         if f.get("bench_left"):
             tier1.append(("g.bench", f))
-        if f.get("gname"):
+        elif f.get("bench_total"):
+            tier1.append(("g.bench_total", {**f, "bench_left": f["bench_total"]}))
+        sg_names = {s["player"]["name"] for rid in (f["_w"], f["_l"]) for s in self.sg_week(week, rid) if s.get("player")}
+        if f.get("gname") and f["gname"] not in sg_names:   # a shotgun player is already named as the dud
             tier1.append(("g.goat", f))
         if f.get("star"):
             tier1.append(("g.star", f))
@@ -123,14 +138,14 @@ class Beats(Book):
                 tier1.append(("g.streak_w", {**f, "k": kw[1:]}))
             if kl.startswith("L") and int(kl[1:]) >= 3:
                 tier1.append(("g.streak_l", {**f, "k": kl[1:]}))
-            if f["_wrank_w"] == 1:
+            if f["_wrank_w"] == 1 and not skip_top:    # the lede of a "top score" story has said it already
                 tier1.append(("g.top", f))
             if f["_wrank_l"] == len(self.teams):
                 tier1.append(("g.low", f))
             lucks = [(abs(v[0]), key, v) for key, v in (("w", f["_luck_w"]), ("l", f["_luck_l"])) if abs(v[0]) >= 1 and v[1] >= 3]
             if lucks:
                 _, key, (lk, _, rec) = max(lucks, key=lambda x: x[0])
-                tier2.append(("g.luck_up" if lk > 0 else "g.luck_down", {**f, "n": f[key], "luck": signed(lk), "n_rec": rec}))
+                tier2.append(("g.luck_up" if lk > 0 else "g.luck_down", {**f, "n": f[key], "luck": signed(lk), "luck_abs": f"{abs(lk):.1f}", "n_rec": rec}))
             tier2.append(("g.record", f))
         w.rng.shuffle(tier1)
         out: list[str] = []
@@ -142,7 +157,7 @@ class Beats(Book):
                 out.append(s)
         return out
 
-    def _quotes_for(self, w: Writer, f: dict, who: str, week: int) -> str | None:
+    def _quotes_for(self, w: Writer, f: dict, who: str, week: int, sig: bool = False) -> str | None:
         """Boast (who='w') or lament (who='l') for a decided game of class blowout/comfortable/close."""
         mc = f["mclass"]
         if mc not in ("blowout", "comfortable", "close"):
@@ -150,8 +165,8 @@ class Beats(Book):
         big = mc in ("blowout", "comfortable")
         base = {"m": f["m"], "wp": f["wp"], "lp": f["lp"], "wk": str(week)}
         if who == "w":
-            return w.quote(f["_w"], "won_big" if big else "won_close", {**base, "opp": f["l"]})
-        return w.quote(f["_l"], "lost_big" if big else "lost_close", {**base, "opp": f["w"]})
+            return w.quote(f["_w"], "won_big" if big else "won_close", {**base, "opp": f["l"]}, sig_ok=sig)
+        return w.quote(f["_l"], "lost_big" if big else "lost_close", {**base, "opp": f["w"]}, sig_ok=sig)
 
     def roundup(self, week: int, voice) -> dict | None:
         games = [g for g in self.games_by_week.get(week, []) if g["a"] in self.teams and g["b"] in self.teams]
@@ -165,7 +180,7 @@ class Beats(Book):
         info = {"wl": wl, "wavg": sum(scores) / len(scores), "S1": S1, "S0": S0}
         gfs = [self.game_facts(g, week, info) for g in games]
         r = self.rng("roundup", week, voice.id)
-        w = Writer(self, voice, r)
+        w = Writer(self, voice, r, "recap", week)
 
         # ---- the week's biggest story ----
         decided = [i for i, f in enumerate(gfs) if f["mclass"] != "tie"]
@@ -197,6 +212,7 @@ class Beats(Book):
             base = {"blowout": 2.0, "comfortable": 1.0, "normal": 0.5, "close": 2.0, "tie": 3.0}[f["mclass"]]
             return base + (3.0 if f.get("w_rank0") else 0.0) + r.random() * 0.1
         order = [story] + sorted((i for i in range(len(gfs)) if i != story), key=lambda i: -interest(i))
+        boost = 1 if len(games) <= 3 else 0    # a short playoff slate still gets a full-length roundup
         quoted_second = None
         for i in order[1:]:
             if gfs[i]["mclass"] in ("blowout", "comfortable", "close"):
@@ -211,22 +227,22 @@ class Beats(Book):
             if rank_i == 0:
                 sents.append(w.line(f"r.lede.{slot_key}", f, repeat=True))
                 if f["mclass"] != "tie":
-                    sents.extend(self._extras(w, f, week, 2))
+                    sents.extend(self._extras(w, f, week, 2 + boost, skip_upset=(slot_key == "upset"), skip_top=(slot_key == "top")))
                     sents.append(w.aside(f["_l"], f"a {f['m']}-point loss to {f['w']}", wl, str(week)))
-                    qsents = [self._quotes_for(w, f, "w", week), self._quotes_for(w, f, "l", week)]
+                    qsents = [self._quotes_for(w, f, "w", week, True), self._quotes_for(w, f, "l", week, True)]
                 else:
                     for key, rid in (("a", f["_a"]), ("b", f["_b"])):
                         its = self.sg_week(week, rid)
                         if its:
                             sents.append(w.line("g.shotgun", {**f, "n": f[key], "sgn": plural(len(its), "shotgun"), "why": self._sg_phrase(its)}))
-                    qsents = [w.quote(f["_a"], "tied", {"opp": f["b"], "pts": f["pts"], "wk": str(week)}),
-                              w.quote(f["_b"], "tied", {"opp": f["a"], "pts": f["pts"], "wk": str(week)})]
+                    qsents = [w.quote(f["_a"], "tied", {"opp": f["b"], "pts": f["pts"], "wk": str(week)}, sig_ok=True),
+                              w.quote(f["_b"], "tied", {"opp": f["a"], "pts": f["pts"], "wk": str(week)}, sig_ok=True)]
             elif f["mclass"] == "tie":
                 sents.append(w.line("g.tie", f, repeat=True))
             else:
                 sents.append(w.line("g.result", f, repeat=True,
                                     prefer=("noun", "m") if f["mclass"] in ("blowout", "close") else ()))
-                budget = 3 if (f["mclass"] in ("blowout", "close") or f.get("w_rank0")) else 2
+                budget = (3 if (f["mclass"] in ("blowout", "close") or f.get("w_rank0")) else 2) + boost
                 sents.extend(self._extras(w, f, week, budget))
                 if i == quoted_second:
                     sents.append(self._quotes_for(w, f, "w", week))
@@ -279,7 +295,7 @@ class Beats(Book):
         if f["mclass"] == "tie":
             return {"result": "tie", "teams": [f["a"], f["b"]], "points_each": f["pts"], "shotguns": self._sg_names(week, [f["_a"], f["_b"]])}
         out = {k: f[k] for k in ("w", "l", "wp", "lp", "m", "mclass", "w_rec", "l_rec", "w_rank", "l_rank", "w_rank0", "l_rank0",
-                                  "star", "spos", "spts", "sshare", "gname", "gpos", "gpts", "bench_left", "bench_name", "bench_pos", "bench_pts") if f.get(k)}
+                                  "star", "spos", "spts", "sshare", "gname", "gpos", "gpts", "bench_left", "bench_total", "bench_name", "bench_pos", "bench_pts") if f.get(k)}
         out["shotguns"] = self._sg_names(week, [f["_w"], f["_l"]])
         return {("winner" if k == "w" else "loser" if k == "l" else "winner_score" if k == "wp" else "loser_score" if k == "lp"
                  else "margin" if k == "m" else k): v for k, v in out.items()}
@@ -319,7 +335,8 @@ class Beats(Book):
                 s += abs(x["if_win"] - x["if_loss"])
         return s
 
-    def _trash(self, w: Writer, me: dict, opp: dict, games: list[dict], upto: int, h2h: bool = True) -> tuple[str, str | None]:
+    def _trash(self, w: Writer, me: dict, opp: dict, games: list[dict], upto: int, h2h: bool = True,
+               sig: bool = False) -> tuple[str, str | None]:
         """Pick a trash-talk quote for `me` aimed at `opp` that only claims what the data supports."""
         hh = self.h2h_games(me["rid"], opp["rid"], upto) if h2h else []
         wins = sum(1 for g in hh if g["winner"] == me["rid"])
@@ -330,19 +347,21 @@ class Beats(Book):
             sit, facts = "trash_h2h_trail", {"opp": opp["name"], "h2h": f"{wins}-{losses}"}
         elif me["rank"] < opp["rank"]:
             sit, facts = "trash_standings", {"opp": opp["name"], "rank": ordinal(me["rank"]), "opp_rank": ordinal(opp["rank"])}
+        elif (me["pct"] is not None and opp["pct"] is not None and round(me["pct"] * 100) < round(opp["pct"] * 100)):
+            sit, facts = "trash_underdog", {"opp": opp["name"]}    # "spoiler" talk only from the side with the worse odds
         else:
-            sit, facts = "trash_underdog", {"opp": opp["name"]}
-        return sit, w.quote(me["rid"], sit, facts)
+            sit, facts = "trash_even", {"opp": opp["name"]}
+        return sit, w.quote(me["rid"], sit, facts, sig_ok=sig)
 
-    def _exchange(self, w: Writer, A: dict, B: dict, upto: int, h2h: bool = True) -> list[str | None]:
+    def _exchange(self, w: Writer, A: dict, B: dict, upto: int, h2h: bool = True, sig: bool = False) -> list[str | None]:
         """A trash-talks B; B either denies (right after the trash) or trashes back."""
-        sit, qa = self._trash(w, A, B, [], upto, h2h)
+        sit, qa = self._trash(w, A, B, [], upto, h2h, sig)
         if qa is None:
             return []
         if w.rng.random() < 0.4:
-            qb = w.quote(B["rid"], "deny_after_trash", {"opp": A["name"]})
+            qb = w.quote(B["rid"], "deny_after_trash", {"opp": A["name"]}, sig_ok=sig)
         else:
-            qb = self._trash(w, B, A, [], upto, h2h)[1]
+            qb = self._trash(w, B, A, [], upto, h2h, sig)[1]
         return [qa, qb]
 
     def _h2h_line(self, w: Writer, A: dict, B: dict, upto: int) -> str | None:
@@ -366,7 +385,7 @@ class Beats(Book):
         S = self.snap(last)
         wl = f"Week {week}"
         r = self.rng("preview", week, voice.id)
-        w = Writer(self, voice, r)
+        w = Writer(self, voice, r, "preview", week)
         n_po = self.ctx["playoff_teams"]
         rows = []
         for g in games:
@@ -431,10 +450,11 @@ class Beats(Book):
             if x["rv"]:
                 s.append(w.line("p.rivnote", {**f, "rv_name": x["rv"]["name"], "backstory": x["rv"]["backstory"].strip()}))
             if k == 0:
-                s.extend(self._exchange(w, A, B, last))
-            elif r.random() < 0.6:
+                s.extend(self._exchange(w, A, B, last, sig=True))
+            else:   # every game gets at least one quote
                 first, second = (A, B) if r.random() < 0.5 else (B, A)
-                s.append(self._trash(w, first, second, [], last)[1])
+                q = self._trash(w, first, second, [], last)[1] or self._trash(w, second, first, [], last)[1]
+                s.append(q)
             if k == 0:
                 s.append(w.line("p.close", f))
             w.add(s, meta)
@@ -463,7 +483,7 @@ class Beats(Book):
         a, b = rv["owners"]
         A, B = self._pv(a, S), self._pv(b, S)
         r = self.rng("rivalry", week, rv["name"])
-        w = Writer(self, voice, r)
+        w = Writer(self, voice, r, "rivalry", week)
         f = {"a": A["name"], "b": B["name"], "rv_name": rv["name"], "backstory": rv["backstory"].strip(), "wk": str(week),
              "wl": f"Week {week}", "a_rec": A["rec"], "b_rec": B["rec"], "a_avg": A["avg"], "b_avg": B["avg"],
              "a_rank": ordinal(A["rank"]), "b_rank": ordinal(B["rank"])}

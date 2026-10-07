@@ -133,7 +133,7 @@ def test_template_text_never_uses_forbidden_words():
 
 # ---------------------------------------------------------------- quotes
 SITUATIONS = ["won_big", "won_close", "lost_big", "lost_close", "tied", "trade_gave_more", "trade_got_more",
-              "waiver_win", "shotgun_owed", "rule_owed", "bubble", "clinched", "eliminated", "trash_h2h_lead",
+              "waiver_brag", "waiver_neutral", "waiver_miss", "waiver_pending", "trash_even", "shotgun_owed", "rule_owed", "bubble", "clinched", "eliminated", "trash_h2h_lead",
               "trash_h2h_trail", "trash_standings", "deny_after_trash"]
 
 
@@ -224,7 +224,10 @@ def test_lint_clean_across_demo_weeks(week):
 
 def test_lint_catches_what_it_should(demo14_arts):
     nr, arts = demo14_arts
-    base = next(a for a in arts if a["type"] == "recap")
+    def story_class(a):   # the "thriller" headline case needs a story game that is not itself close
+        g = a["facts"]["games"][a["facts"]["story"]["game"]]
+        return g.get("mclass")
+    base = next(a for a in arts if a["type"] == "recap" and story_class(a) != "close")
     bad_cases = [
         dict(base, body=base["body"][:1] + ["Double  space."]),
         dict(base, body=base["body"][:1] + ["Broken {placeholder} here."]),

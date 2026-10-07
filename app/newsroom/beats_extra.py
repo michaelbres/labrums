@@ -71,7 +71,7 @@ class Beats3(Beats2):
         if S["week"] < 1:
             return None
         r = self.rng("column", week, a, b, voice.id)
-        w = Writer(self, voice, r)
+        w = Writer(self, voice, r, "column", week)
         nm = self.name
         T = S["teams"]
         wk, wl = str(S["week"]), f"Week {S['week']}"
@@ -162,7 +162,7 @@ class Beats3(Beats2):
         """The most lopsided early return among in-season trades that have had at least one week to play out."""
         best = None
         for tw in sorted(self.ctx["transactions"]):
-            if tw >= upto:
+            if tw > upto:
                 break
             for tx in self.live_txs(tw):
                 if tx.get("type") != "trade":
@@ -174,13 +174,17 @@ class Beats3(Beats2):
                 ga, gb = ti["got"][a], ti["got"][b]
                 if not ga["players"] or not gb["players"]:
                     continue
-                pa = round(sum(self.points_since(p, tw, a, upto) for p in ga["pids"]), 2)
-                pb = round(sum(self.points_since(p, tw, b, upto) for p in gb["pids"]), 2)
+                first = ti["first"]
+                n_weeks = len(self.counted_weeks(first, upto))
+                if n_weeks < 1:
+                    continue
+                pa = round(sum(self.points_from(p, first, a, upto) for p in ga["pids"]), 2)
+                pb = round(sum(self.points_from(p, first, b, upto) for p in gb["pids"]), 2)
                 if pa == pb:
                     continue
                 lead, trail = (a, b) if pa > pb else (b, a)
                 cand = {"lead": lead, "trail": trail, "lead_pts": max(pa, pb), "trail_pts": min(pa, pb), "twk": tw,
-                        "since": upto - tw, "gap": abs(pa - pb)}
+                        "since": n_weeks, "gap": abs(pa - pb)}
                 if best is None or cand["gap"] > best["gap"]:
                     best = cand
         return best
@@ -195,7 +199,7 @@ class Beats3(Beats2):
         if gp < 1:
             return None
         r = self.rng("analytics", week, voice.id)
-        w = Writer(self, voice, r)
+        w = Writer(self, voice, r, "analytics", week)
         wk, wl = str(S["week"]), f"Week {S['week']}"
         base = {"wk": wk, "wl": wl}
         cands: list[int] = []
@@ -238,7 +242,7 @@ class Beats3(Beats2):
                                               "least_pts": bench_f["bench_low_pts"]}
             wr = max(((v["worst"][0], v["worst"][1], rid, v["worst"][2]) for rid, v in et.items() if v["worst"][2]),
                      key=lambda x: (x[0], -x[1], nm(x[2])), default=None)
-            if wr and wr[0] > 0 and wr[3]["points"] > 0:
+            if wr and wr[0] > 0 and 0 < wr[3]["points"] <= wr[0]:   # a named bench player must fit inside the points left
                 blunder_f = {"bl_n": nm(wr[2]), "bl_pts": pts(wr[0]), "bl_wk": str(wr[1]), "bl_player": wr[3]["name"],
                              "bl_pos": wr[3]["position"], "bl_player_pts": pts(wr[3]["points"])}
                 cands.append(wr[2])

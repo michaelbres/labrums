@@ -101,6 +101,8 @@ FAMILY = {
             "{star} ({spos}) led {w}'s starters with {spts}, {sshare} of the team's {wp}.",
             "The top individual scorer for {w} was {star} ({spos}), who recorded {spts}.",
             "{star}, a {spos}, accounted for {spts} of {w}'s {wp}.",
+            "{star} ({spos}) was {w}'s top scorer with {spts}.",
+            "{w} got {spts} from {star} ({spos}), the best individual score on the roster.",
         ],
         "g.goat": [
             "{l}'s lowest-scoring starter was {gname} ({gpos}), who produced {gpts}.",
@@ -111,16 +113,25 @@ FAMILY = {
             "{l} left {bench_left} on the bench; {bench_name} ({bench_pos}) scored {bench_pts} while not starting.",
             "{bench_name} ({bench_pos}) scored {bench_pts} on {l}'s bench. The best possible lineup would have added {bench_left}.",
             "A better lineup would have given {l} {bench_left} more, including {bench_pts} from {bench_name} ({bench_pos}), who did not start.",
+            "{l} left {bench_name} ({bench_pos}), who scored {bench_pts}, on the bench; the best lineup would have added {bench_left}.",
+            "On {l}'s bench, {bench_name} ({bench_pos}) scored {bench_pts}. {l} left {bench_left} unused in all.",
+        ],
+        "g.bench_total": [
+            "{l} left {bench_left} on the bench in {wl}; an optimal lineup would have scored that much more.",
+            "The best possible lineup for {l} would have added {bench_left}.",
+            "{l}'s bench held {bench_left} that an optimal lineup would have used.",
+            "{l}'s optimal lineup would have outscored the one started by {bench_left}.",
+            "The bench cost {l} {bench_left} in {wl}.",
         ],
         "g.streak_w": [
             "{w} has won {k} consecutive games and stands {w_rank} at {w_rec}.",
             "The win was {w}'s {k}th in a row; the team is {w_rec}, {w_rank} in the standings.",
-            "{w} is {w_rec} and has won {k} straight, which places it {w_rank}.",
+            "{w} is {w_rec} and has won {k} straight, which puts {w} {w_rank}.",
         ],
         "g.streak_l": [
             "{l} has lost {k} consecutive games and stands {l_rank} at {l_rec}.",
             "The loss was {l}'s {k}th in a row; the team is {l_rec}, {l_rank} in the standings.",
-            "{l} is {l_rec} and has lost {k} straight, which places it {l_rank}.",
+            "{l} is {l_rec} and has lost {k} straight, which puts {l} {l_rank}.",
         ],
         "g.record": [
             "{w} improved to {w_rec} ({w_rank}); {l} fell to {l_rec} ({l_rank}).",
@@ -138,14 +149,14 @@ FAMILY = {
             "{lp} points made {l} the week's lowest scorer, against a league average of {wavg}.",
         ],
         "g.luck_up": [
-            "{n} ({n_rec}) has {luck} wins relative to what its all-play record predicts.",
-            "By all-play expectation, {n} is {luck} wins to the good at {n_rec}.",
-            "{n}'s {n_rec} record is {luck} wins better than its weekly scoring suggests.",
+            "{n} ({n_rec}) has {luck} wins relative to what their all-play record predicts.",
+            "By all-play expectation, {n} is {luck_abs} wins to the good at {n_rec}.",
+            "{n}'s {n_rec} record is {luck_abs} wins better than their weekly scoring suggests.",
         ],
         "g.luck_down": [
-            "{n} ({n_rec}) has {luck} wins relative to what its all-play record predicts.",
-            "By all-play expectation, {n} is {luck} wins behind at {n_rec}.",
-            "{n}'s {n_rec} record is {luck} wins worse than its weekly scoring suggests.",
+            "{n} ({n_rec}) has {luck} wins relative to what their all-play record predicts.",
+            "By all-play expectation, {n} is {luck_abs} wins behind at {n_rec}.",
+            "{n}'s {n_rec} record is {luck_abs} wins worse than their weekly scoring suggests.",
         ],
         "g.upset": [
             "{w} entered {wl} {w_rank0} in the standings; {l} was {l_rank0}.",
@@ -204,6 +215,8 @@ FAMILY = {
             "{a} ({a_rec}) meets {b} ({b_rec}) in {wl}. {a} averages {a_avg} points per game; {b} averages {b_avg}.",
             "In {wl}, {b_team} ({b}, {b_rec}, {b_avg} per game) faces {a_team} ({a}, {a_rec}, {a_avg} per game).",
             "{a} is {a_rec} and scores {a_avg} per game. {b} is {b_rec} and scores {b_avg}. They play in {wl}.",
+            "In {wl}, {a} ({a_rec}) and {b} ({b_rec}) meet. {a} averages {a_avg} points per game and {b} averages {b_avg}.",
+            "{b} ({b_rec}, {b_avg} points per game) is scheduled against {a} ({a_rec}, {a_avg}) in {wl}.",
         ],
         "p.h2h_split": [
             "{a} and {b} have split their meetings this season, {h2h_rec}.",
@@ -269,9 +282,9 @@ FAMILY = {
             "Over {since_wk}, {a}'s new players scored {a_pts} and {b}'s scored {b_pts}. The early advantage belongs to {lead}.",
         ],
         "t.pending": [
-            "{pk_side} received {pk_got}; {pl_side} received {pl_got}. A deal of picks for players cannot be graded on points yet.",
-            "The trade sent {pk_got} to {pk_side} and {pl_got} to {pl_side}. Because one side received only picks, there is no production to compare.",
-            "{pl_side} took {pl_got}, and {pk_side} took {pk_got}. Picks have not played a game, so the deal cannot be graded.",
+            "{pk_side} took picks and {pl_side} took players, so the deal cannot be graded on points yet.",
+            "Picks have not played a game, so there is no production to compare for {pk_side} and {pl_side}.",
+            "Because {pk_side} received only picks, the trade cannot be graded yet.",
         ],
         "t.fresh": [
             "The trade cannot be graded on production yet.",
@@ -285,7 +298,7 @@ FAMILY = {
         ],
         "t.rec": [
             "Before the trade, {a} was {a_rec} ({a_rank}) and {b} was {b_rec} ({b_rank}).",
-            "Entering that week, {a} stood {a_rank} at {a_rec}; {b} stood {b_rank} at {b_rec}.",
+            "Going into the deal, {a} stood {a_rank} at {a_rec}; {b} stood {b_rank} at {b_rec}.",
             "At the time, the standings had {a} {a_rank} ({a_rec}) and {b} {b_rank} ({b_rec}).",
         ],
         "t.close": [
@@ -483,6 +496,7 @@ FAMILY = {
             "{w} beat {l} by {m} points in Week {gwk}, {wp}-{lp}, the sort of margin a league remembers.",
             "In Week {gwk}, {w} {verb} {l}, {wp} to {lp}, by {m} points.",
             "The {m}-point margin in Week {gwk}, {w} over {l}, is among the largest of the season.",
+            "{w} won by {m} points over {l} in Week {gwk}, {wp}-{lp}.",
         ],
         "f.sg": [
             "{a} has {a_sg} on the season ledger; {b} has {b_sg}.",
@@ -613,7 +627,7 @@ FAMILY = {
         "h.a.eff": [
             "{best_n} leads lineup efficiency at {best_pct}; {worst_n} is last at {worst_pct}",
             "Lineup efficiency: {best_n} {best_pct}, {worst_n} {worst_pct}",
-            "{worst_n} scored {worst_pct} of its possible points; {best_n} scored {best_pct}",
+            "{worst_n} scored {worst_pct} of their possible points; {best_n} scored {best_pct}",
         ],
         "h.a.bench": [
             "{bench_n} left {bench_pts} on the bench through {wl}",
@@ -677,6 +691,12 @@ FAMILY = {
             "“{qc}” said {n}.",
             "{n} told the league: “{qp}”",
             "“{qc}” {n} told reporters.",
+            "“{qc}” {n} said in a statement.",
+            "Asked about it, {n} said: “{qp}”",
+            "“{qc}” {n} said when reached by the league desk.",
+            "“{qc}” {n} wrote in a message to the group chat.",
+            "{n} confirmed to the wire: “{qp}”",
+            "“{qc}” {n} said by message.",
         ],
     },
 }

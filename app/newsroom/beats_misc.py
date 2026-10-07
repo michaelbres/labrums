@@ -5,24 +5,31 @@ from typing import Any
 
 from ..loader import is_offseason
 from .beats import Beats
-from .engine import Writer
-from .util import fmt, fmt1, join_and, num_word, ordinal, ord_word, pct, plural, pts, signed
+from .engine import BUSY_RX, Writer
+from .util import fmt, fmt1, join_and, mclass, num_word, ordinal, ord_word, pct, plural, pts, signed
+
+
+WAIVER_HI = 15.0    # points since the claim: at or above, a good pickup
+WAIVER_MID = 5.0    # at or above (and below HI), a middling one; below, a miss
 
 
 def sg_words(n: int) -> str:
     return f"{num_word(n)} shotgun" + ("" if n == 1 else "s")
 
 
-def short_side(players: list, picks: list) -> str:
-    if len(players) == 1 and not picks:
+def short_side(players: list, picks: list, n_picks: int | None = None) -> str:
+    n = len(picks) if n_picks is None else n_picks
+    if len(players) == 1 and not n:
         return players[0]
-    if len(picks) == 1 and not players:
+    if n == 1 and not players:
         return picks[0]
+    if n and not players and len(picks) == 1:
+        return picks[0]       # one collapsed line: "two 2026 round 2 picks"
     parts = []
     if players:
         parts.append(plural(len(players), "player"))
-    if picks:
-        parts.append(plural(len(picks), "pick"))
+    if n:
+        parts.append(plural(n, "pick"))
     return " and ".join(parts)
 
 
@@ -39,9 +46,10 @@ class Beats2(Beats):
         ga, gb = got.get(a), got.get(b)
         if not ga or not gb or not (ga["players"] or ga["picks"]) or not (gb["players"] or gb["picks"]):
             return None
-        weeks = self.ctx["last_completed"] - week
-        since = {a: round(sum(self.points_since(p, week, a) for p in ga["pids"]), 2),
-                 b: round(sum(self.points_since(p, week, b) for p in gb["pids"]), 2)}
+        first = self.first_week_after(tx, week)   # a deal made before the week's games counts that week's points
+        weeks = len(self.counted_weeks(first))
+        since = {a: round(sum(self.points_from(p, first, a) for p in ga["pids"]), 2),
+                 b: round(sum(self.points_from(p, first, b) for p in gb["pids"]), 2)}
         graded = bool(ga["players"] and gb["players"] and weeks >= 1 and since[a] != since[b])
         lead = trail = None
         if graded:
@@ -52,7 +60,7 @@ class Beats2(Beats):
             return join_and(names + g["picks"])
         return {"a": a, "b": b, "got": {a: ga, b: gb}, "text": {a: join_and(ga["players"] + ga["picks"]), b: join_and(gb["players"] + gb["picks"])},
                 "plain": {a: plain(ga), b: plain(gb)}, "weeks": weeks, "since": since, "graded": graded,
-                "lead": lead, "trail": trail, "week": week, "tx": tx.get("transaction_id")}
+                "lead": lead, "trail": trail, "week": week, "tx": tx.get("transaction_id"), "first": first, "raw": tx}
 
     def trade(self, tx: dict, week: int, voice) -> dict | None:
         T = self.trade_info(tx, week)
@@ -60,10 +68,10 @@ class Beats2(Beats):
             return None
         a, b = T["a"], T["b"]
         r = self.rng("trade", week, T["tx"], voice.id)
-        w = Writer(self, voice, r)
+        w = Writer(self, voice, r, "trade", week)
         ga, gb = T["got"][a], T["got"][b]
         f = {"a": self.name(a), "b": self.name(b), "a_got": T["text"][a], "b_got": T["text"][b], "wk": str(week), "wl": f"Week {week}",
-             "gave_s": short_side(gb["players"], gb["picks"]), "got_s": short_side(ga["players"], ga["picks"])}
+             "gave_s": short_side(gb["players"], gb["picks"], gb["n_picks"]), "got_s": short_side(ga["players"], ga["picks"], ga["n_picks"])}
         headline = w.head("h.t", f)
         w.add([w.line("t.sides", f, repeat=True)], {"trade": True})
         # early returns: only when both sides received a player and a week has passed
@@ -81,7 +89,7 @@ class Beats2(Beats):
             else:
                 s_ret = w.line("t.fresh", f, repeat=True)
         # league reaction, grounded in real counts and records
-        counts = {x: self.moves_through(x, week) for x in (a, b)}
+        counts = {x: self.moves_before(x, tx, week) for x in (a, b)}
         busy = max((a, b), key=lambda x: (counts[x]["trades"], counts[x]["trades"] + counts[x]["claims"]))
         s_cnt = None
         if counts[busy]["trades"] >= 1:
@@ -89,10 +97,11 @@ class Beats2(Beats):
             cf = {"n": self.name(busy), "nth": ord_word(counts[busy]["trades"])}
             if total > counts[busy]["trades"]:
                 cf["moves"] = plural(total, "in-season move")
-            s_cnt = w.line("t.count", cf)
+            s_cnt = w.line("t.count", cf, avoid=BUSY_RX if counts[busy]["trades"] < 3 else None)   # a first trade is not "busy"
         s_rec = None
-        if week >= 2:
-            S = self.snap(week - 1)
+        rw = self.records_week(tx, week)   # the standings "before the deal": through the week if it was already played
+        if rw >= 1:
+            S = self.snap(rw)
             if S["teams"][a]["games"] >= 1:
                 s_rec = w.line("t.rec", {"a": f["a"], "b": f["b"], "a_rec": S["teams"][a]["record"], "b_rec": S["teams"][b]["record"],
                                          "a_rank": ordinal(S["teams"][a]["rank"]), "b_rank": ordinal(S["teams"][b]["rank"])})
@@ -105,11 +114,11 @@ class Beats2(Beats):
                 sit = "trade_got_more" if x == T["lead"] else "trade_gave_more"
             else:
                 sit = "trade_pending"
-            qs.append(w.quote(x, sit, qf))
+            qs.append(w.quote(x, sit, qf, sig_ok=True))
         if T["graded"] and r.random() < 0.5:
             qs = qs[:1] if T["lead"] == a else qs[1:]
         w.add(qs + [w.line("t.close", f, repeat=True)], {"trade": True})
-        dek = f"{self.name(a)} receives {short_side(ga['players'], ga['picks'])}; {self.name(b)} receives {short_side(gb['players'], gb['picks'])}"
+        dek = f"{self.name(a)} receives {short_side(ga['players'], ga['picks'], ga['n_picks'])}; {self.name(b)} receives {short_side(gb['players'], gb['picks'], gb['n_picks'])}"
         facts = {"type": "trade", "week": week, "teams": [self.name(a), self.name(b)],
                  "received": {self.name(a): ga["players"] + ga["picks"], self.name(b): gb["players"] + gb["picks"]},
                  "points_since": {self.name(a): T["since"][a], self.name(b): T["since"][b]}, "weeks_since": T["weeks"],
@@ -132,12 +141,14 @@ class Beats2(Beats):
             if not rids or rids[0] not in self.teams:
                 continue
             bid = (tx.get("settings") or {}).get("waiver_bid")
+            first = self.first_week_after(tx, week)
+            n_weeks = len(self.counted_weeks(first))
             for pid, to in (tx.get("adds") or {}).items():
                 if int(to) not in self.teams:
                     continue
                 lab = self.label(pid)
                 moves.append({"rid": int(to), "pid": pid, "name": lab["name"], "pos": lab["position"],
-                              "bid": int(bid) if bid else 0, "since": self.points_since(pid, week, int(to))})
+                              "bid": int(bid) if bid else 0, "since": self.points_from(pid, first, int(to)), "weeks": n_weeks})
         moves.sort(key=lambda m: (-m["bid"], -m["since"], m["name"]))
         return moves
 
@@ -146,10 +157,10 @@ class Beats2(Beats):
         if not moves:
             return None
         r = self.rng("waiver", week, voice.id)
-        w = Writer(self, voice, r)
+        w = Writer(self, voice, r, "waiver", week)
         top = moves[0]
         budget = float(self.ctx["settings"].get("waiver_budget") or 100)
-        weeks = self.ctx["last_completed"] - week
+        weeks = top["weeks"]
         f = {"n": self.name(top["rid"]), "player": top["name"], "pos": top["pos"], "wk": str(week), "wl": f"Week {week}"}
         if top["bid"]:
             f["bid"] = f"${top['bid']}"
@@ -160,7 +171,7 @@ class Beats2(Beats):
         headline = w.head(hs, f)
         s1 = [w.line("w.top_bid" if top["bid"] else "w.top_free", f, repeat=True)]
         if weeks >= 1:
-            tier = "hi" if top["since"] > 25 else "mid" if top["since"] > 10 else "lo"
+            tier = "hi" if top["since"] >= WAIVER_HI else "mid" if top["since"] >= WAIVER_MID else "lo"
             s1.append(w.line("w.since", {**f, "spts": pts(top["since"]), "tier": tier, "since_wk": plural(weeks, "week")}))
         w.add(s1, {"waiver": True})
         others = moves[1:5]
@@ -180,7 +191,18 @@ class Beats2(Beats):
         qf = {"player": top["name"], "pos": top["pos"]}
         if top["bid"]:
             qf["bid"] = f["bid"]
-        w.add([w.quote(top["rid"], "waiver_win", qf), w.line("w.close", f, repeat=True)], {"waiver": True})
+        # the quote must fit how the claim has actually gone: brag / shrug / defend / "too early"
+        if weeks < 1:
+            qsit = "waiver_pending"
+        elif top["since"] >= WAIVER_HI:
+            qsit = "waiver_brag"
+        elif top["since"] >= WAIVER_MID:
+            qsit = "waiver_neutral"
+        else:
+            qsit = "waiver_miss"
+        if weeks >= 1:
+            qf["spts"] = pts(top["since"])
+        w.add([w.quote(top["rid"], qsit, qf), w.line("w.close", f, repeat=True)], {"waiver": True})
         dek = f"{plural(len(moves), 'add')} · top move: {f['n']} adds {top['name']} ({top['pos']})" + (f" for {f['bid']}" if top["bid"] else "")
         facts = {"type": "waiver", "week": week, "top": {"owner": f["n"], "player": top["name"], "pos": top["pos"], "bid": top["bid"] or None,
                                                        "points_since": top["since"] if weeks >= 1 else None},
@@ -208,7 +230,7 @@ class Beats2(Beats):
         if not items:
             return None
         r = self.rng("shotgun", week, voice.id)
-        w = Writer(self, voice, r)
+        w = Writer(self, voice, r, "shotgun", week)
         per: dict[int, list[dict]] = {}
         for s in items:
             per.setdefault(s["roster_id"], []).append(s)
@@ -245,7 +267,7 @@ class Beats2(Beats):
             sit = "shotgun_owed"
             if len(top_items) == 1 and top_items[0]["reason"] in ("negative", "zero", "low"):
                 qf["player"] = top_items[0]["player"]["name"]
-        w.add([w.quote(top_rid, sit, qf, multi=len(top_items) >= 2), w.line("s.close", f, repeat=True)], {"shotgun": True})
+        w.add([w.quote(top_rid, sit, qf, multi=len(top_items) >= 2, sig_ok=True), w.line("s.close", f, repeat=True)], {"shotgun": True})
         dek = f"{plural(len(items), 'shotgun')} owed across {plural(len(per), 'owner')} · {self.name(top_rid)} leads with {len(top_items)}"
         facts = {"type": "shotgun", "week": week, "total": len(items),
                  "owners": [{"owner": self.name(rid), "count": len(its), "items": [{"reason": s["reason"], "player": s["player"]["name"], "pos": s["player"]["position"],
@@ -265,7 +287,7 @@ class Beats2(Beats):
         order = S["standings"]
         n_po = self.ctx["playoff_teams"]
         r = self.rng("standings", week, voice.id)
-        w = Writer(self, voice, r)
+        w = Writer(self, voice, r, "standings", week)
         po = self.po["teams"]
         T = S["teams"]
         wl = f"Week {S['week']}"
@@ -383,10 +405,12 @@ class Beats2(Beats):
 
     def feud(self, week: int, a: int, b: int, voice) -> dict | None:
         r = self.rng("feud", week, a, b, voice.id)
-        w = Writer(self, voice, r)
+        w = Writer(self, voice, r, "feud", week)
         S = self.snap(week)  # as-of (regular season through `week`)
         nm = self.name
         rv = self.rivalry_between(a, b)
+        # Every incident below involves BOTH parties. A blowout by one of them over a third team is only ever
+        # background (the `third` context sentence), never the lede, the dek or what the quotes answer.
         inc: dict[str, dict] = {}
         info: dict[str, Any] = {}
         hh = [g for g in self.h2h_games(a, b, week) if g["winner"] is not None]
@@ -394,10 +418,11 @@ class Beats2(Beats):
             g = max(hh, key=lambda x: x["week"])
             ww = g["winner"]; ll = b if ww == a else a
             wp = g["a_pts"] if ww == g["a"] else g["b_pts"]; lp = g["b_pts"] if ww == g["a"] else g["a_pts"]
-            from .util import mclass
             mc = mclass(g["margin"])
             inc["h2h"] = {"w": nm(ww), "l": nm(ll), "wp": fmt(wp), "lp": fmt(lp), "m": fmt(g["margin"]), "gwk": str(g["week"]), "mclass": mc}
-            info["h2h"] = {"w": ww, "l": ll, "mc": mc, "m": fmt(g["margin"]), "wp": fmt(wp), "lp": fmt(lp), "wk": g["week"]}
+            wins = sum(1 for x in hh if x["winner"] == ww)
+            info["h2h"] = {"w": ww, "l": ll, "mc": mc, "m": fmt(g["margin"]), "wp": fmt(wp), "lp": fmt(lp), "wk": g["week"],
+                           "rec": {ww: (wins, len(hh) - wins), ll: (len(hh) - wins, wins)}}
         trades = []
         for wk in sorted(self.ctx["transactions"]):
             if wk > week:
@@ -417,13 +442,6 @@ class Beats2(Beats):
             gap = abs(S["teams"][a]["pf"] - S["teams"][b]["pf"])
             inc["adj"] = {"hi": nm(hi), "lo": nm(lo), "hi_rank": ordinal(S["teams"][hi]["rank"]), "lo_rank": ordinal(S["teams"][lo]["rank"]),
                           "hi_rec": S["teams"][hi]["record"], "lo_rec": S["teams"][lo]["record"], "pf_gap": pts(gap)}
-        blows = [g for g in self.st["games"] if g["week"] <= week and g["margin"] >= 30 and (a in (g["a"], g["b"]) or b in (g["a"], g["b"]))]
-        if blows:
-            g = max(blows, key=lambda x: (x["margin"], x["week"]))
-            ww = g["winner"]; ll = g["b"] if ww == g["a"] else g["a"]
-            wp = g["a_pts"] if ww == g["a"] else g["b_pts"]; lp = g["b_pts"] if ww == g["a"] else g["a_pts"]
-            inc["blow"] = {"w": nm(ww), "l": nm(ll), "m": fmt(g["margin"]), "gwk": str(g["week"]), "wp": fmt(wp), "lp": fmt(lp), "mclass": "blowout"}
-            info["blow"] = {"w": ww, "l": ll, "m": fmt(g["margin"]), "wk": g["week"]}
         cnt = self.sg_counts(week)
         ca, cb = cnt.get(a, 0), cnt.get(b, 0)
         if ca != cb and ca + cb >= 2:
@@ -435,21 +453,35 @@ class Beats2(Beats):
         tb = [t.strip().rstrip(".") for t in self.profile(b).get("traits") or []]
         if ta and tb:
             inc["trait"] = {"a": nm(a), "b": nm(b), "a_trait": r.choice(ta), "b_trait": r.choice(tb)}
-        weights = {"trade": 4, "story": 3, "blow": 3, "sg": 2, "adj": 2, "h2h": 2.5, "trait": 1}
+        # background only: one party's blowout over somebody else this season
+        third = None
+        blows = [g for g in self.st["games"] if g["week"] <= week and g["margin"] >= 30 and g["winner"] in (a, b)
+                 and (g["b"] if g["winner"] == g["a"] else g["a"]) not in (a, b)]
+        if blows:
+            g = max(blows, key=lambda x: (x["margin"], x["week"]))
+            ww = g["winner"]; ll = g["b"] if ww == g["a"] else g["a"]
+            wp = g["a_pts"] if ww == g["a"] else g["b_pts"]; lp = g["b_pts"] if ww == g["a"] else g["a_pts"]
+            third = {"w": nm(ww), "l": nm(ll), "m": fmt(g["margin"]), "gwk": str(g["week"]), "wp": fmt(wp), "lp": fmt(lp), "mclass": "blowout"}
+        weights = {"h2h": 5, "trade": 4.5, "story": 3.5, "adj": 3, "sg": 2.5, "trait": 1}
         kinds = list(inc)
         if not kinds:
             return None
-        chosen: list[str] = []
-        pool = kinds[:]
-        while pool and len(chosen) < 2:
-            k = r.choices(pool, weights=[weights[x] for x in pool])[0]
-            chosen.append(k); pool.remove(k)
-        primary = chosen[0]
+        primary = r.choices(kinds, weights=[weights[x] for x in kinds])[0]
+        rest = [k for k in kinds if k != primary]
+        second = None
+        if rest or third:
+            opts = rest + (["third"] if third else [])
+            second = r.choices(opts, weights=[3 if k == "third" else weights[k] for k in opts])[0]
         f = {"a": nm(a), "b": nm(b)}
         headline = w.head("h.f", f)
-        slot = {"h2h": "f.h2h", "trade": "f.trade", "adj": "f.adj", "blow": "f.blow", "sg": "f.sg", "story": "f.story", "trait": "f.trait"}
-        paras = [[w.line(slot[chosen[0]], inc[chosen[0]], repeat=True)]]
-        p2 = [w.line(slot[chosen[1]], inc[chosen[1]], repeat=True)] if len(chosen) > 1 else []
+        slot = {"h2h": "f.h2h", "trade": "f.trade", "adj": "f.adj", "sg": "f.sg", "story": "f.story", "trait": "f.trait"}
+        paras = [[w.line(slot[primary], inc[primary], repeat=True)]]
+        p2: list[str | None] = []
+        if second == "third":
+            # a third team may only appear in a sentence that says "over <third>"
+            p2.append(w.line("f.blow", third, need="over {l}"))
+        elif second:
+            p2.append(w.line(slot[second], inc[second], repeat=True))
         if S["week"] >= 1:
             p2.append(w.line("f.mid", {**f, "a_rec": S["teams"][a]["record"], "b_rec": S["teams"][b]["record"],
                                        "a_rank": ordinal(ra), "b_rank": ordinal(rb), "wk": str(S["week"])}))
@@ -459,8 +491,11 @@ class Beats2(Beats):
         w.add(p2, meta)
         w.add(quotes + [w.line("f.close", f, repeat=True)], meta)
         dek = self._feud_dek(primary, inc[primary], a, b)
-        facts = {"type": "feud", "week": week, "teams": [nm(a), nm(b)], "incidents": {k: {kk: vv for kk, vv in inc[k].items()} for k in chosen},
+        shown = [k for k in (primary, second) if k and k != "third"]
+        facts = {"type": "feud", "week": week, "teams": [nm(a), nm(b)], "incidents": {k: dict(inc[k]) for k in shown},
                  "primary": primary, "rivalry": rv["name"] if rv else None}
+        if second == "third":
+            facts["background"] = {"blowout_over_third_team": third}
         return self._article(w, "feud", week, headline, dek, [a, b], ["feud"] + (["rivalry"] if rv else []) + [f"week-{week}"], facts,
                              key_teams=[a, b])
 
@@ -472,8 +507,6 @@ class Beats2(Beats):
             return f"{n(a)} and {n(b)} traded in Week {d['twk']}"
         if kind == "adj":
             return f"{d['hi']} ({d['hi_rec']}, {d['hi_rank']}) and {d['lo']} ({d['lo_rec']}, {d['lo_rank']}), {d['pf_gap']} apart in points"
-        if kind == "blow":
-            return f"Week {d['gwk']}: {d['w']} {d['wp']}, {d['l']} {d['lp']}"
         if kind == "sg":
             return f"Shotgun ledger: {d['a']} {d['a_sg']}, {d['b']} {d['b_sg']}"
         if kind == "story":
@@ -481,6 +514,7 @@ class Beats2(Beats):
         return f"{n(a)} vs. {n(b)}"
 
     def _feud_quotes(self, w: Writer, kind: str, a: int, b: int, info: dict, week: int, S: dict) -> list[str | None]:
+        """Quotes that answer the chosen incident (never a game against a third team)."""
         nm = self.name
         pa, pb = self._pv(a, S), self._pv(b, S)
         if kind == "h2h":
@@ -488,40 +522,42 @@ class Beats2(Beats):
             ww, ll = d["w"], d["l"]
             big = d["mc"] in ("blowout", "comfortable")
             base = {"m": d["m"], "wp": d["wp"], "lp": d["lp"], "wk": str(d["wk"])}
-            boast = w.quote(ww, "won_big" if big else "won_close" if d["mc"] == "close" else "trash_h2h_lead",
-                            {**base, "opp": nm(ll), "h2h": "1-0"} if d["mc"] == "normal" else {**base, "opp": nm(ll)})
+
+            def sit_for(x: int, y: int, won: bool) -> tuple[str, dict]:
+                if d["mc"] == "close":
+                    return ("won_close" if won else "lost_close"), {**base, "opp": nm(y)}
+                if big:
+                    return ("won_big" if won else "lost_big"), {**base, "opp": nm(y)}
+                x_w, x_l = d["rec"][x]
+                rec = f"{x_w}-{x_l}"
+                if x_w > x_l:
+                    return "trash_h2h_lead", {"opp": nm(y), "h2h": rec}
+                if x_l > x_w:
+                    return "trash_h2h_trail", {"opp": nm(y), "h2h": rec}
+                return "trash_even", {"opp": nm(y)}
+            sit, qf = sit_for(ww, ll, True)
+            boast = w.quote(ww, sit, qf, sig_ok=True)
             if boast is None:
                 return []
             if w.rng.random() < 0.5:
-                reply = w.quote(ll, "deny_after_trash", {"opp": nm(ww)})
+                reply = w.quote(ll, "deny_after_trash", {"opp": nm(ww)}, sig_ok=True)
             else:
-                reply = w.quote(ll, "lost_big" if big else "lost_close" if d["mc"] == "close" else "trash_h2h_trail",
-                                {**base, "opp": nm(ww), "h2h": "0-1"})
+                sit2, qf2 = sit_for(ll, ww, False)
+                reply = w.quote(ll, sit2, qf2, sig_ok=True)
             return [boast, reply]
         if kind == "trade":
             T = info["trade"]
             out = []
             for x, y in ((a, b), (b, a)):
                 sit = "trade_pending" if not T["graded"] else ("trade_got_more" if x == T["lead"] else "trade_gave_more")
-                out.append(w.quote(x, sit, {"opp": nm(y), "gave": T["plain"][y], "got": T["plain"][x]}))
+                out.append(w.quote(x, sit, {"opp": nm(y), "gave": T["plain"][y], "got": T["plain"][x]}, sig_ok=True))
             return out
-        if kind == "blow":
-            d = info["blow"]
-            x = d["w"] if d["w"] in (a, b) else d["l"]
-            y = b if x == a else a
-            if x == d["w"]:
-                q = w.quote(x, "won_big", {"opp": nm(d["l"]), "m": d["m"], "wp": "", "lp": "", "wk": str(d["wk"])})
-            else:
-                q = w.quote(x, "lost_big", {"opp": nm(d["w"]), "m": d["m"], "wk": str(d["wk"])})
-            X, Y = (pa, pb) if x == a else (pb, pa)
-            return [q, self._trash(w, Y, X, [], week, False)[1]]
         if kind == "sg":
             xa, ca, xb, cb = info["sg"]
             x, cx = (xa, ca) if ca > cb else (xb, cb)
-            y = xb if x == xa else xa
             Y, X = (pb, pa) if x == a else (pa, pb)
-            return [w.quote(x, "shotgun_owed", {"sgn": sg_words(cx)}, multi=cx >= 2), self._trash(w, Y, X, [], week, False)[1]]
-        return self._exchange(w, pa, pb, week, kind == "h2h")
+            return [w.quote(x, "shotgun_owed", {"sgn": sg_words(cx)}, multi=cx >= 2, sig_ok=True), self._trash(w, Y, X, [], week, False, True)[1]]
+        return self._exchange(w, pa, pb, week, False, True)
 
     # ======================================================================
     # Offseason
@@ -532,7 +568,7 @@ class Beats2(Beats):
         if not trades and not pickups:
             return None
         r = self.rng("offseason", voice.id)
-        w = Writer(self, voice, r)
+        w = Writer(self, voice, r, "offseason", 1)
         counts: dict[int, int] = {}
         for t in trades:
             for x in t.get("roster_ids") or []:

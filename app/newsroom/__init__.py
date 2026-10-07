@@ -56,7 +56,8 @@ class Newsroom(Beats3):
     def __init__(self, ctx: dict, st: dict, po: dict, shotgun_items: list[dict], *, debug: bool | None = None):
         super().__init__(ctx, st, po, shotgun_items)
         self.debug = (os.environ.get("LABRUMS_NEWSROOM_DEBUG", "") in ("1", "true", "yes")) if debug is None else debug
-        self.assign = Assigner(self.season, VOICES)
+        # the league id is part of the casting seed: two leagues that share a season label do not share a cast
+        self.assign = Assigner(f"lg:{(ctx.get('league') or {}).get('league_id', '')}:{self.season}", VOICES)
         self._rv_voice: dict[str, Voice] = {}
         self.desk_report: list[dict] = []
 

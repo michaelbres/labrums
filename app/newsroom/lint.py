@@ -65,12 +65,23 @@ def check(a: dict, book=None) -> list[str]:
             if book.name(rid) not in body_text and book.nickname(rid) not in body_text:
                 bad(f"team {book.name(rid)!r} in teams but not mentioned in the body")
         owner_text = book.scrub_players(text)
+        for chunk in [rv["backstory"].strip() for rv in book.rivalries if rv.get("backstory")] + \
+                [str(c).strip() for t in book.teams.values() for c in [(t.get("profile") or {}).get("catchphrase")] + list((t.get("profile") or {}).get("traits") or []) if c]:
+            if chunk:   # owner-written text keeps the owner's own wording, nicknames included
+                owner_text = owner_text.replace(chunk, "")
         for rid, t in book.teams.items():
             nick = str(t.get("nickname") or "").strip()
-            if nick and nick != book.name(rid) and len(re.findall(rf"\b{re.escape(nick)}\b", owner_text)) > 1:
-                bad(f"nickname {nick!r} used more than once")
+            if nick and nick != book.name(rid):
+                uses = len(re.findall(rf"\b{re.escape(nick)}\b", owner_text))
+                if uses > 1:
+                    bad(f"nickname {nick!r} used more than once")
+                asides = len(re.findall(rf"{re.escape(book.name(rid))}, \u201c{re.escape(nick)}\u201d to the group chat,", owner_text))
+                if uses and asides != uses:
+                    bad(f"nickname {nick!r} used as a bare name (only '<name>, \u201c{nick}\u201d to the group chat,' is allowed)")
     facts = a.get("facts") or {}
     kind = a["type"]
+    if kind == "feud" and book is not None:
+        _lint_feud(a, book, bad)
     if kind == "recap":
         _lint_recap(a, facts, bad, {book.name(r): (book.nickname(r),) for r in book.teams} if book is not None else None)
     if kind == "column":
@@ -118,3 +129,28 @@ def _lint_recap(a: dict, facts: dict, bad, nicks: dict | None = None) -> None:
             g = games[m["game"]] if m["game"] < len(games) else None
             if g and g.get("winner") and (g["winner"] not in m["teams"] or g["loser"] not in m["teams"]):
                 bad(f"paragraph {i} teams do not match the game")
+
+
+def _lint_feud(a: dict, book, bad) -> None:
+    """A feud is about its two parties. A third team may appear only in a sentence that says 'over <third>'
+    and never in the headline, the dek or the first paragraph."""
+    from .util import split_sentences
+    pair = list(a["teams"][:2]) if len(a["teams"]) >= 2 else []
+    names = {rid: book.name(rid) for rid in book.teams}
+    parties = {names[r] for r in a["teams"][:2]}
+    facts_teams = set((a.get("facts") or {}).get("teams") or [])
+    parties |= facts_teams
+    others = {rid: nm for rid, nm in names.items() if nm not in parties}
+
+    def mentioned(text: str) -> list[str]:
+        t = book.scrub_players(text)
+        return [nm for nm in others.values() if re.search(rf"\b{re.escape(nm)}\b", t)]
+    for where, text in (("headline", a["headline"]), ("dek", a["dek"]), ("lede", a["body"][0] if a["body"] else "")):
+        hit = mentioned(text)
+        if hit:
+            bad(f"feud {where} names a third team: {hit}")
+    for p in a["body"]:
+        for sent in split_sentences(p):
+            for nm in mentioned(sent):
+                if f"over {nm}" not in sent:
+                    bad(f"feud sentence names third team {nm!r} without 'over {nm}': {sent[:80]!r}")

@@ -68,9 +68,9 @@ FAMILY = {
             "Pulse check! {w} beat {l} by {m} in the closest game of {wl}, {wp} to {lp}!",
         ],
         "r.lede.top": [
-            "{wp}!!! That's the top score of {wl}, and it belongs to {w}, who {verb} {l} on the way! The league average was {wavg}!",
+            "{wp}!!! That's the top score of {wl}, and it belongs to {w}, who {verb} {l} on the way! Compare that to the league average of {wavg}!",
             "Somebody went OFF in {wl}, and it was {w}, with {wp} points, best in the league! {l} had {lp} and still lost!",
-            "{w_team} ({w}) led everybody with {wp} in {wl}! The league average was {wavg}! {l} scored {lp} and got the loss!",
+            "{w_team} ({w}) led everybody with {wp} in {wl}! The league average? {wavg}! {l} scored {lp} and got the loss!",
         ],
         "r.lede.tie": [
             "You can't make this up! {a_team} ({a}) and {b_team} ({b}) tied at {pts} points each in {wl}!",
@@ -98,6 +98,8 @@ FAMILY = {
             "{star} ({spos}) went OFF for {spts}, which is {sshare} of {w}'s {wp}!",
             "The man, the myth, {star} ({spos}): {spts} for {w}!",
             "{star} ({spos}) put up {spts} to lead {w}'s lineup!",
+            "{star} ({spos}) carried the torch for {w} with {spts}!",
+            "Give it up for {star} ({spos})! {spts} for {w}!",
         ],
         "g.goat": [
             "Meanwhile, {gname} ({gpos}) gave {l} {gpts} as a starter. Ouch!",
@@ -108,6 +110,15 @@ FAMILY = {
             "{l} left {bench_left} on the BENCH! {bench_name} ({bench_pos}) put up {bench_pts} while sitting!",
             "Lineup alert! {bench_name} ({bench_pos}) scored {bench_pts} on {l}'s bench. The best lineup would have added {bench_left}!",
             "Somebody check {l}'s lineup: {bench_left} sat on the bench, including {bench_pts} from {bench_name} ({bench_pos})!",
+            "{bench_name} ({bench_pos}) dropped {bench_pts} on {l}'s BENCH! That's {bench_left} left on the table!",
+            "Not the move, {l}! {bench_name} ({bench_pos}) had {bench_pts} sitting there, and the best lineup was {bench_left} better!",
+        ],
+        "g.bench_total": [
+            "{l} left {bench_left} on the BENCH! Somebody check that lineup!",
+            "Lineup alert! The best lineup would have added {bench_left} for {l}!",
+            "{bench_left} just sat there on {l}'s bench!",
+            "The bench cost {l} {bench_left} this week!",
+            "{l} wasted {bench_left} sitting on the bench!",
         ],
         "g.streak_w": [
             "{w} has now won {k} STRAIGHT! At {w_rec}, they sit {w_rank} in the standings!",
@@ -125,24 +136,24 @@ FAMILY = {
             "The result puts {w} at {w_rec} and {l} at {l_rec}!",
         ],
         "g.top": [
-            "{wp} was the BEST score in the league in {wl}! The league average was {wavg}!",
-            "Nobody scored more than {w} in {wl}: {wp}! The average was {wavg}!",
+            "{wp} was the BEST score in the league in {wl}! The bar was a league average of {wavg}!",
+            "Nobody scored more than {w} in {wl}: {wp}! Compare that to the league average of {wavg}!",
             "{w} led the league with {wp}! That's well clear of the {wavg} average!",
         ],
         "g.low": [
-            "{lp} was the LOWEST score in the league in {wl}! The average was {wavg}!",
+            "{lp} was the LOWEST score in the league in {wl}! The league average? {wavg}!",
             "{l} brought up the rear with {lp} in {wl}, against a league average of {wavg}!",
-            "Nobody scored less than {l} in {wl}: {lp}! The league average was {wavg}!",
+            "Nobody scored less than {l} in {wl}: {lp}! The bar was a league average of {wavg}!",
         ],
         "g.luck_up": [
-            "{n} ({n_rec}) is {luck} wins ahead of where the all-play numbers say! Somebody's got a horseshoe!",
-            "By all-play, {n} has {luck} extra wins at {n_rec}! Luck is a real stat!",
-            "{n} is living a charmed life: {luck} wins above expectation at {n_rec}!",
+            "{n} ({n_rec}) is {luck_abs} wins ahead of where the all-play numbers say! Somebody's got a horseshoe!",
+            "By all-play, {n} has {luck_abs} extra wins at {n_rec}! Luck is a real stat!",
+            "{n} is living a charmed life: {luck_abs} wins above expectation at {n_rec}!",
         ],
         "g.luck_down": [
-            "{n} ({n_rec}) is {luck} wins behind where the all-play numbers say! The schedule is NOT being kind!",
+            "{n} ({n_rec}) is {luck_abs} wins behind where the all-play numbers say! The schedule is NOT being kind!",
             "By all-play, {n} should have more wins than {n_rec}: that's {luck} against expectation!",
-            "{n} is cursed: {luck} wins below expectation at {n_rec}!",
+            "{n} is cursed: {luck_abs} wins below expectation at {n_rec}!",
         ],
         "g.upset": [
             "{w} was {w_rank0} entering {wl}. {l} was {l_rank0}. Table, meet turnaround!",
@@ -150,7 +161,7 @@ FAMILY = {
             "{l_rank0} vs. {w_rank0}, and {w} won it!",
         ],
         "g.shotgun": [
-            "And {n} owes {sgn}! The reason: {why}!",
+            "Brace yourselves: {n} owes {sgn}! The reason: {why}!",
             "Beer alert! {n} incurred {sgn} for {why}!",
             "{n}: {sgn} owed in {wl}, thanks to {why}!",
         ],
@@ -200,6 +211,8 @@ FAMILY = {
             "{a} is {a_rec} and scoring {a_avg} a game. {b} is {b_rec} and scoring {b_avg}. Somebody has to win!",
             "{b_team} ({b}, {b_rec}, {b_avg} ppg) vs. {a_team} ({a}, {a_rec}, {a_avg} ppg)! Here we go!",
             "{a} ({a_rec}) meets {b} ({b_rec}) in {wl}, {a_avg} ppg versus {b_avg}!",
+            "{a} ({a_rec}, {a_avg} ppg) squares off with {b} ({b_rec}, {b_avg} ppg) in {wl}!",
+            "It's {a_team} against {b_team}! {a} is {a_rec} and {b} is {b_rec}, scoring {a_avg} and {b_avg}!",
         ],
         "p.h2h_split": [
             "{a} and {b} have split their meetings this season, {h2h_rec}!",
@@ -250,13 +263,13 @@ FAMILY = {
             "BLOCKBUSTER! {a} ships {gave_s} to {b} for {got_s}",
             "{a} sends {gave_s} to {b} in exchange for {got_s}!",
             "{b} lands {gave_s} from {a}, and {a} gets {got_s}",
-            "TRADE ALERT: {gave_s} goes from {a} to {b}, and {got_s} comes back!",
+            "TRADE ALERT: {b} gets {gave_s}, and {a} gets {got_s} back!",
         ],
         "t.sides": [
             "It's DONE! {a} and {b} pulled the trigger in {wl}! {a} gets {a_got}, and {b} gets {b_got}!",
             "TRADE ALERT! In {wl}, {a} lands {a_got}, and {b} lands {b_got}!",
             "{b} sends {a_got} to {a} in {wl} and gets {b_got} back!",
-            "{a} out, {b} in: {b_got} heads to {b}, and {a_got} goes to {a}!",
+            "{a} out, {b} in: {b} takes {b_got}, and {a} takes {a_got}!",
         ],
         "t.returns": [
             "And the early returns? In the {since_wk} since, {a}'s new guys have scored {a_pts} and {b}'s have scored {b_pts}! Early edge: {lead}!",
@@ -264,9 +277,9 @@ FAMILY = {
             "After {since_wk}, {a}'s side has {a_pts} and {b}'s side has {b_pts}! {lead} is ahead!",
         ],
         "t.pending": [
-            "{pk_side} gets {pk_got} and {pl_side} gets {pl_got}! Picks for players means we can't grade it on points yet!",
-            "It's picks for players: {pl_side} gets {pl_got}, {pk_side} gets {pk_got}! Check back when the picks play a game!",
-            "{pl_side} took {pl_got}; {pk_side} took {pk_got}! Not gradable yet, folks!",
+            "Picks for players means we can't grade it on points yet!",
+            "{pk_side} took the picks and {pl_side} took the players! Check back when the picks play a game!",
+            "Not gradable yet, folks, because the picks haven't played a snap!",
         ],
         "t.fresh": [
             "Too early to grade it, folks!",
@@ -280,7 +293,7 @@ FAMILY = {
         ],
         "t.rec": [
             "Before the deal, {a} was {a_rec} ({a_rank}) and {b} was {b_rec} ({b_rank})!",
-            "Entering that week: {a} at {a_rec} ({a_rank}), {b} at {b_rec} ({b_rank})!",
+            "Going into the deal: {a} at {a_rec} ({a_rank}), {b} at {b_rec} ({b_rank})!",
             "At the time, {a} stood {a_rank} at {a_rec}, and {b} stood {b_rank} at {b_rec}!",
         ],
         "t.close": [
@@ -351,7 +364,7 @@ FAMILY = {
         ],
         "s.owner": [
             "{n} owes {sgn}! {list}!",
-            "{n}: {sgn}. The damage: {list}!",
+            "{n} is down for {sgn}! The damage: {list}!",
             "{sgn} for {n}! Here's why: {list}!",
             "{n} racked up {sgn}: {list}!",
         ],
@@ -474,6 +487,7 @@ FAMILY = {
             "Remember Week {gwk}? {w} {verb} {l}, {wp} to {lp}, by {m} points!",
             "{m} POINTS! That's how much {w} beat {l} by in Week {gwk}, {wp}-{lp}!",
             "The scars from Week {gwk} are REAL: {w} won by {m} over {l}, {wp}-{lp}!",
+            "{w} stomped to a {m}-point win over {l} in Week {gwk}, {wp}-{lp}!",
         ],
         "f.sg": [
             "On the shotgun ledger, {a} has {a_sg} and {b} has {b_sg}!",
@@ -665,6 +679,12 @@ FAMILY = {
             "“{qc}” {n} told us!",
             "{n} let it fly: “{qp}”",
             "“{qc}” {n} said, and we believe every word!",
+            "“{qc}” {n} yelled, and we felt it!",
+            "{n} dropped the mic: “{qp}”",
+            "“{qc}” {n} fired back!",
+            "“{qc}” {n} said, and the place erupted!",
+            "Hear it straight from {n}: “{qp}”",
+            "{n} wasn't done: “{qp}”",
         ],
     },
 }

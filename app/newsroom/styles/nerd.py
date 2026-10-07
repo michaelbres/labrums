@@ -95,9 +95,13 @@ FAMILY = {
             "The scoring ended level at {pts} for {a} and {b}.",
         ],
         "g.star": [
-            "{star} ({spos}) provided {spts} for {w}, {sshare} of the {wp} total, so most of the win came from elsewhere in the lineup.",
+            "{star} ({spos}) provided {spts} for {w}, {sshare} of the {wp} total, {elsewhere}.",
             "{w}'s top starter was {star} ({spos}) at {spts}, a {sshare} share of the team score.",
-            "{star} ({spos}) scored {spts}, which is {sshare} of {w}'s {wp}. Concentration like that is a variance source.",
+            "{star} ({spos}) scored {spts}, which is {sshare} of {w}'s {wp}. A single player's share is always a variance source.",
+            "{star} ({spos}) scored {spts}, {sshare} of {w}'s {wp}, which is {over_half}.",
+            "{star} ({spos}) led {w}'s starters with {spts}, a {sshare} share of the {wp}.",
+            "{star} ({spos}) led {w} in scoring: {spts}, or {sshare} of the {wp}.",
+            "The top individual score on {w} was {star}'s {spts} ({spos}).",
         ],
         "g.goat": [
             "{gname} ({gpos}) returned {gpts} in a starting slot for {l}, a drag on the total.",
@@ -108,6 +112,15 @@ FAMILY = {
             "{l} left {bench_left} on the table: {bench_name} ({bench_pos}) scored {bench_pts} on the bench, and the optimal lineup was {bench_left} better.",
             "An optimal lineup would have scored {bench_left} more for {l}, including {bench_pts} from {bench_name} ({bench_pos}), who sat.",
             "{bench_name} ({bench_pos}) scored {bench_pts} on {l}'s bench. Measured against the best lineup available, {l} gave up {bench_left}.",
+            "{l}'s bench held {bench_name} ({bench_pos}) at {bench_pts}; the best lineup would have scored {bench_left} more.",
+            "Lineup efficiency note: {l} sat {bench_name} ({bench_pos}, {bench_pts}) and left {bench_left} unused.",
+        ],
+        "g.bench_total": [
+            "The optimal lineup was {bench_left} better than the one {l} started.",
+            "{l} left {bench_left} on the table, measured against the best lineup available.",
+            "Lineup efficiency note: {l} gave up {bench_left} versus the optimum.",
+            "The bench cost {l} {bench_left} against the optimum.",
+            "{l}'s lineup was {bench_left} short of the best one available.",
         ],
         "g.streak_w": [
             "{w} has won {k} straight (now {w_rec}, {w_rank}), though streaks are mostly noise.",
@@ -135,14 +148,14 @@ FAMILY = {
             "{lp} puts {l} at the bottom of the weekly distribution (mean {wavg}).",
         ],
         "g.luck_up": [
-            "{n}'s luck index stands at {luck} wins ({n_rec}): the weekly scoring says the team has won more games than it earned.",
-            "By all-play expectation, {n} is {luck} wins to the good at {n_rec}. That tends to regress.",
-            "{n} ({n_rec}) is {luck} wins above its all-play expectation, which is the kind of gap that usually closes.",
+            "{n}'s luck index stands at {luck_abs} wins ({n_rec}): the weekly scoring says the team has won more games than it earned.",
+            "By all-play expectation, {n} is {luck_abs} wins to the good at {n_rec}. That tends to regress.",
+            "{n} ({n_rec}) is {luck_abs} wins above their all-play expectation, which is the kind of gap that usually closes.",
         ],
         "g.luck_down": [
-            "{n}'s luck index stands at {luck} wins ({n_rec}): the weekly scoring says the team has earned more than it got.",
-            "By all-play expectation, {n} is {luck} wins to the bad at {n_rec}. That tends to regress too.",
-            "{n} ({n_rec}) is {luck} wins below its all-play expectation, a gap the schedule may eventually repay.",
+            "{n}'s luck index stands at {luck_abs} wins ({n_rec}): the weekly scoring says the team has earned more than it got.",
+            "By all-play expectation, {n} is {luck_abs} wins to the bad at {n_rec}. That tends to regress too.",
+            "{n} ({n_rec}) is {luck_abs} wins below their all-play expectation, a gap the schedule may eventually repay.",
         ],
         "g.upset": [
             "Before the game, {w} ranked {w_rank0} and {l} ranked {l_rank0}.",
@@ -200,6 +213,8 @@ FAMILY = {
             "{a}: {a_rec}, {a_avg} ppg. {b}: {b_rec}, {b_avg} ppg. (Records lag scoring; both are small samples.)",
             "Scoring first: {a} averages {a_avg}, {b} averages {b_avg}. Records: {a_rec} and {b_rec}.",
             "In {wl}, {b_team} ({b}, {b_rec}, {b_avg}) faces {a_team} ({a}, {a_rec}, {a_avg}).",
+            "Inputs for {wl}: {a} at {a_rec} and {a_avg} ppg, {b} at {b_rec} and {b_avg} ppg.",
+            "{a} ({a_rec}) and {b} ({b_rec}) average {a_avg} and {b_avg} points per game respectively.",
         ],
         "p.h2h_split": [
             "{a} and {b} are {h2h_rec} against each other this season, a sample of tiny size.",
@@ -264,9 +279,9 @@ FAMILY = {
             "{a}'s side has produced {a_pts} and {b}'s side {b_pts} in {since_wk}. {lead} is ahead, but production in small samples is unstable.",
         ],
         "t.pending": [
-            "{pk_side} received {pk_got} and {pl_side} received {pl_got}. With picks on one side, there is no production to compare.",
-            "{pl_side} took {pl_got}; {pk_side} took {pk_got}. A picks-for-players deal has no points to analyze yet.",
-            "Picks have no scoring history, so this deal ({pk_side}: {pk_got}; {pl_side}: {pl_got}) cannot be graded on production.",
+            "With picks on one side, there is no production to compare.",
+            "A picks-for-players deal has no points to analyze yet, for {pk_side} or {pl_side}.",
+            "Picks have no scoring history, so this deal cannot be graded on production.",
         ],
         "t.fresh": [
             "There is no production to grade yet.",
@@ -279,7 +294,7 @@ FAMILY = {
             "For {n}, this is the {nth} trade of the season.",
         ],
         "t.rec": [
-            "Entering that week, {a} was {a_rec} ({a_rank}) and {b} was {b_rec} ({b_rank}).",
+            "Going into the deal, {a} was {a_rec} ({a_rank}) and {b} was {b_rec} ({b_rank}).",
             "Before the trade, {a} sat {a_rank} at {a_rec}; {b} sat {b_rank} at {b_rec}.",
             "At the time, the table had {a} {a_rank} ({a_rec}) and {b} {b_rank} ({b_rec}).",
         ],
@@ -474,6 +489,7 @@ FAMILY = {
             "The outlier is Week {gwk}: {w} {verb} {l}, {wp} to {lp}, a margin of {m}.",
             "In Week {gwk}, {w}'s {m}-point win over {l} ({wp}-{lp}) sat far in the tail of the margin distribution.",
             "{w} beat {l} by {m} in Week {gwk}, {wp}-{lp}, among the widest margins of the season.",
+            "In Week {gwk}, {w} won by {m} over {l}, {wp}-{lp}, a large margin for a single game.",
         ],
         "f.sg": [
             "The shotgun ledger shows {a} at {a_sg} and {b} at {b_sg}.",
@@ -626,7 +642,7 @@ FAMILY = {
         ],
         "a.eff": [
             "Lineup efficiency (points scored over the points of the optimal lineup) is {best_pct} for {best_n} and {worst_pct} for {worst_n}, against {lg_pct} league-wide.",
-            "The league as a whole captured {lg_pct} of the points its rosters made available. {best_n} was the high at {best_pct} (it set the best lineups); {worst_n} was the low at {worst_pct}.",
+            "The league as a whole captured {lg_pct} of the points its rosters made available. {best_n} was the high at {best_pct} (they set the best lineups); {worst_n} was the low at {worst_pct}.",
             "{best_n} ({best_pct}) and {worst_n} ({worst_pct}) bracket the efficiency range, with the league mean at {lg_pct}.",
         ],
         "a.bench": [
@@ -665,6 +681,12 @@ FAMILY = {
             "“{qc}” {n} told reporters, the sample being one.",
             "{n}'s response: “{qp}”",
             "“{qc}” {n} said, n = 1.",
+            "“{qc}” {n} said, which I am recording as an anecdote.",
+            "{n} offered, without data: “{qp}”",
+            "“{qc}” {n} said, and I flagged it for follow-up.",
+            "“{qc}” {n} told the thread, unreviewed.",
+            "In {n}'s own words, uncited: “{qp}”",
+            "“{qc}” {n} said, confidence interval unknown.",
         ],
     },
 }

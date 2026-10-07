@@ -7,9 +7,10 @@ from collections import Counter
 from typing import Any
 
 from .. import shotguns, stats
+from . import calendar
 from ..loader import is_offseason
 from ..sleeper import player_label
-from .util import fmt, ordinal, pts, split_sentences
+from .util import fmt, num_word, ordinal, pts, split_sentences
 
 
 class Book:
@@ -26,6 +27,11 @@ class Book:
         self._bench: dict[tuple[int, int], tuple[float, dict | None]] = {}
         self.seen: Counter = Counter()        # normalized sentence -> times written in this build
         self.quote_use: Counter = Counter()   # (situation, variant) -> times quoted in this build
+        self.once_used: set[str] = set()      # family tics / voice tics already spent in this build (each runs once)
+        self.catch_week: set[tuple] = set()   # (roster_id, week) pairs that already got their catchphrase
+        self.n_articles = 0                   # finished articles so far (the catchphrase budget is a share of these)
+        self.n_catch = 0                      # of which carry a catchphrase
+        self._protect_rx: re.Pattern | None = None
         self._norm_rx: re.Pattern | None = None
         self._players_rx: re.Pattern | None = None
         self.games_by_week: dict[int, list[dict]] = {}
@@ -118,17 +124,44 @@ class Book:
             best = {**player_label(self.ctx["players"], pid), "points": round(v, 2)}
         return max(left, 0.0), best
 
-    def points_since(self, pid: str, after_week: int, rid: int, upto: int | None = None) -> float:
-        """Points `pid` scored for `rid` in weeks after `after_week`, through `upto` (default: last completed)."""
-        total = 0.0
+    # ---- trade / waiver timing ---------------------------------------------
+    def counted_weeks(self, first: int, upto: int | None = None) -> list[int]:
+        """Weeks first..upto (default: last completed) that count as played: never beyond the last completed week,
+        never a week whose matchup rows carry no matchup_id (e.g. a week 18 that nobody plays)."""
         last = self.ctx["last_completed"] if upto is None else min(upto, self.ctx["last_completed"])
-        for w, rows in self.ctx["matchups"].items():
-            if w <= after_week or w > last:
+        out = []
+        for w in sorted(self.ctx["matchups"]):
+            if w < first or w > last:
                 continue
-            for r in rows:
-                if int(r["roster_id"]) == rid:
+            if any(r.get("matchup_id") is not None for r in self.ctx["matchups"][w]):
+                out.append(w)
+        return out
+
+    def points_from(self, pid: str, first_week: int, rid: int, upto: int | None = None) -> float:
+        """Points `pid` scored for `rid` over the counted weeks first_week..upto (see counted_weeks)."""
+        total = 0.0
+        for w in self.counted_weeks(first_week, upto):
+            for r in self.ctx["matchups"][w]:
+                if int(r["roster_id"]) == rid and r.get("matchup_id") is not None:
                     total += float((r.get("players_points") or {}).get(pid, 0) or 0)
         return round(total, 2)
+
+    def after_games(self, tx: dict, week: int) -> bool:
+        """True when the move was made on or after the Tuesday that follows week `week`'s games, so week `week`
+        was already in the books. (Unknown season start or timestamp: treated as made during the week.)"""
+        start = calendar.season_start(self.ctx)
+        ms = tx.get("created")
+        if start is None or not ms:
+            return False
+        return calendar._to_et(ms).date() >= calendar.week_tuesday(start, week)
+
+    def first_week_after(self, tx: dict, week: int) -> int:
+        """First week whose points count toward the move's early returns."""
+        return week + 1 if self.after_games(tx, week) else week
+
+    def records_week(self, tx: dict, week: int) -> int:
+        """The snapshot week that shows the standings 'before the deal'."""
+        return week if self.after_games(tx, week) else week - 1
 
     def label(self, pid: str) -> dict:
         return player_label(self.ctx["players"], pid)
@@ -139,14 +172,18 @@ class Book:
                 if t.get("type") != "commissioner" and t.get("status") == "complete"
                 and not is_offseason(t, self.ctx.get("season_start_ms"))]
 
-    def moves_through(self, rid: int, week: int) -> dict[str, int]:
-        """In-season trades / waiver-or-FA claims that involve `rid`, weeks <= week."""
+    def moves_before(self, rid: int, tx: dict, week: int) -> dict[str, int]:
+        """In-season trades / waiver-or-FA claims that involve `rid` made up to and including `tx` (chronological:
+        created <= tx.created, ties broken by transaction id)."""
+        key = (int(tx.get("created") or 0), str(tx.get("transaction_id") or ""))
         out = {"trades": 0, "claims": 0}
         for w in sorted(self.ctx["transactions"]):
             if w > week:
                 break
             for t in self.live_txs(w):
                 if rid not in [int(x) for x in t.get("roster_ids") or []]:
+                    continue
+                if (int(t.get("created") or 0), str(t.get("transaction_id") or "")) > key:
                     continue
                 if t["type"] == "trade":
                     out["trades"] += 1
@@ -188,9 +225,11 @@ class Book:
         return [g for g in self.st["games"] if g["week"] <= upto and {g["a"], g["b"]} == {a, b}]
 
     def tx_desc(self, tx: dict) -> dict[int, dict]:
-        """What each roster received in a trade: players as 'Name (POS)', picks as 'a 2027 round 2 pick'."""
+        """What each roster received in a trade: players as 'Name (POS)', picks as 'a 2027 round 2 pick'
+        (identical picks collapse: 'two 2026 round 2 picks'; `n_picks` keeps the true count)."""
         rids = [int(x) for x in tx.get("roster_ids") or []]
-        got: dict[int, dict] = {r: {"players": [], "picks": [], "pids": []} for r in rids}
+        got: dict[int, dict] = {r: {"players": [], "picks": [], "pids": [], "n_picks": 0} for r in rids}
+        raw: dict[int, Counter] = {r: Counter() for r in rids}
         for pid, to in (tx.get("adds") or {}).items():
             if int(to) in got:
                 lab = self.label(pid)
@@ -198,7 +237,11 @@ class Book:
                 got[int(to)]["pids"].append(pid)
         for p in tx.get("draft_picks") or []:
             if p.get("owner_id") is not None and int(p["owner_id"]) in got:
-                got[int(p["owner_id"])]["picks"].append(f"a {p.get('season')} round {p.get('round')} pick")
+                raw[int(p["owner_id"])][(p.get("season"), p.get("round"))] += 1
+        for r, c in raw.items():
+            for (season, rnd), n in c.items():
+                got[r]["n_picks"] += n
+                got[r]["picks"].append(f"a {season} round {rnd} pick" if n == 1 else f"{num_word(n)} {season} round {rnd} picks")
         return got
 
     # ---- repetition memory ----------------------------------------------
@@ -222,6 +265,13 @@ class Book:
             self._norm_rx = re.compile("|".join(re.escape(n) for n in ordered)) if ordered else re.compile(r"(?!x)x")
         return self._norm_rx
 
+    def protected_rx(self) -> re.Pattern | None:
+        """Names (teams, owners, nicknames, players) that must keep their own capitalization in the final pass."""
+        if self._protect_rx is None:
+            rx = self._names_rx()
+            self._protect_rx = rx
+        return self._protect_rx
+
     def scrub_players(self, text: str) -> str:
         """`text` without player names: a player named Pat is not an owner nicknamed Pat."""
         if self._players_rx is None:
@@ -238,7 +288,7 @@ class Book:
             self._players_rx = re.compile("|".join(re.escape(n) for n in ordered)) if ordered else re.compile(r"(?!x)x")
         return self._players_rx.sub("", text)
 
-    def sentence_keys(self, text: str) -> list[str]:
+    def sentence_keys(self, text: str, min_words: int = 4) -> list[str]:
         """Sentences of `text` with names and numbers stripped, lowercased: two sentences are 'the same
         language' when their keys match."""
         rx = self._names_rx()
@@ -247,6 +297,6 @@ class Book:
             k = sent.replace("\u201c", "").replace("\u201d", "").replace('"', "")
             k = re.sub(r"-?\d[\d.,]*%?", "N", k)
             k = re.sub(r"\s+", " ", k.lower()).strip()
-            if len(k.split()) >= 4:   # fragments like "N points." are not 'language'
+            if len(k.split()) >= min_words:   # fragments like "N points." are not 'language'
                 out.append(k)
         return out

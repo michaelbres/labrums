@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import re
 
-_ORD = {1: "1st", 2: "2nd", 3: "3rd"}
+_ORD_SUFFIX = {1: "st", 2: "nd", 3: "rd"}
 _WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"]
 _ORD_WORDS = ["zeroth", "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth",
               "eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth",
@@ -11,10 +11,11 @@ _ORD_WORDS = ["zeroth", "first", "second", "third", "fourth", "fifth", "sixth", 
 
 
 def ordinal(n: int) -> str:
+    """1st, 2nd, 3rd, 4th ... 11th, 12th, 13th, 21st, 22nd, 23rd, 101st, 111th."""
     n = int(n)
-    if 10 <= n % 100 <= 20:
+    if 11 <= n % 100 <= 13:
         return f"{n}th"
-    return _ORD.get(n % 10, f"{n}th") if n % 10 in _ORD else f"{n}th"
+    return f"{n}{_ORD_SUFFIX.get(n % 10, 'th')}"
 
 
 def ord_word(n: int) -> str:
@@ -48,7 +49,38 @@ def pct(p: float | None) -> str | None:
 
 
 def plural(n: int, one: str, many: str | None = None) -> str:
+    """'1 owner' / '2 owners'."""
     return f"{n} {one}" if n == 1 else f"{n} {many or one + 's'}"
+
+
+def verb(n: int, singular: str, plural_form: str) -> str:
+    """Agreement for a counted subject: verb(1, 'owes', 'owe') -> 'owes'."""
+    return singular if n == 1 else plural_form
+
+
+_AN_WORD = re.compile(r"^(?:[aeiou]|hour|honest|honou?r|heir)", re.I)
+_A_WORD = re.compile(r"^(?:uni|use|usu|one|eu|ubiq)", re.I)
+
+
+def _number_takes_an(d: str) -> bool:
+    """True when the integer part `d` is read starting with a vowel sound: 8, 11, 18, 80-89, 800s, 8000s."""
+    if len(d) in (1, 2, 3, 4) and d.startswith("8"):
+        return True
+    return d in ("11", "18") or (len(d) == 4 and d.startswith(("11", "18")))
+
+
+def a_an(phrase: str) -> str:
+    """'83.21-point' -> 'an 83.21-point'; '12.5-point' -> 'a 12.5-point'; 'umpire' -> 'an umpire'; 'one' -> 'a one'."""
+    p = phrase.strip()
+    m = re.match(r"^(\d+)", p)
+    if m:
+        return f"{'an' if _number_takes_an(m.group(1)) else 'a'} {p}"
+    return f"{'an' if _AN_WORD.match(p) and not _A_WORD.match(p) else 'a'} {p}"
+
+
+def sentence_case(text: str) -> str:
+    """Capitalize the first letter of `text`."""
+    return text[:1].upper() + text[1:]
 
 
 def join_and(items: list[str]) -> str:
@@ -99,3 +131,36 @@ def split_sentences(text: str) -> list[str]:
     text = _ABBR.sub(lambda m: m.group(1) + "\x00", text)
     parts = re.split(r'(?<=[.!?])"?\s+(?=["A-Z0-9(])', text)
     return [p.replace("\x00", ".").strip() for p in parts if p.strip()]
+
+
+_NO_CAP_BEFORE = re.compile(r"(?:\b(?:vs|v|e\.g|i\.e|etc|approx|no|nos|st|jr|sr|dr|mr|mrs|ms|esq|ret|hon)\.)$", re.I)
+_AN_FIX = re.compile(r"\b([Aa]n?) (\d[\d,]*)(?=[A-Za-z.\d%\-\s]|$)")
+
+
+def _fix_article(m: re.Match) -> str:
+    art, num = m.group(1), m.group(2).replace(",", "")
+    want = "an" if _number_takes_an(num) else "a"
+    return (want.capitalize() if art[0] == "A" else want) + " " + m.group(2)
+
+
+def polish(text: str, protect: "re.Pattern | None" = None) -> str:
+    """The final pass over every rendered paragraph: collapse double spaces, close up ' ,' and ' .', start a
+    sentence with a capital (never touching a team or player name that is spelled lowercase), and use 'an' before
+    numbers read with a vowel sound ('an 83.21-point win', 'a 12-point win')."""
+    text = re.sub(r"[ \t]{2,}", " ", text)
+    text = re.sub(r"\s+([,;])", r"\1", text)
+    text = re.sub(r"\s+\.(?!\d)", ".", text)
+    text = _AN_FIX.sub(_fix_article, text)
+
+    def cap(m: re.Match) -> str:
+        head, ch = m.group(1), m.group(2)
+        if "\u201d" in head:      # '!" said Colin': an attribution, not a new sentence
+            return m.group(0)
+        if _NO_CAP_BEFORE.search(text[: m.start(1) + 1]):
+            return m.group(0)
+        if protect is not None:
+            hit = protect.match(text, m.start(2))
+            if hit:
+                return m.group(0)
+        return head + ch.upper()
+    return re.sub(r"([.!?][\"\u201d)]*\s+)([a-z])", cap, text)

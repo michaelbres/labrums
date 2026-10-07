@@ -69,8 +69,8 @@ FAMILY = {
         ],
         "r.lede.top": [
             "Top of the charts! {w} hits {wp} in {wl}, the highest score of the round against a league average of {wavg}, and {verb} {l} ({lp}) on the way.",
-            "What a performance! {w_team} ({w}) put up {wp} in {wl}, best in the league, with {l} managing {lp}. The league average was {wavg}.",
-            "{wp}! That's the top score of {wl}, and it belongs to {w}. {l} had {lp}. League average: {wavg}.",
+            "What a performance! {w_team} ({w}) put up {wp} in {wl}, best in the league, with {l} managing {lp}. The league averaged {wavg} on the day.",
+            "{wp}! That's the top score of {wl}, and it belongs to {w}. {l} had {lp}. The league average was {wavg}, if you're counting.",
         ],
         "r.lede.tie": [
             "Honours even! {a_team} ({a}) and {b_team} ({b}) drew at {pts} each in {wl}.",
@@ -98,6 +98,8 @@ FAMILY = {
             "{star} ({spos}) was the man of the match for {w}, with {spts}, {sshare} of the {wp}.",
             "Top of the bill for {w}: {star} ({spos}), {spts}.",
             "{star} ({spos}) bagged {spts} for {w}, and what a contribution.",
+            "{star} ({spos}) put in a shift for {w}: {spts}.",
+            "{star} ({spos}) led the way for {w}, with {spts}.",
         ],
         "g.goat": [
             "{l} got {gpts} from {gname} ({gpos}) in the starting eleven. Not ideal.",
@@ -108,14 +110,23 @@ FAMILY = {
             "{l} left {bench_left} on the bench, and {bench_name} ({bench_pos}) scored {bench_pts} from the subs' bench. Questions for the gaffer.",
             "{bench_name} ({bench_pos}) scored {bench_pts} while sitting on {l}'s bench, and a better lineup was worth {bench_left}.",
             "A selection headache for {l}: {bench_left} on the bench, {bench_pts} of them from {bench_name} ({bench_pos}).",
+            "{l} left {bench_name} ({bench_pos}) on the bench and the player scored {bench_pts} anyway. {bench_left} left behind, that.",
+            "A bit of a head-scratcher from {l}: {bench_name} ({bench_pos}) scored {bench_pts} from the bench.",
+        ],
+        "g.bench_total": [
+            "{l} left {bench_left} on the bench. Questions for the gaffer.",
+            "A better lineup was worth {bench_left} to {l}, and the subs never got a look.",
+            "A selection headache for {l}: {bench_left} sat on the bench.",
+            "The bench cost {l} {bench_left}, which is the sort of thing the gaffer hears about.",
+            "{l} left {bench_left} on the subs' bench.",
         ],
         "g.streak_w": [
-            "{w} has now won {k} on the bounce and sit {w_rank} at {w_rec}.",
+            "{w} has now won {k} on the bounce and sits {w_rank} at {w_rec}.",
             "That's {k} wins in a row for {w}: {w_rec}, {w_rank} in the table.",
             "{w} is {w_rec} and {w_rank}, on a run of {k} straight wins.",
         ],
         "g.streak_l": [
-            "{l} has now lost {k} on the bounce and sit {l_rank} at {l_rec}.",
+            "{l} has now lost {k} on the bounce and sits {l_rank} at {l_rec}.",
             "That's {k} defeats in a row for {l}: {l_rec}, {l_rank} in the table.",
             "{l} is {l_rec} and {l_rank}, on a run of {k} straight losses. Not great, not great at all.",
         ],
@@ -125,24 +136,24 @@ FAMILY = {
             "After {wl}, {w} is {w_rec} and {l} is {l_rec}.",
         ],
         "g.top": [
-            "{w}'s {wp} was the highest score of {wl}. The league average was {wavg}.",
-            "Nobody scored more than {w} in {wl}: {wp}. The average was {wavg}.",
+            "{w}'s {wp} was the highest score of {wl}. The average on the day was {wavg}, give or take.",
+            "Nobody scored more than {w} in {wl}: {wp}. The rest of the league averaged {wavg}.",
             "{wp} for {w}, the top mark of the week by a distance. Average: {wavg}.",
         ],
         "g.low": [
-            "{l}'s {lp} was the lowest score of {wl}. The league average was {wavg}.",
-            "Nobody scored less than {l} in {wl}: {lp}. The average was {wavg}.",
+            "{l}'s {lp} was the lowest score of {wl}. The league averaged {wavg} on the day.",
+            "Nobody scored less than {l} in {wl}: {lp}. The average on the day was {wavg}, give or take.",
             "{lp} for {l}, the lowest mark of the week. Average: {wavg}.",
         ],
         "g.luck_up": [
-            "{n} ({n_rec}) is {luck} wins ahead of the all-play numbers. A bit fortunate, that.",
-            "By all-play, {n} has {luck} more wins than they've earned at {n_rec}. The football gods are smiling.",
-            "{n}: {n_rec}, and {luck} wins above expectation. Lucky, lucky, lucky.",
+            "{n} ({n_rec}) is {luck_abs} wins ahead of the all-play numbers. A bit fortunate, that.",
+            "By all-play, {n} has {luck_abs} more wins than they've earned at {n_rec}. The football gods are smiling.",
+            "{n}: {n_rec}, and {luck_abs} wins above expectation. Lucky, lucky, lucky.",
         ],
         "g.luck_down": [
-            "{n} ({n_rec}) is {luck} wins behind the all-play numbers. Hard done by, that.",
+            "{n} ({n_rec}) is {luck_abs} wins behind the all-play numbers. Hard done by, that.",
             "By all-play, {n} should have more than {n_rec}: {luck}. The football gods are not smiling.",
-            "{n}: {n_rec}, and {luck} wins below expectation. Unlucky, unlucky, unlucky.",
+            "{n}: {n_rec}, and {luck_abs} wins below expectation. Unlucky, unlucky, unlucky.",
         ],
         "g.upset": [
             "Going in, {w} was {w_rank0} and {l} was {l_rank0}. The table doesn't know what it's doing.",
@@ -160,7 +171,7 @@ FAMILY = {
             "{n}, who {trait}, now has {event} to chew over.",
         ],
         "r.close_shift": [
-            "And in the table, {in_names} are up into the top six, and {out_names} are out of it. {leader} still lead at {leader_rec}.",
+            "And in the table, {in_names} are up into the top six, and {out_names} are out of it. {leader} still leads at {leader_rec}.",
             "Movement in the table after {wl}: {in_names} in, {out_names} out of the top six. {leader} is first at {leader_rec}.",
             "After {wl}, {in_names} climb into the playoff places and {out_names} slip out. {leader} sits top, {leader_rec}.",
         ],
@@ -200,6 +211,8 @@ FAMILY = {
             "{a} is {a_rec} and scoring {a_avg}. {b} is {b_rec} and scoring {b_avg}. Somebody's got to win.",
             "On the one side, {a} ({a_rec}, {a_avg}); on the other, {b} ({b_rec}, {b_avg}).",
             "{b_team} ({b}, {b_rec}, {b_avg} a game) against {a_team} ({a}, {a_rec}, {a_avg}) in {wl}.",
+            "{a} ({a_rec}, {a_avg} a game) is up against {b} ({b_rec}, {b_avg}) in {wl}.",
+            "In {wl}, {a} at {a_rec} meets {b} at {b_rec}, scoring {a_avg} and {b_avg} a game.",
         ],
         "p.h2h_split": [
             "They've met already this season and shared the spoils, {h2h_rec}.",
@@ -248,15 +261,15 @@ FAMILY = {
         ],
         "h.t": [
             "Transfer news: {a} sends {gave_s} to {b} for {got_s}",
-            "{a} and {b} does a deal: {gave_s} for {got_s}",
-            "{b} signs {gave_s} from {a}, who take {got_s} in return",
-            "Done deal: {gave_s} goes from {a} to {b}, {got_s} comes back",
+            "{a} and {b} do a deal: {gave_s} for {got_s}",
+            "{b} signs {gave_s} from {a}, who takes {got_s} in return",
+            "Done deal: {a} sends {gave_s} to {b} and gets {got_s} back",
         ],
         "t.sides": [
             "A transfer deal in {wl}: {a} brings in {a_got}, and {b} brings in {b_got}.",
             "Here's the deal from {wl}. {a} gets {a_got}. {b} gets {b_got}.",
-            "{a} lets go {b_got} and take {a_got} in {wl}.",
-            "{b} sends {a_got} to {a} in {wl} and take {b_got} the other way.",
+            "{a} lets go {b_got} and takes {a_got} in {wl}.",
+            "{b} sends {a_got} to {a} in {wl} and takes {b_got} the other way.",
         ],
         "t.returns": [
             "And the early returns: over {since_wk}, {a}'s new players have scored {a_pts} and {b}'s have scored {b_pts}. {lead} has the better of it so far.",
@@ -264,9 +277,9 @@ FAMILY = {
             "After {since_wk}, {a}'s side of the deal has {a_pts}, and {b}'s has {b_pts}. {lead} is ahead.",
         ],
         "t.pending": [
-            "{pk_side} takes {pk_got}, and {pl_side} takes {pl_got}. Picks for players, so it can't be judged yet.",
-            "It's picks for players: {pl_side} has {pl_got}, {pk_side} has {pk_got}. Time will tell.",
-            "{pl_side} has the players ({pl_got}), {pk_side} the picks ({pk_got}). No verdict yet.",
+            "Picks for players, so it can't be judged yet.",
+            "Time will tell for {pk_side} and {pl_side}.",
+            "No verdict yet on the picks and the players.",
         ],
         "t.fresh": [
             "It's far too early to say who won that one.",
@@ -290,7 +303,7 @@ FAMILY = {
         ],
         "h.w.big": [
             "{n} splashes out {bid} on {player}",
-            "{bid} for {player} ({pos}): {n} break the bank",
+            "{bid} for {player} ({pos}): {n} breaks the bank",
             "{n} bids {bid} for {player}",
         ],
         "h.w.small": [
@@ -346,13 +359,13 @@ FAMILY = {
         ],
         "s.total": [
             "The Week {wk} shotgun ledger lists {total_n} across {owners_n}. Pints all round.",
-            "{owners_n} are in for a round, with {total_n} between them for Week {wk}.",
+            "In Week {wk}, {owners_n} will be buying, and the tab is {total_n}.",
             "Week {wk} leaves {total_n} on the tab, across {owners_n}.",
         ],
         "s.owner": [
             "{n} is buying {sgn} this week: {list}.",
             "{n} is on {sgn}, thanks to {list}.",
-            "{n}: {sgn}. Here's why: {list}.",
+            "Here's why {n} is buying: {sgn}, from {list}.",
             "{n} racked up {sgn} with {list}.",
         ],
         "s.low": [
@@ -457,7 +470,7 @@ FAMILY = {
         ],
         "f.h2h": [
             "It all goes back to Week {gwk}, when {w} {verb} {l}, {wp} to {lp}, by {m}. Nobody forgets that.",
-            "In Week {gwk}, {w} beat {l}, {wp}-{lp}, by {m} points, and {l} haven't forgotten.",
+            "In Week {gwk}, {w} beat {l}, {wp}-{lp}, by {m} points, and {l} hasn't forgotten.",
             "{l} went down to {w} in Week {gwk}, {lp} to {wp}. What {noun}.",
         ],
         "f.trade": [
@@ -474,6 +487,7 @@ FAMILY = {
             "There's Week {gwk} to think about: {w} {verb} {l}, {wp} to {lp}, by {m} points.",
             "In Week {gwk}, {w} puts {m} on {l}, {wp}-{lp}. That doesn't wash out.",
             "{w}'s {m}-point win over {l} in Week {gwk} ({wp}-{lp}) is the sort of margin a rival remembers.",
+            "{w} won by {m} over {l} in Week {gwk}, {wp}-{lp}, and the lads still talk about it.",
         ],
         "f.sg": [
             "On the pub tab, {a} is down for {a_sg} and {b} for {b_sg}.",
@@ -665,6 +679,12 @@ FAMILY = {
             "“{qc}” {n} told the cameras.",
             "{n} didn't hold back: “{qp}”",
             "“{qc}” said {n}, as the pundits nodded.",
+            "“{qc}” {n} said, to the lads in the bar.",
+            "{n}, speaking after the final whistle: “{qp}”",
+            "“{qc}” said {n}, with a shrug.",
+            "“{qc}” {n} told the press, as you do.",
+            "Asked for a reaction, {n} said: “{qp}”",
+            "“{qc}” {n} said, and fair play.",
         ],
     },
 }

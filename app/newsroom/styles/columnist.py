@@ -95,9 +95,13 @@ FAMILY = {
             "{pts} for {a}, {pts} for {b}: a draw.",
         ],
         "g.star": [
-            "{star} ({spos}) did most of the heavy lifting for {w}, with {spts}, some {sshare} of the {wp}.",
+            "{star} ({spos}) led the way for {w}, with {spts}, some {sshare} of the {wp}.",
             "I would give the game ball to {star}, the {spos}, who put up {spts} for {w}.",
-            "{star} ({spos}) scored {spts}, {sshare} of {w}'s total, and carried more of the load than the rest of the roster combined, or near it.",
+            "{star} ({spos}) scored {spts}, {sshare} of {w}'s total, and carried {over_half}.",
+            "{star} ({spos}) scored {spts}, {sshare} of {w}'s total, and that was {part_note}.",
+            "{star} ({spos}) led {w}'s lineup with {spts}, which was {sshare} of the {wp}.",
+            "If {w} had a hero, it was {star} ({spos}), with {spts}.",
+            "{star} ({spos}) gave {w} {spts}, and the rest followed as it could.",
         ],
         "g.goat": [
             "{l} got {gpts} out of {gname} ({gpos}), and a lineup cannot carry that kind of weight.",
@@ -108,6 +112,15 @@ FAMILY = {
             "It is a sorry thing to sit a player who scores {bench_pts}, as {l} did with {bench_name} ({bench_pos}), and the best lineup would have added {bench_left}.",
             "{l} left {bench_left} on the bench, {bench_pts} of it from {bench_name} ({bench_pos}), who watched.",
             "A better lineup would have been worth {bench_left} to {l}. {bench_name} ({bench_pos}) scored {bench_pts} on the bench, and nobody asked.",
+            "I cannot let {l}'s bench go unremarked: {bench_name} ({bench_pos}) scored {bench_pts} there, and {bench_left} went unused.",
+            "{l} will think about {bench_name} ({bench_pos}) all week, and the {bench_pts} the player scored on the bench.",
+        ],
+        "g.bench_total": [
+            "It is a sorry thing to leave {bench_left} on the bench, as {l} did, and call it a lineup.",
+            "A better lineup would have been worth {bench_left} to {l}, and nobody asked for it.",
+            "{l} left {bench_left} sitting on the bench, which is the kind of mistake a person remembers.",
+            "The bench cost {l} {bench_left}, and I suspect {l} knows it.",
+            "{l} could have had {bench_left} more, and chose otherwise.",
         ],
         "g.streak_w": [
             "{w} has now won {k} in a row and stands {w_rank} at {w_rec}, and a streak like that begins to feel less like luck and more like habit.",
@@ -135,14 +148,14 @@ FAMILY = {
             "{lp} for {l}, the low mark of the week by some distance; the average was {wavg}.",
         ],
         "g.luck_up": [
-            "{n} is {n_rec}, and by the all-play numbers {luck} wins better than the team has earned, which is the kind of luck you should not count on.",
-            "I notice {n} is {luck} wins ahead of the all-play expectation at {n_rec}. Fortune has been kind.",
-            "{n} ({n_rec}) has {luck} wins more than its weekly scoring deserves, and that sort of thing tends to be repaid.",
+            "{n} is {n_rec}, and by the all-play numbers {luck_abs} wins better than the team has earned, which is the kind of luck you should not count on.",
+            "I notice {n} is {luck_abs} wins ahead of the all-play expectation at {n_rec}. Fortune has been kind.",
+            "{n} ({n_rec}) has {luck_abs} wins more than their weekly scoring deserves, and that sort of thing tends to be repaid.",
         ],
         "g.luck_down": [
-            "{n} is {n_rec}, and by the all-play numbers {luck} wins worse than the team has earned, which is the kind of luck you would not wish on a friend.",
-            "I notice {n} is {luck} wins behind the all-play expectation at {n_rec}. Fortune has not been kind.",
-            "{n} ({n_rec}) has {luck} wins fewer than its weekly scoring deserves, and I would expect that to be repaid in time.",
+            "{n} is {n_rec}, and by the all-play numbers {luck_abs} wins worse than the team has earned, which is the kind of luck you would not wish on a friend.",
+            "I notice {n} is {luck_abs} wins behind the all-play expectation at {n_rec}. Fortune has not been kind.",
+            "{n} ({n_rec}) has {luck_abs} wins fewer than their weekly scoring deserves, and I would expect that to be repaid in time.",
         ],
         "g.upset": [
             "Before the game, {w} stood {w_rank0} and {l} stood {l_rank0}, and the order of things was clear. It did not last.",
@@ -200,6 +213,8 @@ FAMILY = {
             "{a} is {a_rec} and scoring {a_avg} a game. {b} is {b_rec} and scoring {b_avg}. Those are the facts of the matter.",
             "On one side, {a} at {a_rec}, scoring {a_avg}; on the other, {b} at {b_rec}, scoring {b_avg}.",
             "{b_team} ({b}, {b_rec}, {b_avg} a game) will face {a_team} ({a}, {a_rec}, {a_avg}) in {wl}.",
+            "Consider {a}, at {a_rec} and {a_avg} a game, and {b}, at {b_rec} and {b_avg}.",
+            "{a} and {b} meet in {wl}, one at {a_rec} and one at {b_rec}, scoring {a_avg} and {b_avg}.",
         ],
         "p.h2h_split": [
             "They have met already this season and split it, {h2h_rec}, which settles nothing.",
@@ -250,7 +265,7 @@ FAMILY = {
             "{a} sends {gave_s} to {b} for {got_s}, and I have my doubts",
             "A swap between {a} and {b}: {gave_s} for {got_s}",
             "{b} gets {gave_s} from {a}, who takes {got_s} in return",
-            "A trade worth a second look: {gave_s} goes from {a} to {b}, {got_s} comes back",
+            "A trade worth a second look: {a} sends {gave_s} to {b} and gets {got_s} back",
         ],
         "t.sides": [
             "In {wl}, {a} and {b} made a trade. {a} took {a_got}, and {b} took {b_got}.",
@@ -264,9 +279,9 @@ FAMILY = {
             "Over {since_wk}, {a}'s side of the trade has scored {a_pts} and {b}'s side {b_pts}. {lead} is ahead, but I would not carve it in stone.",
         ],
         "t.pending": [
-            "{pk_side} got {pk_got}, and {pl_side} got {pl_got}. Picks for players cannot be graded until the picks play a game, and I will wait.",
-            "It is picks for players: {pl_side} took {pl_got}, and {pk_side} took {pk_got}. The verdict will come in time.",
-            "{pl_side} has the players ({pl_got}) and {pk_side} has the picks ({pk_got}). We will know who was wise later.",
+            "Picks for players cannot be graded until the picks play a game, and I will wait.",
+            "{pl_side} has the players and {pk_side} has the picks. We will know who was wise later.",
+            "The verdict will come in time, and {pk_side} and {pl_side} will both hear it.",
         ],
         "t.fresh": [
             "It is too early to say who got the better of it, and I will not pretend otherwise.",
@@ -347,7 +362,7 @@ FAMILY = {
         "s.total": [
             "The shotgun ledger for Week {wk} lists {total_n} across {owners_n}, and I am told the beer is cold.",
             "{owners_n} will be paying {total_n} for Week {wk}.",
-            "Week {wk} produced {total_n}, and {owners_n} to answer for them.",
+            "Week {wk} produced {total_n}, with {owners_n} to answer for the lot.",
         ],
         "s.owner": [
             "{n} will be settling up for {sgn}: {list}.",
@@ -474,6 +489,7 @@ FAMILY = {
             "Nothing sticks like a beating, and in Week {gwk}, {w} {verb} {l}, {wp} to {lp}, by {m}.",
             "I was struck by Week {gwk}, when {w} beat {l} by {m} points, {wp}-{lp}.",
             "{w}'s {m}-point win over {l} in Week {gwk} ({wp}-{lp}) is a margin people remember.",
+            "In Week {gwk}, {w} won by {m} over {l}, and I have not forgotten it.",
         ],
         "f.sg": [
             "On the shotgun ledger, {a} has {a_sg} and {b} has {b_sg}, a small comfort or a large one.",
@@ -665,6 +681,12 @@ FAMILY = {
             "“{qc}” {n} offered, and I could not argue.",
             "As {n} put it: “{qp}”",
             "“{qc}” {n} said, and left it at that.",
+            "“{qc}” {n} said over the phone, and I let it stand.",
+            "{n} put it to me this way: “{qp}”",
+            "“{qc}” {n} said, with a straight face.",
+            "“{qc}” {n} told me, and I wrote it down.",
+            "I asked {n} about it. The answer: “{qp}”",
+            "“{qc}” {n} said, which was more than I expected.",
         ],
     },
 }
