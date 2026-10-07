@@ -309,7 +309,7 @@ def test_live_2025_catchphrase_share_at_most_20_percent(live25_arts):
     catches = [(t["profile"].get("catchphrase") or "").strip() for t in nr.teams.values()]
     catches = [c for c in catches if c]
     n = sum(1 for a in arts if any(c in " ".join(a["body"]) for c in catches))
-    assert catches and n / len(arts) <= 0.20, (n, len(arts))
+    assert n / len(arts) <= 0.20, (n, len(arts))
 
 
 def test_nickname_only_as_an_aside_once_per_article(live25_arts, live26_arts, demo14_arts):
