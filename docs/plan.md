@@ -1,6 +1,11 @@
 # Plan / status board
 
 ## Right now
+- Newsroom v2 shipped (50 reporters, 14 families, grounded facts, weekly roundup/preview, as-of-week snapshots); editorial desk + daily release calendar shipped; fix round 1 (feud incidents, ordinals, trade timing, grammar, catchphrase share) in progress.
+- Daily routine "Labrums daily desk" (trig_01SvKFQhrc9AixSX936kn4Qp) fires 5:29 am America/New_York, fresh session, writes today's edition into content/articles/ and pushes to claude/magical-edison-g0t0m1. Update its prompt if the branch is merged to main.
+- Owner declined an Anthropic API key; the desk routine (their Claude Code subscription) is the "AI-written" path instead.
+- Pending from owner: iMessage group chat export (imessage-exporter) to build per-person voice profiles; Vercel import + Upstash.
+
 - Running against the real league (Labrums and Lagers, 10 teams, 2 divisions, dynasty). Verified vs Sleeper: 10/10 records, 14/14 shotguns, 2025 playoff field. 78 tests green. Pushed to `claude/magical-edison-g0t0m1`.
 - Config is filled: 10 owner profiles with real names, 5 rivalry bowls, the Nick rule (Michael/Patrick/Bowie owe a shotgun any week they score less than Nick). Division seeding confirmed by the owner. Articles and pages use real first names; Sleeper handles shown as secondary. 82 tests green.
 - Restyled to match davidsasser.com (paper/ink/green, Geist + Geist Mono, hairlines, square, mono eyebrows, data-driven hero). Refuter-verified: all interactions, dark mode, mobile. His site: Next.js (vinext) on Cloudflare.

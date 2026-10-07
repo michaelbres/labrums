@@ -36,6 +36,13 @@ Modeled on davidsasser.com (brief saved during the session; the tokens live at t
 - davidsasser.com itself: Next.js (vinext) on Cloudflare; static, hence free. Rejected for us: Render free (sleeps), Fly/Railway (no free tier), Cloudflare Pages static rebuild (more refactor).
 - UNVERIFIED until a real deploy: FastAPI detection, static promotion, pyproject vs requirements precedence, real Upstash SCAN/limits.
 
+## Newsroom v2 + editorial desk (2026-10-07)
+- app/newsroom/: voices.py (50 reporters), families.py + styles/ (14 families, ≥3 variants per beat slot), quotes.py (situation-keyed), beats*.py (facts → paragraphs), lint.py (coherence rules, raises under LABRUMS_NEWSROOM_DEBUG=1), calendar.py (publish_on; 6 am America/New_York editions), desk.py (content/articles/{season}/week-N.json overrides by stable key), tools.py. app/articles.py is a thin wrapper. stats.snapshot(st, ctx, week) gives as-of-week records/streaks/ranks.
+- One roundup + one preview per week; column (Sun) and analytics (Mon) types added. Catchphrase/trait use is rate-limited per build. Determinism verified across processes and hash seeds.
+- Writer tooling: scripts/newsroom_facts.py (--week / --all-pending → content/facts, gitignored), scripts/newsroom_lint.py, docs/newsroom.md.
+- Refuter6 fact-check: all numbers/records/odds matched the data; remaining issues (feud incident selection, ordinal bug, trade timing vs Tuesday cutoff, catchphrase share 50%, grammar in deadpan/british/finance) are in specs/newsroom-fixes-1.md (scratch) and being fixed.
+- Config: `commissioner: michaelbreslow`; legacy `reporters` list removed; Adam's "..." catchphrase treated as unset.
+
 ## Known assumptions / unverified
 - Clinch/eliminate: exact counting rule while games remain (ties on wins count as "can still pass me"); final standings decide once the regular season is over.
 
