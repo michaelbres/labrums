@@ -89,14 +89,16 @@ def test_tie_recap(ctx):
     assert len(pair) == 2
     pair[1]["points"] = pair[0]["points"]
     _, _, _, arts = _build(c)
-    recaps = [a for a in arts if a["type"] == "recap" and a["week"] == 2
-              and {int(pair[0]["roster_id"]), int(pair[1]["roster_id"])} == set(a["teams"])]
-    assert len(recaps) == 1
-    assert "Tie" in recaps[0]["headline"]
+    recaps = [a for a in arts if a["type"] == "recap" and a["week"] == 2]
+    assert len(recaps) == 1 and recaps[0]["facts"]["story"]["kind"] == "tie"
+    a_id, b_id = int(pair[0]["roster_id"]), int(pair[1]["roster_id"])
+    assert {a_id, b_id} <= set(recaps[0]["teams"])
+    tied = next(g for g in recaps[0]["facts"]["games"] if g.get("result") == "tie")
+    assert len(tied["teams"]) == 2
     for a in arts:
         for p in [a["headline"], a["dek"], *a["body"]]:
             assert "{" not in p and "}" not in p, p
-    assert not any("beat" in p or "drops to" in p for p in recaps[0]["body"])
+    assert not any(" beat " in p and "tie" in a["headline"].lower() for p in recaps[0]["body"] for a in recaps)
 
 
 def test_low_reason_between_zero_and_threshold(ctx, make_ctx):

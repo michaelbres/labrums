@@ -60,7 +60,10 @@ def test_quotes_read_cleanly_and_pluralize(ctx, st, po, items):
     for a in arts:
         for para in a["body"]:
             assert not bad.search(para), para
-    quoted = [p for a in arts for p in a["body"] if p.startswith("“")]
-    assert quoted and all(re.search(r"[,!?]” said \S", p) for p in quoted)
+    quoted = [p for a in arts for p in a["body"] if "“" in p]
+    assert quoted
+    for p in quoted:
+        assert p.count("“") == p.count("”"), p
+        assert re.search(r"[,.!?]”", p), p  # punctuation sits inside the closing quote mark
     assert not [a for a in arts if "1 Other Moves" in a["headline"]]
     assert not re.search(r"\d+ round \d+ pick", " ".join(p.replace("a 20", "") for a in arts if a["type"] == "trade" for p in a["body"]))

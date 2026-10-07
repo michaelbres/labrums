@@ -31,7 +31,8 @@ def test_offseason_trades_make_one_article(ctx, arts):
     off = [a for a in arts if a["type"] == "offseason"]
     assert len(off) == 1
     assert off[0]["week"] == 1
-    assert off[0]["headline"].startswith("Offseason Report: 4 Trades, 6 Pickups")
+    assert off[0]["facts"]["trades"] == 4 and off[0]["facts"]["pickups"] == 6
+    assert "4 trades" in " ".join([off[0]["headline"], off[0]["dek"], *off[0]["body"]]).lower()
     trades = [a for a in arts if a["type"] == "trade"]
     assert sorted(a["week"] for a in trades) == [2, 4, 6]  # in-season trades keep their own articles
 

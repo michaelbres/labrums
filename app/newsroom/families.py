@@ -29,7 +29,7 @@ SLOTS: dict[str, tuple[int, str, str]] = {
     "r.lede.close": (3, G_RES, ""),
     "r.lede.top": (3, G_RES + " wavg", ""),
     "r.lede.tie": (3, G_TIE, ""),
-    "g.result": (5, G_RES, ""),
+    "g.result": (10, G_RES, ""),
     "g.tie": (3, G_TIE, ""),
     "g.star": (3, "w l wp lp star spos spts sshare wl wk", ""),
     "g.goat": (3, "w l gname gpos gpts wl wk", ""),
@@ -51,12 +51,12 @@ SLOTS: dict[str, tuple[int, str, str]] = {
     "h.p.fav": (3, "fav dog fav_odds dog_odds a b wk wl", ""),
     "h.p.even": (3, "a b a_odds b_odds wk wl", ""),
     "h.p.lev": (3, "a b swing wk wl", ""),
-    "p.lede": (3, "a b a_team b_team a_odds b_odds swing fav dog wk wl", ""),
+    "p.lede": (3, "a b a_team b_team wk wl", "swing fav dog"),
     "p.matchup": (4, "a b a_team b_team a_rec b_rec a_avg b_avg wk wl", ""),
     "p.h2h_split": (3, "a b h2h_rec", ""),
     "p.h2h_lead": (3, "lead trail h2h_rec", ""),
     "p.h2h_none": (3, "a b", ""),
-    "p.stakes": (3, "a b a_odds b_odds", "a_win a_loss b_win b_loss"),
+    "p.stakes": (3, "a b a_win a_loss b_win b_loss", ""),
     "p.leverage": (3, "a b swing", ""),
     "p.favorite": (3, "fav dog fav_odds dog_odds fav_why", ""),
     "p.vol": (3, "vol_n vol_std other other_std", ""),
@@ -201,6 +201,16 @@ def validate(fam: Family) -> list[str]:
                 bad.append(f"{fam.id}:{slot}: spacing in {t!r}")
         if usable < 3:
             bad.append(f"{fam.id}:{slot}: only {usable} templates always usable")
+    names_w = ("{w}", "{w_nick}")
+    for slot in fam.T:
+        if slot in ("g.result",) or slot.startswith("r.lede.") and not slot.endswith(".tie"):
+            for t in fam.T[slot]:
+                if not any(k in t for k in names_w) or "{l}" not in t and "{l_nick}" not in t:
+                    bad.append(f"{fam.id}:{slot}: must name both owners ({{w}} and {{l}}): {t!r}")
+        if slot == "r.lede.tie" or slot == "g.tie":
+            for t in fam.T[slot]:
+                if "{a}" not in t or "{b}" not in t:
+                    bad.append(f"{fam.id}:{slot}: must name both owners ({{a}} and {{b}}): {t!r}")
     for slot in fam.T:
         if slot not in SLOTS:
             bad.append(f"{fam.id}:{slot}: unknown slot")

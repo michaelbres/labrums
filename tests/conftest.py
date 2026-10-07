@@ -2,8 +2,11 @@
 from __future__ import annotations
 
 import copy
+import os
 
 import pytest
+
+os.environ.setdefault("LABRUMS_NEWSROOM_DEBUG", "1")  # newsroom lint raises inside generate() under test
 
 from app import articles, config, loader, playoffs, shotguns, stats
 from app.demo import DemoClient

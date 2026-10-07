@@ -5,7 +5,9 @@ import re
 
 _ORD = {1: "1st", 2: "2nd", 3: "3rd"}
 _WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"]
-_ORD_WORDS = ["zeroth", "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"]
+_ORD_WORDS = ["zeroth", "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth",
+              "eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth",
+              "nineteenth", "twentieth"]
 
 
 def ordinal(n: int) -> str:
@@ -38,7 +40,7 @@ def fmt1(x: float) -> str:
 
 def pts(x: float) -> str:
     """'1 point' / '12.4 points' / '0 points' / '-2.1 points'."""
-    return "1 point" if round(float(x), 2) == 1 else f"{fmt(x)} points"
+    return f"{fmt(x)} point" if abs(round(float(x), 2)) == 1 else f"{fmt(x)} points"
 
 
 def pct(p: float | None) -> str | None:
@@ -88,8 +90,12 @@ def fill(tpl: str, vals: dict[str, str]) -> str:
     return _PLACE.sub(lambda m: vals[m.group(1)], tpl)
 
 
+_ABBR = re.compile(r"\b(Dr|Mr|Mrs|Ms|Hon|vs|St|Jr|Sr|Esq|ret)\.")
+
+
 def split_sentences(text: str) -> list[str]:
-    """Rough sentence splitter used by lint and the diversity tests."""
-    text = text.replace("“", '"').replace("”", '"')
+    """Rough sentence splitter used by the repetition memory, lint and tests."""
+    text = text.replace("\u201c", '"').replace("\u201d", '"')
+    text = _ABBR.sub(lambda m: m.group(1) + "\x00", text)
     parts = re.split(r'(?<=[.!?])"?\s+(?=["A-Z0-9(])', text)
-    return [p.strip() for p in parts if p.strip()]
+    return [p.replace("\x00", ".").strip() for p in parts if p.strip()]

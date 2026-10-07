@@ -156,12 +156,3 @@ rivalries:
   - name: "The Waste Management Bowl"
     owners: ["asinagra25", "colonbuns"]
     backstory: "Adam and Colin. Catan's most questionable trader against Minecraft's most dedicated builder. The Rule of 5 does not apply to sheep."
-
-# Fake newsroom bylines.
-reporters:
-  - "Skip Bayless Jr."
-  - "Adam Schefter's Nephew"
-  - "Woj Bomb"
-  - "Diana Russini-Lite"
-  - "The Beat Writer"
-  - "Anonymous League Source"

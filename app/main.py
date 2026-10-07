@@ -171,6 +171,7 @@ def serialize(season: str, m: dict) -> dict[str, Any]:
                                "special": [r for r in ctx["config"].get("special_rules", []) if not r.get("season") or r["season"] == season]}},
         "articles": m["articles"],
         "rivalries": articles.Newsroom(ctx, st, m["playoffs"], m["shotgun_items"]).rivalries,
+        "reporters": articles.reporters(),
         "meta": {"demo": state.demo, "built_at": m["built_at"], "build_seconds": m["build_seconds"],
                  "admin_locked": bool(state.admin_pin), "persistence": state.persistence,
                  **({"store_error": store_error} if store_error else {})},

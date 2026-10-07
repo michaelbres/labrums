@@ -93,7 +93,7 @@
     const owed = lb.reduce((a, r) => a + r.outstanding, 0);
     const rec = d.records || {};
     const hi = rec.high_score ? `${fmt(rec.high_score.points)} · ${team(rec.high_score.roster_id).name} (wk ${rec.high_score.week})` : '—';
-    const headlines = d.articles.slice(0, 8);
+    const headlines = pickHeadlines(d.articles, 6);
     const po = d.playoffs.teams;
     const [tw, tl, tt] = String(top.record).split('-').map(Number);
     const bubble = d.standings.slice(1).map(team).filter((t) => po[t.roster_id] && po[t.roster_id].playoff_pct != null)
@@ -292,10 +292,34 @@
         <form class="form-row" id="manual-form"><select class="select" name="week">${weekOpts}</select><select class="select" name="roster_id">${ownerOpts}</select><input class="input" name="label" placeholder="Reason (e.g. lost a side bet)" required style="flex:1;min-width:200px"><input class="input" name="detail" placeholder="Details (optional)" style="flex:1;min-width:160px"><button class="btn btn-primary" type="submit" ${locked ? 'disabled' : ''}>Add</button></form></div>`;
   }
 
+  // Home page: the freshest story of each kind, in a fixed order of importance, instead of the first N by date.
+  function pickHeadlines(arts, n) {
+    const order = ['preview', 'recap', 'standings', 'shotgun', 'rivalry', 'trade', 'waiver', 'feud', 'offseason'];
+    const picked = [];
+    for (const type of order) {
+      const a = arts.find((x) => x.type === type);
+      if (a) picked.push(a);
+    }
+    for (const a of arts) if (picked.length < n && !picked.includes(a)) picked.push(a);
+    return picked.slice(0, n);
+  }
+
+  function bylineOf(a) {
+    const r = a.reporter;
+    return r ? `By ${esc(r.name)} · ${esc(r.outlet)}` : `By ${esc(a.byline)}`;
+  }
+
+  function mastheadCard() {
+    const rs = state.data.reporters || [];
+    if (!rs.length) return '';
+    return `<div class="card section masthead"><div class="card-h"><h2>Masthead</h2><small>${rs.length} reporters, no two alike</small></div>
+      <ul class="clean masthead-list">${rs.map((r) => `<li><div class="m-name">${esc(r.name)}</div><div class="m-outlet">${esc(r.outlet)}</div><div class="m-bio">${esc(r.bio)}</div></li>`).join('')}</ul></div>`;
+  }
+
   function articleCard(a, open = false) {
     return `<article class="card article type-${esc(a.type)} ${open ? 'open' : ''}" id="art-${esc(a.id)}">
       <div class="kicker"><span>${esc(a.type)}</span><span>·</span><span>Week ${a.week}</span>${a.tags.includes('rivalry') ? '<span class="badge bad">rivalry</span>' : ''}</div>
-      <h3>${esc(a.headline)}</h3><div class="dek">${esc(a.dek)}</div><div class="byline">By ${esc(a.byline)} · ${a.teams.map((rid) => teamLink(rid)).join(', ')}</div>
+      <h3>${esc(a.headline)}</h3><div class="dek">${esc(a.dek)}</div><div class="byline">${bylineOf(a)} · ${a.teams.map((rid) => teamLink(rid)).join(', ')}</div>
       <div class="body">${a.body.map((p) => `<p>${esc(p)}</p>`).join('')}</div>
       <span class="more" data-more>${open ? 'Collapse' : 'Read more'}</span></article>`;
   }
@@ -317,7 +341,8 @@
       ${pageHead('05 / News', 'League News', 'All of it fake. Most of it accurate.',
         `<select class="select" id="news-week">${weeks.map((w) => `<option value="${w}" ${String(state.newsWeek) === String(w) ? 'selected' : ''}>${w === 'all' ? 'All weeks' : `Week ${w}`}</option>`).join('')}</select>`)}
       <div class="chips section">${types.map((t) => `<span class="chip ${state.newsFilter === t ? 'active' : ''}" data-news="${t}">${t}</span>`).join('')}</div>
-      <div class="grid" style="gap:12px">${arts.map((a) => articleCard(a)).join('') || '<div class="empty">No stories match.</div>'}</div>`;
+      <div class="grid" style="gap:12px">${arts.map((a) => articleCard(a)).join('') || '<div class="empty">No stories match.</div>'}</div>
+      ${mastheadCard()}`;
   }
 
   function viewRivalries() {

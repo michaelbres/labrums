@@ -2,12 +2,14 @@
 transactions, shotguns, rivalries. Nothing here writes prose."""
 from __future__ import annotations
 
+import re
+from collections import Counter
 from typing import Any
 
 from .. import shotguns, stats
 from ..loader import is_offseason
 from ..sleeper import player_label
-from .util import fmt, ordinal, pts
+from .util import fmt, ordinal, pts, split_sentences
 
 
 class Book:
@@ -21,6 +23,9 @@ class Book:
         self.rivalries = self._resolve_rivalries()
         self.commissioner = shotguns.team_by_name(ctx, self.cfg.get("commissioner")) if self.cfg.get("commissioner") else None
         self._snaps: dict[int, dict] = {}
+        self.seen: Counter = Counter()        # normalized sentence -> times written in this build
+        self.quote_use: Counter = Counter()   # (situation, variant) -> times quoted in this build
+        self._norm_rx: re.Pattern | None = None
         self.games_by_week: dict[int, list[dict]] = {}
         for g in st["games"]:
             self.games_by_week.setdefault(g["week"], []).append(g)
@@ -184,3 +189,37 @@ class Book:
             if p.get("owner_id") is not None and int(p["owner_id"]) in got:
                 got[int(p["owner_id"])]["picks"].append(f"a {p.get('season')} round {p.get('round')} pick")
         return got
+
+    # ---- repetition memory ----------------------------------------------
+    def _names_rx(self) -> re.Pattern | None:
+        if self._norm_rx is None:
+            names: set[str] = set()
+            for rid, t in self.teams.items():
+                for k in ("name", "team_name", "nickname", "display_name"):
+                    v = " ".join(str(t.get(k) or "").split())
+                    if v:
+                        names.add(v)
+            players = self.ctx["players"]
+            for rows in self.ctx["matchups"].values():
+                for r in rows:
+                    for pid in r.get("players") or []:
+                        lab = players.get(str(pid)) or {}
+                        n = " ".join(str(x) for x in (lab.get("first_name"), lab.get("last_name")) if x)
+                        if n:
+                            names.add(n)
+            ordered = sorted(names, key=len, reverse=True)
+            self._norm_rx = re.compile("|".join(re.escape(n) for n in ordered)) if ordered else re.compile(r"(?!x)x")
+        return self._norm_rx
+
+    def sentence_keys(self, text: str) -> list[str]:
+        """Sentences of `text` with names and numbers stripped, lowercased: two sentences are 'the same
+        language' when their keys match."""
+        rx = self._names_rx()
+        out = []
+        for sent in split_sentences(rx.sub("X", text)):
+            k = sent.replace("\u201c", "").replace("\u201d", "").replace('"', "")
+            k = re.sub(r"-?\d[\d.,]*%?", "N", k)
+            k = re.sub(r"\s+", " ", k.lower()).strip()
+            if len(k.split()) >= 4:   # fragments like "N points." are not 'language'
+                out.append(k)
+        return out

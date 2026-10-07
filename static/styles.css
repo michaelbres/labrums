@@ -236,6 +236,13 @@ tr.cut-line td { border-bottom: 1px dashed var(--accent); }
 .headlines a:hover { color: var(--accent); }
 .headlines .kicker { font-family: var(--mono); font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: .08em; }
 
+/* masthead */
+.masthead-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0 28px; }
+.masthead-list li { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.masthead .m-name { font-weight: 560; letter-spacing: -.01em; }
+.masthead .m-outlet { font-family: var(--mono); font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; margin: 2px 0 4px; }
+.masthead .m-bio { color: var(--muted); font-size: 13px; line-height: 1.4; }
+
 /* shotgun list */
 .shot-row { display: grid; grid-template-columns: 24px 56px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
 .shot-row:last-child { border-bottom: 0; }

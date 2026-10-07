@@ -1,0 +1,108 @@
+"""Coherence lint. Run in generate() (debug mode raises) and in the test-suite."""
+from __future__ import annotations
+
+import re
+
+BLOW_RE = re.compile(r"massacre|\brout(?:ed|s)?\b|demoli|obliterat|annihilat|steamroll|pummel|dismantl|thrash|humiliat|"
+                     r"shellack|landslide|blowout|flatten|\bcrush|destroy|decimat|bulldoz|\bmauled?\b|wreck", re.I)
+CLOSE_RE = re.compile(r"\bescap|thriller|nail-?bit|squeaker|photo finish|whisker|\bedged\b|\bedges\b|razor|"
+                      r"survived|survives|heart-?stop|sweated|sweating|cliffhanger|knife-?edge|by a hair", re.I)
+PLAYOFF_BAD = re.compile(r"drops to|moved to|moves to|bylaws|alive for|\bstanding ovation\b", re.I)
+GENERIC_BAD = re.compile(r"\bassets\b|nothing of note|\bnan\b|(?<![\d.])1 (?:points|shotguns|players|picks|wins|games|trades)\b|"
+                         r"\bLARP|\bkicker|\bpunter|\bundefined\b", re.I)
+CASE_BAD = re.compile(r"\bNone\b")
+
+
+def _paras(a: dict) -> list[tuple[str, dict]]:
+    metas = (a.get("facts") or {}).get("paras") or []
+    out = []
+    for i, p in enumerate(a["body"]):
+        out.append((p, metas[i] if i < len(metas) else {}))
+    return out
+
+
+def check(a: dict, book=None) -> list[str]:
+    probs: list[str] = []
+    head, dek, body = a["headline"], a["dek"], a["body"]
+    text = " ".join([head, dek, *body])
+    aid = a["id"]
+
+    def bad(msg: str) -> None:
+        probs.append(f"{aid}: {msg}")
+
+    scrub = text
+    if book is not None:  # owner-written text (catchphrases, traits) may legitimately contain braces
+        for t in book.teams.values():
+            prof = t.get("profile") or {}
+            for chunk in [prof.get("catchphrase")] + list(prof.get("traits") or []):
+                for variant in (chunk, str(chunk or "").replace("{me}", "").replace("{them}", "")):
+                    if variant:
+                        scrub = scrub.replace(str(variant), "")
+    if re.search(r"[{}]", scrub):
+        bad("unfilled braces")
+    if "  " in text:
+        bad("double space")
+    if re.search(r"(?<!\.)\.\.(?!\.)|,,|\s,|\s\.(?!\d)|\.\s\.", text):
+        bad("double/stray punctuation")
+    for p in [head, dek, *body]:
+        if re.search(r"[.!?]”\s+[a-z]", p):
+            bad(f"lowercase sentence start after a quote: {p[:80]!r}")
+        if p != p.strip() or not p:
+            bad("empty or untrimmed paragraph")
+    if re.search(r"larp", text, re.I):
+        bad("LARP")
+    m = GENERIC_BAD.search(text)
+    if m and not (m.group(0).lower() in ("kicker", "punter") and book is not None and ({"K", "DEF", "DST"} & book.positions)):
+        bad(f"banned phrase {m.group(0)!r}")
+    if CASE_BAD.search(text):
+        bad(f"banned token {CASE_BAD.search(text).group(0)!r}")
+    for p in body:
+        if "typo" in p and not re.search(r"(?<![\d.])0(?:\.0+)? points|zero", p):
+            bad("'typo' joke on a non-zero score")
+    body_text = " ".join(body)
+    if book is not None:
+        for rid in a["teams"]:
+            if book.name(rid) not in body_text and book.nickname(rid) not in body_text:
+                bad(f"team {book.name(rid)!r} in teams but not mentioned in the body")
+        for rid, t in book.teams.items():
+            nick = str(t.get("nickname") or "").strip()
+            if nick and nick != book.name(rid) and len(re.findall(rf"\b{re.escape(nick)}\b", text)) > 1:
+                bad(f"nickname {nick!r} used more than once")
+    facts = a.get("facts") or {}
+    kind = a["type"]
+    if kind == "recap":
+        _lint_recap(a, facts, bad, {book.name(r): (book.nickname(r),) for r in book.teams} if book is not None else None)
+    if kind == "preview":
+        hf = facts.get("headline_favorite")
+        if hf is not None and hf != facts.get("favorite"):
+            bad("preview headline favorite differs from facts.favorite")
+        if hf is not None and hf not in head:
+            bad("preview headline does not name its favorite")
+    return probs
+
+
+def _lint_recap(a: dict, facts: dict, bad, nicks: dict | None = None) -> None:
+    nicks = nicks or {}
+    games = facts.get("games") or []
+    story = facts.get("story") or {}
+    sg = games[story["game"]] if games and story.get("game") is not None and story["game"] < len(games) else None
+    cls = (sg.get("mclass") if sg and sg.get("result") != "tie" else "tie") if sg else None
+    texts = [("headline", a["headline"], cls)] + [(f"para {i}", p, m.get("mclass") if m else None)
+                                                  for i, (p, m) in enumerate(_paras(a))]
+    for where, t, c in texts:
+        if c is None and where != "headline":
+            continue
+        if c != "blowout" and BLOW_RE.search(t):
+            bad(f"blowout wording in {where} but game class is {c}: {BLOW_RE.search(t).group(0)!r}")
+        if c != "close" and CLOSE_RE.search(t):
+            bad(f"close-game wording in {where} but game class is {c}: {CLOSE_RE.search(t).group(0)!r}")
+    if facts.get("playoff") and PLAYOFF_BAD.search(" ".join(a["body"])):
+        bad(f"regular-season framing in a playoff week: {PLAYOFF_BAD.search(' '.join(a['body'])).group(0)!r}")
+    for i, (p, m) in enumerate(_paras(a)):
+        if m and m.get("game") is not None and m.get("teams"):
+            for nm in m["teams"]:
+                if nm not in p and not any(nick and nick in p for nick in nicks.get(nm, ())):
+                    bad(f"game paragraph {i} does not mention {nm!r}")
+            g = games[m["game"]] if m["game"] < len(games) else None
+            if g and g.get("winner") and (g["winner"] not in m["teams"] or g["loser"] not in m["teams"]):
+                bad(f"paragraph {i} teams do not match the game")

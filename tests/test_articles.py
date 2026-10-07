@@ -18,25 +18,26 @@ def test_deterministic(ctx, st, po, items):
     assert a == b
 
 
-def test_recap_for_every_completed_game(st, arts):
+def test_one_roundup_per_completed_week(ctx, st, arts):
     recaps = [a for a in arts if a["type"] == "recap"]
-    assert len(recaps) == len(st["games"])
-    got = {(a["week"], frozenset(a["teams"])) for a in recaps}
-    want = {(g["week"], frozenset((g["a"], g["b"]))) for g in st["games"]}
-    assert got == want
+    weeks = sorted({g["week"] for g in st["games"]})
+    assert sorted(a["week"] for a in recaps) == weeks and len(recaps) == len(weeks)
+    for a in recaps:
+        week_teams = {t for g in st["games"] if g["week"] == a["week"] for t in (g["a"], g["b"])}
+        assert set(a["teams"]) == week_teams
+        assert a["tags"] == ["recap", f"week-{a['week']}"]
 
 
 def test_single_standings_article(arts):
     assert len([a for a in arts if a["type"] == "standings"]) == 1
 
 
-def test_week7_previews(st, arts):
-    previews = [a for a in arts if a["type"] == "preview" and a["week"] == 7]
-    assert len(previews) == len(st["schedule"][7])
+def test_one_weekly_preview(st, arts):
+    previews = [a for a in arts if a["type"] == "preview"]
+    assert len(previews) == 1 and previews[0]["week"] == 7
     games = {frozenset((g["a"], g["b"])) for g in st["schedule"][7]}
-    for p in previews:
-        assert len(p["teams"]) == 2
-        assert frozenset(p["teams"]) in games
+    assert len(previews[0]["facts"]["games"]) == len(games)
+    assert set(previews[0]["teams"]) == {t for g in st["schedule"][7] for t in (g["a"], g["b"])}
 
 
 def test_rivalry_article(ctx, st, po, make_ctx):
@@ -51,6 +52,7 @@ def test_rivalry_article(ctx, st, po, make_ctx):
     assert len(riv) == 1
     assert riv[0]["week"] == 7
     assert set(riv[0]["teams"]) == {game["a"], game["b"]}
+    assert riv[0]["reporter"]["name"] and riv[0]["reporter"]["outlet"] and riv[0]["reporter"]["bio"]
     assert "Born in a group chat." in " ".join(riv[0]["body"])
 
 

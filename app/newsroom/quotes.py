@@ -21,6 +21,17 @@ BANK: dict[str, list[str]] = {
         "Somebody tell {opp} it's only fantasy. Tell {opp} after I screenshot this.",
         "Great win, great team, great margin: {m}. I'll be at the bar if anyone wants the receipts.",
         "{opp} played the {lp} game {opp} was always going to play, and I played the {wp} game I was always going to play.",
+        "Put {wp} on the board and left the rest to {opp}. {opp} did not take the hint.",
+        "I'm not saying {opp} gave up, but I didn't see a fight. {m} points is a statement.",
+        "A {m}-point win is a lot of points. I'm choosing to enjoy every one of them.",
+        "Week {wk} was my week, and {opp} just happened to be in it.",
+        "If you need me, I'll be refreshing my phone and not feeling sorry for {opp}.",
+        "I've seen better teams lose by less than {opp} did, so take that however you like.",
+        "Scored {wp}, took the week, and I'm still deciding whether to be humble about it.",
+        "{opp} brought a plan. I brought {wp} points. Guess which one traveled farther.",
+        "The way {opp} lost by {m} is the way you lose when the other side is having fun.",
+        "{m} points of daylight. I'll bring sunglasses to the next group chat.",
+        "Nobody check the margin, {m}. Actually, everybody check the margin, {m}.",
     ],
     "won_close": [
         "{m} points. That's a win, that's a win, and nobody gets to ask how.",
@@ -30,15 +41,37 @@ BANK: dict[str, list[str]] = {
         "Put {m} points in the bank and don't ask what happened in the fourth quarter.",
         "If you'd told me on Thursday that I'd win by {m}, I'd have asked what I was doing wrong.",
         "{opp} had me sweating through my shirt. The scoreboard says {m}, and the scoreboard is the only thing I answer to.",
+        "I won by {m} and I'm calling it a masterclass, because the alternative is calling it luck.",
+        "{m} points. I've had longer commutes with more margin for error.",
+        "That one was closer than I'd like and exactly as close as I needed.",
+        "I'd tell you it was strategy. It was {m} points of pure panic.",
+        "{opp} made me earn it. I'll give {opp} that much, and nothing else.",
+        "I want everyone to know I never doubted it, and I want everyone to forget the middle of the game.",
+        "Won by {m} and aged six years. Worth it.",
+        "Close wins count the same as big wins. I looked it up in my head.",
+        "{opp} was one starter away from a different week. I was lucky it wasn't a different week.",
+        "If this keeps up I'll need a cardiologist and a better lineup, in that order.",
+        "I'll accept the {m}-point win and I'll send {opp} a thank-you note, unsigned.",
     ],
     "lost_big": [
         "{m} points. I'd like to see the tape, but I'd like even more not to.",
         "{opp} was great and I was absent, which is a hard combination to beat.",
         "I'm not going to make excuses. I'll make a couple of observations about my quarterback and then I'm done.",
-        "Down {m}. I'm calling it a data point. Every season has one.",
+        "Down {m} points. I'm calling it a data point. Every season has one.",
         "I'm putting Week {wk} in a drawer, and I'm putting the drawer in a lake.",
         "Nobody gets hurt by a {m}-point loss. Except me. Mostly me.",
         "Tell {opp} congratulations. Tell {opp} it won't happen again. Don't tell {opp} I said either.",
+        "I'd call it an off week, but I'd need a few more of the good kind to compare.",
+        "{m} points is a lot of points to lose by. I'm going to have to sit with that.",
+        "{opp} played well. I played the whole game with my coat on.",
+        "Give {opp} credit. Then give me my {m} points back, if anybody finds them.",
+        "Some weeks the lineup works and some weeks it files a grievance. Week {wk} was the latter.",
+        "I'd like a recount, a referee, and a new quarterback, in that order.",
+        "That was a masterclass. {opp} gave it and I took notes, which I am now burning.",
+        "{m} points. I'm not mad, I'm fascinated.",
+        "I'll let the lineup speak for itself. It said {m} points' worth, none of it good.",
+        "Week {wk} will be remembered. I'd just prefer it weren't.",
+        "I'm going to blame the schedule maker, the weather, and the group chat, in that order.",
     ],
     "lost_close": [
         "{m} points. That's one good tight end away from a different story.",
@@ -48,6 +81,17 @@ BANK: dict[str, list[str]] = {
         "I'd call it a moral victory, but I don't think {opp} would let me.",
         "Down {m} at the end, and I'll be replaying every lineup decision until Thursday.",
         "A game like that doesn't need a quote. It needs a hug.",
+        "{m} points. I can almost feel the ones I left on the bench.",
+        "I lost by {m}. Somewhere, a player I benched is feeling very good about it.",
+        "A loss by {m} is worse than a blowout because I have to think about it.",
+        "I'll take the moral victory over {opp}. It's the only one on offer.",
+        "Down by {m} and still sure I outplayed {opp}. The scoreboard disagrees.",
+        "{m} points. I've lost bets by more and slept better.",
+        "You could fit my regret in a {m}-point gap and still have room for the bench.",
+        "I'm going to be fine by Thursday. That's my official statement on {opp}.",
+        "It came down to {m}. It always comes down to something. This time it came down to me.",
+        "I lost to {opp} by {m} and I'd like to speak to whoever drew up the schedule.",
+        "Close games build character. I'm fully built at this point.",
     ],
     "tied": [
         "We both scored {pts}. I didn't know the league could do this, and I'm not sure it should.",
@@ -74,7 +118,7 @@ BANK: dict[str, list[str]] = {
         "When {opp} said yes to my offer I checked the number twice. Then I took {got} and ran.",
         "Everyone said I overpaid. {got} says otherwise.",
         "{opp} will tell you it's a long game. It is. I'm also winning the short part.",
-        "This one's going in the scrapbook, under 'Things I Got Right.'",
+        "This one's going in the scrapbook, in the section called Things I Got Right.",
     ],
     "trade_pending": [
         "We'll know who won this when the picks turn into players, and not before.",
@@ -103,7 +147,7 @@ BANK: dict[str, list[str]] = {
         "[single] Put it on the ledger: {sgn}. I'll honor it before the next waiver run.",
         "[single] {player} is the reason and {player} knows it.",
         "[single] It's only one. I've made bigger mistakes at tailgates.",
-        "[multi] {sgn} in one week. That's not a lineup, that's a drinking game with a lineup attached.",
+        "[multi] {sgn} owed. That's not a lineup, that's a drinking game with a lineup attached.",
         "[multi] {sgn}. I'd like to say I learned something. I'd like to say a lot of things.",
         "[multi] {sgn} owed and I'll pay every one. The only question is the order.",
         "[multi] Somebody tell my liver. {sgn}.",
@@ -114,8 +158,8 @@ BANK: dict[str, list[str]] = {
         "{rule}. That's a sentence I never wanted attached to my name.",
         "I scored less than {target}. I'd like that struck from the record, and also from my memory.",
         "The rule is the rule, and now I'm in the rule.",
-        "{sgn} for '{rule}.' If I'd known it was coming, I'd have scored more.",
-        "Fine. Pour it. I knew what I signed up for when I agreed to '{rule}.'",
+        "{sgn} for the {rule} rule. If I'd known it was coming, I'd have scored more.",
+        "Fine. Pour it. I knew what I signed up for when I agreed to the {rule} rule.",
         "I read the rule. I understood the rule. I did the thing the rule says not to do.",
         "[commish] I wrote this rule with a straight face and I'm paying it with a straight face.",
         "[commish] I made the rule. I regret the rule. I'm paying the rule.",
@@ -218,13 +262,27 @@ def candidates(situation: str, facts: dict[str, str], *, multi: bool = False, co
     return out
 
 
+def _render(text: str, facts: dict[str, str]) -> str:
+    return re.sub(r"\{(\w+)\}", lambda m: str(facts[m.group(1)]), text)
+
+
 def pick(situation: str, facts: dict[str, str], rng: random.Random, used: set, *,
-         multi: bool = False, commish: bool = False) -> str | None:
+         multi: bool = False, commish: bool = False, counts=None, scorer=None) -> str | None:
+    """A quote for the situation. `used` keeps one article from repeating a line; `counts` (a Counter shared
+    by a whole build) and `scorer` (how many times a rendering's sentences were already written this build)
+    steer every article toward lines that have been used least so far."""
     cands = candidates(situation, facts, multi=multi, commish=commish)
     fresh = [c for c in cands if (situation, c[0]) not in used]
     pool = fresh or cands
     if not pool:
         return None
+    if counts is not None or scorer is not None:
+        def key(c):
+            return (scorer(_render(c[1], facts)) if scorer else 0, counts[(situation, c[0])] if counts is not None else 0)
+        low = min(key(c) for c in pool)
+        pool = [c for c in pool if key(c) == low]
     i, text = pool[rng.randrange(len(pool))]
     used.add((situation, i))
-    return re.sub(r"\{(\w+)\}", lambda m: str(facts[m.group(1)]), text)
+    if counts is not None:
+        counts[(situation, i)] += 1
+    return _render(text, facts)
