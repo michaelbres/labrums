@@ -41,6 +41,22 @@
     }).join('');
     return `<div class="table-wrap power-wrap"><table class="power-table ${eff ? 'has-eff' : ''}"><thead><tr><th class="pw-rank">#</th><th>Team</th><th class="num">Rating</th><th class="num">Avg</th><th class="num">All-play %</th>${eff ? '<th class="num">Lineup eff.</th>' : ''}<th class="num">vs. standings</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   };
+  const luckFmt = (n) => { const r = Math.round(Math.abs(n) * 10) / 10; return (n > 0 && r ? '+' : n < 0 && r ? '\u2212' : '') + r.toFixed(1); };
+  const LUCK_EXPLAINER = "Expected wins come from the all-play record: every week, your score is compared with every other team's, as if you played all of them. Luck is actual wins minus expected wins: positive means the schedule gave you wins your scoring didn't earn; negative means you outscored most of the league and still lost.";
+  const luckCard = (d) => {
+    const ids = Object.keys(d.teams).map(Number).sort((a, b) => team(b).luck - team(a).luck || team(a).rank - team(b).rank);
+    const maxAbs = Math.max(0.01, ...ids.map((rid) => Math.abs(team(rid).luck)));
+    const rows = ids.map((rid, i) => {
+      const t = team(rid), cls = t.luck > 0.75 ? 'good' : t.luck < -0.75 ? 'bad' : '';
+      const w = (Math.abs(t.luck) / maxAbs) * 50;
+      return `<tr><td class="lk-rank"><span class="rank ${i === 0 ? 'top' : ''}">${i + 1}</span></td><td class="lk-team">${teamCell(rid, { sub: 'record' })}</td>
+        <td class="num" data-label="All-play">${esc(t.all_play_record)}</td><td class="num" data-label="Exp. W">${fmt(t.expected_wins, 1)}</td><td class="num" data-label="Actual">${t.wins}</td>
+        <td class="num lk-luck ${cls}" data-label="Luck"><span class="lk-n">${luckFmt(t.luck)}</span><span class="lk-meter" aria-hidden="true"><i class="${t.luck < 0 ? 'neg' : 'pos'} ${cls}" style="width:${w}%"></i></span></td>
+        <td class="num" data-label="Lucky">${t.lucky_wins}</td><td class="num" data-label="Unlucky">${t.unlucky_losses}</td></tr>`;
+    }).join('');
+    return `<div class="card power-card luck-card section"><div class="card-h"><h2>Luck</h2></div><p class="luck-explain">${esc(LUCK_EXPLAINER)}</p>
+      <div class="table-wrap power-wrap"><table class="luck-table"><thead><tr><th class="lk-rank">#</th><th>Team</th><th class="num">All-play</th><th class="num">Expected wins</th><th class="num">Actual wins</th><th class="num">Luck</th><th class="num">Lucky wins</th><th class="num">Unlucky losses</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  };
   const teamLink = (rid) => `<a href="#/teams/${rid}">${esc(team(rid).name)}</a>`;
   const meter = (p, cls = '') => `<div class="meter-row"><div class="meter ${cls}"><i style="width:${Math.max(0, Math.min(100, (p || 0) * 100))}%"></i></div><span class="pct">${pct(p)}</span></div>`;
   const pageHead = (eyebrow, title, lead = '', extra = '') => `<div class="page-h"><div class="eyebrow">${eyebrow}</div><h1>${title}</h1>${lead ? `<p class="lead">${lead}</p>` : ''}${extra ? `<div class="page-tools">${extra}</div>` : ''}</div>`;
@@ -113,6 +129,10 @@
     const bubble = d.standings.slice(1).map(team).filter((t) => po[t.roster_id] && po[t.roster_id].playoff_pct != null)
       .sort((a, b) => Math.abs(po[a.roster_id].playoff_pct - 0.5) - Math.abs(po[b.roster_id].playoff_pct - 0.5))[0];
     const unbeaten = d.standings.map(team).filter((t) => t.wins > 0 && !t.losses && !t.ties);
+    const byLuck = Object.keys(d.teams).map(team).filter((t) => t.luck != null).sort((a, b) => b.luck - a.luck);
+    const lucky = byLuck[0], unlucky = byLuck[byLuck.length - 1];
+    const luckTiles = (lucky && lucky.luck >= 0.5 ? `<div class="tile"><div class="label">Luckiest</div><div class="value">${esc(lucky.name)}</div><div class="sub"><span class="good">${luckFmt(lucky.luck)}</span> wins vs. expected</div></div>` : '')
+      + (unlucky && unlucky.luck <= -0.5 ? `<div class="tile"><div class="label">Unluckiest</div><div class="value">${esc(unlucky.name)}</div><div class="sub"><span class="bad">${luckFmt(unlucky.luck)}</span> wins vs. expected</div></div>` : '');
     const heroTitle = L.status === 'complete' ? `${esc(top.name)} finished ${esc(top.record)} and the rest of you have notes.`
       : L.last_completed === 0 ? `Week 1. Nobody has lost yet. Enjoy it while it lasts.`
       : unbeaten.length > 1 ? `${unbeaten.map((t) => esc(t.name)).join(' and ')} are ${esc(top.record)} and nobody is okay.`
@@ -130,6 +150,7 @@
         <div class="tile"><div class="label">Top score</div><div class="value">${rec.high_score ? fmt(rec.high_score.points, 1) : '—'}</div><div class="sub">${rec.high_score ? `${esc(team(rec.high_score.roster_id).name)}, week ${rec.high_score.week}` : ''}</div></div>
         <div class="tile"><div class="label">League average</div><div class="value">${fmt(d.league_avg, 1)}</div><div class="sub">points per team-week</div></div>
         <div class="tile"><div class="label">Shotguns owed</div><div class="value">${owed}</div><div class="sub">${lb[0] && lb[0].total ? `${esc(lb[0].name)} leads with ${lb[0].total}` : 'nobody yet'}</div></div>
+        ${luckTiles}
       </div>
       <div class="card power-card section"><div class="card-h"><h2>Power rankings</h2><small>${POWER_CAPTION}</small><a href="#/standings">Full standings →</a></div>${powerTable(d, { eff: false })}</div>
       <div class="grid grid-2 section">
@@ -178,7 +199,8 @@
       <div class="grid grid-2 section">
         <div class="card power-card"><div class="card-h"><h2>Power rankings</h2><small>${POWER_CAPTION}</small></div>${powerTable(d)}</div>
         ${recCard}
-      </div>`;
+      </div>
+      ${luckCard(d)}`;
   }
 
   function viewTeams() {

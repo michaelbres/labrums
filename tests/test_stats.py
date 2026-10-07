@@ -58,3 +58,25 @@ def test_power_rating_scale_and_order(st):
     order = [teams[r] for r in st["power_rankings"]]
     keys = [(-t["power_rating"], -t["all_play"]["pct"], -t["avg"]) for t in order]
     assert keys == sorted(keys)
+
+
+def test_luck_breakdown(st):
+    n = len(st["teams"])
+    for rid, t in st["teams"].items():
+        assert 0 <= t["lucky_wins"] <= t["wins"]
+        assert 0 <= t["unlucky_losses"] <= t["losses"]
+        assert t["all_play_record"] == f"{t['all_play']['w']}-{t['all_play']['l']}"
+        games = t["wins"] + t["losses"] + t["ties"]
+        ew = int(t["expected_wins"] + 0.5)
+        assert t["luck_record"] == f"{ew}-{games - ew}"
+        # recompute lucky/unlucky from weekly ranks and game results
+        lw = ul = 0
+        for g in st_games(st, rid):
+            rank = t["weekly_rank"][g["week"]]
+            if g["winner"] == rid and rank > n / 2: lw += 1
+            if g["winner"] not in (None, rid) and rank <= n / 2: ul += 1
+        assert (lw, ul) == (t["lucky_wins"], t["unlucky_losses"]), rid
+
+
+def st_games(st, rid):
+    return [g for g in st["games"] if g["regular"] and rid in (g["a"], g["b"])]

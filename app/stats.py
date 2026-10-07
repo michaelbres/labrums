@@ -97,6 +97,7 @@ def compute(ctx: dict) -> dict[str, Any]:
 
     scores: dict[int, dict[int, float]] = {rid: {} for rid in teams}        # rid -> week -> pts
     results: dict[int, list[str]] = {rid: [] for rid in teams}
+    week_result: dict[int, dict[int, str]] = {rid: {} for rid in teams}      # rid -> regular week -> W/L/T
     opp: dict[int, dict[int, int]] = {rid: {} for rid in teams}
     h2h: dict[int, dict[int, dict]] = {rid: defaultdict(lambda: {"w": 0, "l": 0, "t": 0}) for rid in teams}
     div_rec: dict[int, dict[str, int]] = {rid: {"w": 0, "l": 0, "t": 0} for rid in teams}
@@ -119,6 +120,7 @@ def compute(ctx: dict) -> dict[str, Any]:
             completed_games.append(g)
             if week in reg_weeks:
                 results[a].append(ra); results[b].append(rb)
+                week_result[a][week] = ra; week_result[b][week] = rb
                 h2h[a][b]["w" if ra == "W" else "l" if ra == "L" else "t"] += 1
                 h2h[b][a]["w" if rb == "W" else "l" if rb == "L" else "t"] += 1
                 da, db = teams[a].get("division"), teams[b].get("division")
@@ -187,6 +189,10 @@ def compute(ctx: dict) -> dict[str, Any]:
         ap_games = ap["w"] + ap["l"] + ap["t"]
         ap_pct = (ap["w"] + 0.5 * ap["t"]) / ap_games if ap_games else 0.0
         expected_wins = ap_pct * n
+        half = len(teams) / 2
+        lucky_wins = sum(1 for w, r in week_result[rid].items() if r == "W" and weekly_rank[rid].get(w, 0) > half)
+        unlucky_losses = sum(1 for w, r in week_result[rid].items() if r == "L" and 0 < weekly_rank[rid].get(w, 0) <= half)
+        exp_w = int(expected_wins + 0.5)
         pf = sum(reg_scores)
         pa = sum(scores[opp[rid][w]][w] for w in scores[rid] if w in reg_weeks and w in opp[rid])
         opt_total = sum(optimal[rid][w] for w in optimal[rid] if w in reg_weeks)
@@ -212,6 +218,9 @@ def compute(ctx: dict) -> dict[str, Any]:
             "all_play": {**ap, "pct": round(ap_pct, 3)},
             "expected_wins": round(expected_wins, 2),
             "luck": round(wins - expected_wins, 2),
+            "lucky_wins": lucky_wins, "unlucky_losses": unlucky_losses,
+            "luck_record": f"{exp_w}-{max(n - exp_w, 0)}",
+            "all_play_record": f"{ap['w']}-{ap['l']}",
             "weekly_rank": weekly_rank[rid],
             "weeks_top": sum(1 for w, r in weekly_high.items() if r == rid),
             "weeks_bottom": sum(1 for w, r in weekly_low.items() if r == rid),

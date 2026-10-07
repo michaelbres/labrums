@@ -199,6 +199,51 @@ tbody tr:hover { background: color-mix(in srgb, var(--ink) 3%, transparent); }
   .power-table .pw-n { width: auto; text-align: left; margin-right: 6px; }
   .power-table .pw-rating .meter { width: 28px; }
 }
+/* luck table */
+.luck-explain { margin: 0 0 12px; color: var(--muted); font-size: 14px; line-height: 1.5; max-width: 80ch; }
+.luck-table { table-layout: fixed; }
+.luck-table th, .luck-table td { overflow: hidden; text-overflow: ellipsis; padding-left: 8px; padding-right: 8px; }
+.luck-table th:first-child, .luck-table td:first-child { padding-left: 0; }
+.luck-table th:last-child, .luck-table td:last-child { padding-right: 0; }
+.luck-table th:nth-child(1) { width: 34px; }
+.luck-table th:nth-child(3) { width: 84px; }
+.luck-table th:nth-child(4) { width: 118px; }
+.luck-table th:nth-child(5) { width: 108px; }
+.luck-table th:nth-child(6) { width: 150px; }
+.luck-table th:nth-child(7) { width: 100px; }
+.luck-table th:nth-child(8) { width: 126px; }
+.luck-table td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.luck-table .team-cell, .luck-table .team-cell .names { min-width: 0; }
+.luck-table .team-cell .names b, .luck-table .team-cell .names small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.luck-table .lk-luck .lk-n { display: inline-block; width: 44px; text-align: right; font-weight: 600; margin-right: 8px; }
+.lk-meter { display: inline-block; vertical-align: middle; position: relative; width: 56px; height: 6px; background: color-mix(in srgb, var(--border) 70%, transparent); }
+.lk-meter::after { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--muted); }
+.lk-meter > i { position: absolute; top: 0; bottom: 0; background: var(--muted); }
+.lk-meter > i.pos { left: 50%; }
+.lk-meter > i.neg { right: 50%; }
+.lk-meter > i.good { background: var(--accent); }
+.lk-meter > i.bad { background: var(--bad); }
+@container (max-width: 820px) {
+  .luck-table, .luck-table tbody { display: block; }
+  .luck-table thead { display: none; }
+  .luck-table tr { display: grid; grid-template-columns: 24px repeat(5, minmax(0, 1fr)); column-gap: 8px; row-gap: 6px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .luck-table tbody tr:last-child { border-bottom: 0; }
+  .luck-table td { display: block; border: 0; padding: 0; min-width: 0; text-align: left; }
+  .luck-table td.num { text-align: left; font-size: 13px; }
+  .luck-table .lk-rank { grid-column: 1; grid-row: 1; }
+  .luck-table .lk-team { grid-column: 2 / 5; grid-row: 1; }
+  .luck-table .lk-luck { grid-column: 5 / 7; grid-row: 1; text-align: right; }
+  .luck-table .lk-luck::before { display: none; }
+  .luck-table .lk-luck .lk-n { width: auto; margin: 0 6px 0 0; }
+  .luck-table .lk-meter { width: 40px; }
+  .luck-table td[data-label]:not(.lk-luck) { grid-row: 2; }
+  .luck-table td[data-label]:not(.lk-luck)::before { content: attr(data-label); display: block; font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 500; }
+  .luck-table td:nth-of-type(3) { grid-column: 2; }
+  .luck-table td:nth-of-type(4) { grid-column: 3; }
+  .luck-table td:nth-of-type(5) { grid-column: 4; }
+  .luck-table td:nth-of-type(7) { grid-column: 5; }
+  .luck-table td:nth-of-type(8) { grid-column: 6; }
+}
 tr.cut-line td { border-bottom: 1px dashed var(--accent); }
 .team-cell { display: flex; align-items: center; gap: 10px; min-width: 180px; color: var(--ink); }
 .team-cell:hover { color: var(--accent); }
