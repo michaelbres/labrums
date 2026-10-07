@@ -87,11 +87,11 @@ owners:
   "PatrickHanrahan":
     name: "Patrick"
     nickname: "Pat"
-    bio: "Heavy-set LARPer with a nose for running deer over with his car. Raging socialist."
+    bio: "Big man, bigger heart. Has a nose for hitting deer with his car. Raging socialist."
     traits:
       - "has hit more deer than his running backs have hit holes"
-      - "shows up to the draft in chainmail"
       - "proposes redistributing FAAB to the teams that need it most"
+      - "has never met a trade he didn't want to make, and then regret"
     catchphrase: "The means of production belong to the workers, and so does your running back."
   "trottner":
     name: "Tom"
@@ -145,7 +145,7 @@ rivalries:
     backstory: "Steven and Cian. Two owners who are never around, playing a game neither of them will watch, from locations neither will disclose."
   - name: "The Big Dawg Bowl"
     owners: ["PatrickHanrahan", "trottner"]
-    backstory: "Pat and Tom. A raging socialist LARPer with a body count of deer against a man ranked below his dad's fish in the family hierarchy."
+    backstory: "Pat and Tom. A raging socialist with a body count of deer against a man ranked below his dad's fish in the family hierarchy."
   - name: "The Newcomers Bowl"
     owners: ["ncarney7502", "JimmyWoods10"]
     backstory: "Nick and Jimmy. The league's worst decision-maker versus the Quentin Johnston truther. Somebody has to win this one, and the league would prefer neither did."
