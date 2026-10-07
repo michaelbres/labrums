@@ -187,7 +187,7 @@ FAMILY = {
         ],
         "h.p.fav": [
             "The smart money is on {fav} over {dog} in {wl}",
-            "{wl}: {fav}, {fav_odds}, against {dog}, {dog_odds}",
+            "{wl}: {fav}, {fav_win}, against {dog}, {dog_win}",
             "{dog} is the long shot against {fav} in {wl}",
         ],
         "h.p.even": [
@@ -240,9 +240,9 @@ FAMILY = {
             "{a} and {b} are playing for {swing} points of playoff odds. Nothing else this week comes close.",
         ],
         "p.favorite": [
-            "{fav} is the favorite on {fav_why}: {fav_odds} to {dog}'s {dog_odds}.",
-            "The street says {fav} ({fav_odds}) over {dog} ({dog_odds}), going by {fav_why}.",
-            "{dog} is the long shot at {dog_odds}. {fav} is at {fav_odds}.",
+            "{fav} is the favorite on {fav_why}: {fav_win} to win against {dog}'s {dog_win}.",
+            "The street says {fav} ({fav_win} to win) over {dog} ({dog_win}), going by {fav_why}.",
+            "{dog} is the long shot at {dog_win} to win. {fav} is at {fav_win}.",
         ],
         "p.vol": [
             "{vol_n} is the one that keeps me up at night: {vol_std} points of weekly swing against {other}'s {other_std}.",
@@ -288,8 +288,8 @@ FAMILY = {
         ],
         "t.count": [
             "It's {n}'s {nth} trade of the season. That's a lot of handshakes.",
-            "That makes the {nth} trade of the year for {n}.",
-            "The {nth} trade of the season for {n}.",
+            "That makes {n}'s {nth} trade of the year.",
+            "{n}'s {nth} trade of the season.",
         ],
         "t.rec": [
             "Before the handshake, {a} stood {a_rec} ({a_rank}) and {b} stood {b_rec} ({b_rank}).",
@@ -479,8 +479,8 @@ FAMILY = {
             "Week {twk}: {b_got} went to {b}, {a_got} went to {a}. The log doesn't say who regrets it.",
         ],
         "f.adj": [
-            "In the standings, {hi} ({hi_rec}, {hi_rank}) sat just ahead of {lo} ({lo_rec}, {lo_rank}), {pf_gap} apart in points scored. Close enough to feel the breath.",
-            "{hi} was {hi_rank}. {lo} was {lo_rank}. {pf_gap} apart in points. Neighbors don't always get along.",
+            "In the standings, {hi} ({hi_rec}, {hi_rank}) sat just ahead of {lo} ({lo_rec}, {lo_rank}), {pf_gap} apart. Close enough to feel the breath.",
+            "{hi} was {hi_rank}. {lo} was {lo_rank}. {pf_gap} apart. Neighbors don't always get along.",
             "{lo} trailed {hi} by {pf_gap} in points scored, {lo_rank} to {hi_rank}.",
         ],
         "f.blow": [
@@ -595,7 +595,7 @@ FAMILY = {
         "c.gap": [
             "{hi} was {hi_rank} at {hi_rec}, and {lo} was {lo_rank} at {lo_rec}. {pf_gap} of scoring stood between them like a closed door.",
             "In the table, {hi} sat {hi_rank} and {lo} sat {lo_rank}. In points scored, {pf_gap} separated them, which is how far a grudge can travel.",
-            "{hi}, {hi_rank}, {hi_rec}. {lo}, {lo_rank}, {lo_rec}. {pf_gap} apart in points, and neither would admit it mattered.",
+            "{hi}, {hi_rank}, {hi_rec}. {lo}, {lo_rank}, {lo_rec}. {pf_gap} apart, and neither would admit it mattered.",
         ],
         "c.pick": [
             "If I had to put a dollar down, and I always do, it goes on {fav} over {dog}, on {fav_why}.",

@@ -246,7 +246,7 @@ BANK: dict[str, list[str]] = {
         "[multi] {sgn} on the board. I'll be calling in sick to my own Sunday.",
     ],
     "rule_owed": [
-        "{rule}. That's a sentence I never wanted attached to my name.",
+        "The {rule} rule. That's a sentence I never wanted attached to my name.",
         "I scored less than {target}. I'd like that struck from the record, and also from my memory.",
         "The rule is the rule, and now I'm in the rule.",
         "{sgn} for the {rule} rule. If I'd known it was coming, I'd have scored more.",

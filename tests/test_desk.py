@@ -388,7 +388,7 @@ def test_columns_are_grounded_in_the_data(demo7_arts):
         # the h2h line and the pick only claim what the facts say
         assert f["h2h_this_season"] == "no meeting yet" or all(ch in "0123456789-" for ch in f["h2h_this_season"])
         if f["pick"]:
-            assert f["pick"] in names and f["pick_basis"] in ("playoff odds", "scoring average")
+            assert f["pick"] in names and f["pick_basis"] in ("win probability", "playoff odds", "scoring average")
         if f["next_meeting_week"]:
             assert f["next_meeting_week"] > nr.ctx["last_completed"] and str(f["next_meeting_week"]) in a["dek"]
         if f["rivalry"]:

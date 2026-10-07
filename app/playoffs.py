@@ -132,7 +132,8 @@ def simulate(ctx: dict, st: dict, sims: int | None = None, seed: int = 42) -> di
         if rid in next_week_won:
             won = next_week_won[rid]
             cond = {"if_win": float(made[won, i].mean()) if won.any() else None,
-                    "if_loss": float(made[~won, i].mean()) if (~won).any() else None}
+                    "if_loss": float(made[~won, i].mean()) if (~won).any() else None,
+                    "win_pct": round(float(won.mean()), 4)}
         out[rid] = {
             "playoff_pct": round(p, 4),
             "bye_pct": round(float((seeds[:, i] <= bye_slots).mean()), 4) if bye_slots else 0.0,

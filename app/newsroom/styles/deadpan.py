@@ -187,13 +187,13 @@ FAMILY = {
         ],
         "h.p.fav": [
             "{fav} is favored over {dog}",
-            "{fav} has {fav_odds}. {dog} has {dog_odds}",
+            "{fav} has {fav_win} to win. {dog} has {dog_win}",
             "{fav} is the favorite against {dog}",
         ],
         "h.p.even": [
             "{a} plays {b}. The odds are close",
             "{a} plays {b}. There is no favorite",
-            "{a} has {a_odds}. {b} has {b_odds}",
+            "{a} has {a_win_pct} to win. {b} has {b_win_pct}",
         ],
         "h.p.lev": [
             "{a} plays {b}. There are {swing} points of playoff swing",
@@ -240,9 +240,9 @@ FAMILY = {
             "{a} and {b} share {swing} points of swing. That is the most.",
         ],
         "p.favorite": [
-            "{fav} is the favorite on {fav_why}. {fav_odds} to {dog}'s {dog_odds}.",
-            "{fav} has {fav_odds}. {dog} has {dog_odds}. {fav} is favored.",
-            "{dog} is the underdog, with {dog_odds} against {fav}'s {fav_odds}.",
+            "{fav} is the favorite on {fav_why}. {fav_win} to win, against {dog}'s {dog_win}.",
+            "{fav} has {fav_win} to win. {dog} has {dog_win}. {fav} is favored.",
+            "{dog} is the underdog, at {dog_win} to win against {fav}'s {fav_win}.",
         ],
         "p.vol": [
             "{vol_n} varies more, by {vol_std} points a week. {other} varies by {other_std}.",
@@ -486,7 +486,7 @@ FAMILY = {
             "In Week {twk}, {b_got} went to {b}. {a_got} went to {a}.",
         ],
         "f.adj": [
-            "{hi} is {hi_rank} at {hi_rec}. {lo} is {lo_rank} at {lo_rec}. They are {pf_gap} apart in points.",
+            "{hi} is {hi_rank} at {hi_rec}. {lo} is {lo_rank} at {lo_rec}. They are {pf_gap} apart.",
             "In the standings they are neighbors. {pf_gap} separate them in points scored.",
             "{lo} trails {hi} by {pf_gap} in points scored.",
         ],
@@ -599,7 +599,7 @@ FAMILY = {
             "In the last few games, {a} {a_form}. {b} {b_form}.",
         ],
         "c.gap": [
-            "{hi} is {hi_rank} at {hi_rec}. {lo} is {lo_rank} at {lo_rec}. They are {pf_gap} apart in points.",
+            "{hi} is {hi_rank} at {hi_rec}. {lo} is {lo_rank} at {lo_rec}. They are {pf_gap} apart.",
             "In points scored, {hi} and {lo} are {pf_gap} apart. The table has {hi} {hi_rank}.",
             "{hi} is {hi_rank}. {lo} is {lo_rank}. The points gap is {pf_gap}.",
         ],

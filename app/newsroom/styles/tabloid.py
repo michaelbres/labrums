@@ -187,12 +187,12 @@ FAMILY = {
         ],
         "h.p.fav": [
             "{fav} favored over {dog}, but is {dog} hiding something?",
-            "{wl}: {fav} ({fav_odds}) expected to beat {dog} ({dog_odds})",
+            "{wl}: {fav} ({fav_win}) expected to beat {dog} ({dog_win})",
             "Will {dog} spoil it for {fav}? The odds say no, darling",
         ],
         "h.p.even": [
             "{a} vs. {b}: too close to call!",
-            "{wl}: {a} and {b} even at {a_odds} and {b_odds}. Anything could happen!",
+            "{wl}: {a} and {b} even at {a_win_pct} and {b_win_pct} to win. Anything could happen!",
             "A coin flip for {a} and {b} in {wl}",
         ],
         "h.p.lev": [
@@ -240,9 +240,9 @@ FAMILY = {
             "{a} and {b} are playing for {swing} points of playoff odds, more than any other game. Gulp.",
         ],
         "p.favorite": [
-            "{fav} is the favorite on {fav_why}, at {fav_odds} to {dog}'s {dog_odds}. {dog} is quietly furious.",
-            "By {fav_why}, {fav} ({fav_odds}) leads {dog} ({dog_odds}). Whether it holds is another matter.",
-            "{dog} is the underdog at {dog_odds}, {fav} the favorite at {fav_odds}. Underdogs love a grudge.",
+            "{fav} is the favorite on {fav_why}, at {fav_win} to win against {dog}'s {dog_win}. {dog} is quietly furious.",
+            "By {fav_why}, {fav} ({fav_win} to win) leads {dog} ({dog_win}). Whether it holds is another matter.",
+            "{dog} is the underdog at {dog_win} to win, {fav} the favorite at {fav_win}. Underdogs love a grudge.",
         ],
         "p.vol": [
             "Word is {vol_n} is wildly unpredictable, swinging {vol_std} points a week to {other}'s steadier {other_std}.",
@@ -288,7 +288,7 @@ FAMILY = {
         ],
         "t.count": [
             "It's {n}'s {nth} trade of the season. Somebody likes a deal.",
-            "{n} just made the {nth} trade of the year. Can't sit still.",
+            "This is the {nth} trade {n} has made this year. Can't sit still.",
             "That's the {nth} trade for {n} this season.",
         ],
         "t.rec": [
@@ -479,8 +479,8 @@ FAMILY = {
             "In Week {twk}, {b_got} went to {b} and {a_got} to {a}. And now this.",
         ],
         "f.adj": [
-            "In the standings, {hi} ({hi_rec}, {hi_rank}) is just ahead of {lo} ({lo_rec}, {lo_rank}), a mere {pf_gap} apart in points scored. Sparks!",
-            "{hi} is {hi_rank}. {lo} is {lo_rank}. {pf_gap} apart in points scored. Anybody feeling tense?",
+            "In the standings, {hi} ({hi_rec}, {hi_rank}) is just ahead of {lo} ({lo_rec}, {lo_rank}), a mere {pf_gap} apart. Sparks!",
+            "{hi} is {hi_rank}. {lo} is {lo_rank}. {pf_gap} apart. Anybody feeling tense?",
             "{lo} trails {hi} by {pf_gap} in points scored, {lo_rank} to {hi_rank} in the table. They can see each other.",
         ],
         "f.blow": [

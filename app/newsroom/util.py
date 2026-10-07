@@ -44,6 +44,15 @@ def pts(x: float) -> str:
     return f"{fmt(x)} point" if abs(round(float(x), 2)) == 1 else f"{fmt(x)} points"
 
 
+def rule_ref(label: str, names: "set[str] | frozenset[str]" = frozenset(), quote: str = "\u201c\u201d") -> str:
+    """A special-rule label mid-sentence: the “scored less than Nick” rule. The first letter is lowercased unless
+    the label opens with an owner's name."""
+    label = str(label).strip()
+    if label and not any(re.match(re.escape(n) + r"(?:['\u2019]s)?(?:\s|$)", label) for n in names):
+        label = label[:1].lower() + label[1:]
+    return f"the {quote[0]}{label}{quote[1]} rule"
+
+
 def pct(p: float | None) -> str | None:
     return None if p is None else f"{round(p * 100):d}%"
 
@@ -51,6 +60,11 @@ def pct(p: float | None) -> str | None:
 def plural(n: int, one: str, many: str | None = None) -> str:
     """'1 owner' / '2 owners'."""
     return f"{n} {one}" if n == 1 else f"{n} {many or one + 's'}"
+
+
+def times(n: int) -> str:
+    """'once' / '2 times': how often something happens."""
+    return "once" if n == 1 else f"{n} times"
 
 
 def verb(n: int, singular: str, plural_form: str) -> str:

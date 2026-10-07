@@ -187,12 +187,12 @@ FAMILY = {
         ],
         "h.p.fav": [
             "The oddsmakers send {fav} to the ring as the favorite against {dog} in {wl}!",
-            "{wl}: {fav} ({fav_odds}) steps in against {dog} ({dog_odds})!",
+            "{wl}: {fav} ({fav_win}) steps in against {dog} ({dog_win})!",
             "Can {dog} shock {fav} in {wl}?",
         ],
         "h.p.even": [
             "{a} vs. {b} in {wl}: TOO CLOSE TO CALL!",
-            "{a_odds} to {b_odds}! {a} and {b} are neck and neck in {wl}",
+            "{a_win_pct} to {b_win_pct}! {a} and {b} are neck and neck in {wl}",
             "A coin flip for {a} and {b} in {wl}!",
         ],
         "h.p.lev": [
@@ -240,9 +240,9 @@ FAMILY = {
             "{a} and {b} are fighting for {swing} points of playoff odds! Nothing else comes close!",
         ],
         "p.favorite": [
-            "{fav} is the favorite on {fav_why}: {fav_odds} to {dog}'s {dog_odds}!",
-            "The odds like {fav}: {fav_odds} to {dog}'s {dog_odds}, going by {fav_why}!",
-            "{dog} climbs through the ropes as the underdog at {dog_odds}, with {fav} the champ at {fav_odds}!",
+            "{fav} is the favorite on {fav_why}: {fav_win} to win against {dog}'s {dog_win}!",
+            "The odds like {fav}: {fav_win} to win, against {dog}'s {dog_win}, going by {fav_why}!",
+            "{dog} climbs through the ropes as the underdog at {dog_win} to win, with {fav} the champ at {fav_win}!",
         ],
         "p.vol": [
             "{vol_n} is a loose cannon, swinging {vol_std} points a week, while {other} is steady at {other_std}!",
@@ -288,7 +288,7 @@ FAMILY = {
         ],
         "t.count": [
             "{n} makes the tag for the {nth} time this season!",
-            "{n} is making deals! The {nth} trade of the year!",
+            "{n} is making deals! That's {n}'s {nth} trade of the year!",
             "It's the {nth} trade for {n}!",
         ],
         "t.rec": [
@@ -480,7 +480,7 @@ FAMILY = {
         ],
         "f.adj": [
             "In the rankings, {hi} ({hi_rec}, {hi_rank}) is one rung above {lo} ({lo_rec}, {lo_rank}), and {pf_gap} of points scored is all that separates them!",
-            "{hi} is {hi_rank}, {lo} is {lo_rank}, and they're {pf_gap} apart in points scored, locked up collar and elbow!",
+            "{hi} is {hi_rank}, {lo} is {lo_rank}, and they're {pf_gap} apart, locked up collar and elbow!",
             "{lo} is chasing {hi}! {lo_rank} and {hi_rank}, with {pf_gap} between them in points scored!",
         ],
         "f.blow": [

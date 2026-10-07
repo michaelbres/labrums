@@ -191,11 +191,11 @@ FAMILY = {
         # ---------------- preview ----------------
         "h.p.fav": [
             "{fav} favored over {dog} in {wl}",
-            "{wl}: {fav} ({fav_odds}) holds the edge over {dog} ({dog_odds})",
+            "{wl}: {fav} ({fav_win}) holds the edge over {dog} ({dog_win})",
             "{fav} is the favorite against {dog} in {wl}",
         ],
         "h.p.even": [
-            "{a} and {b} meet in {wl} with similar playoff odds ({a_odds}, {b_odds})",
+            "{a} and {b} meet in {wl} with similar odds to win ({a_win_pct}, {b_win_pct})",
             "{wl}: {a} vs. {b} is close to a toss-up",
             "{a}, {b} face off in {wl} with no clear favorite",
         ],
@@ -244,9 +244,9 @@ FAMILY = {
             "No game on the slate carries more playoff leverage than {a} against {b}, at {swing} points of swing.",
         ],
         "p.favorite": [
-            "{fav} is the favorite on {fav_why}: {fav_odds} to make the playoffs against {dog}'s {dog_odds}.",
-            "By {fav_why}, {fav} ({fav_odds}) is ahead of {dog} ({dog_odds}).",
-            "{dog} is the underdog at {dog_odds}; {fav} is at {fav_odds}.",
+            "{fav} is the favorite on {fav_why}: {fav_win} to win against {dog}'s {dog_win}.",
+            "By {fav_why}, {fav} ({fav_win} to win) is ahead of {dog} ({dog_win}).",
+            "{dog} is the underdog at {dog_win} to win; {fav} is at {fav_win}.",
         ],
         "p.vol": [
             "{vol_n}'s scoring has been the more volatile, with a standard deviation of {vol_std} points a week against {other_std} for {other}.",
@@ -293,7 +293,7 @@ FAMILY = {
         ],
         "t.count": [
             "It is {n}'s {nth} trade of the season.",
-            "{n} has now made the {nth} trade of the season.",
+            "This is the {nth} trade {n} has made this season.",
             "The deal was the {nth} of the season for {n}.",
         ],
         "t.rec": [

@@ -187,13 +187,13 @@ FAMILY = {
         ],
         "h.p.fav": [
             "{wl} forecast: {fav} favored over {dog}",
-            "{fav} ({fav_odds}) on the sunny side against {dog} ({dog_odds}) in {wl}",
+            "{fav} ({fav_win}) on the sunny side against {dog} ({dog_win}) in {wl}",
             "Sunny skies for {fav}, clouds for {dog} in {wl}",
         ],
         "h.p.even": [
             "{wl} forecast: {a} and {b} too close to call",
             "A coin flip of a front: {a} vs. {b} in {wl}",
-            "{a} and {b} meet in {wl} with matching odds, {a_odds} and {b_odds}",
+            "{a} and {b} meet in {wl} with matching odds to win, {a_win_pct} and {b_win_pct}",
         ],
         "h.p.lev": [
             "Storm watch in {wl}: {a} vs. {b}, {swing} points of playoff swing",
@@ -240,9 +240,9 @@ FAMILY = {
             "{a} and {b} are fighting over {swing} points of playoff odds. Nothing else comes close.",
         ],
         "p.favorite": [
-            "{fav} is the favorite on {fav_why}: a {fav_odds} chance to {dog}'s {dog_odds}.",
-            "By {fav_why}, {fav} ({fav_odds}) has the sunnier outlook over {dog} ({dog_odds}).",
-            "{dog} faces cloudy skies at {dog_odds}; {fav} is at {fav_odds}.",
+            "{fav} is the favorite on {fav_why}: a {fav_win} chance to win against {dog}'s {dog_win}.",
+            "By {fav_why}, {fav} ({fav_win} to win) has the sunnier outlook over {dog} ({dog_win}).",
+            "{dog} faces cloudy skies at {dog_win} to win; {fav} is at {fav_win}.",
         ],
         "p.vol": [
             "Expect turbulence from {vol_n}: {vol_std} points of weekly swing, against {other_std} for {other}.",
@@ -287,8 +287,8 @@ FAMILY = {
             "There is no verdict on the trade yet.",
         ],
         "t.count": [
-            "That's the {nth} trade of the season for {n}. Plenty of movement.",
-            "{n} has now made the {nth} trade of this season.",
+            "That's {n}'s {nth} trade of the season. Plenty of movement.",
+            "This is the {nth} trade {n} has made this season.",
             "The {nth} trade for {n} this season.",
         ],
         "t.rec": [
@@ -409,7 +409,7 @@ FAMILY = {
         ],
         "n.luck": [
             "Fair weather and foul: {lucky} is {lucky_luck} wins above all-play expectation, and {unlucky} is {unlucky_luck}.",
-            "By all-play, {lucky} has {lucky_luck} wins it hasn't earned; {unlucky} has {unlucky_luck}.",
+            "By all-play, {lucky} has {lucky_luck} wins they haven't earned; {unlucky} has {unlucky_luck}.",
             "{lucky} ({lucky_luck}) has had the sunshine; {unlucky} ({unlucky_luck}) has had the rain.",
         ],
         "n.clinch": [
@@ -479,8 +479,8 @@ FAMILY = {
             "In Week {twk}, {b_got} blew toward {b} and {a_got} toward {a}.",
         ],
         "f.adj": [
-            "In the standings, {hi} ({hi_rec}, {hi_rank}) sits just above {lo} ({lo_rec}, {lo_rank}), {pf_gap} apart in points scored. A tight pressure gradient.",
-            "{hi} is {hi_rank}, {lo} is {lo_rank}, and they're only {pf_gap} apart in points scored.",
+            "In the standings, {hi} ({hi_rec}, {hi_rank}) sits just above {lo} ({lo_rec}, {lo_rank}), {pf_gap} apart. A tight pressure gradient.",
+            "{hi} is {hi_rank}, {lo} is {lo_rank}, and they're only {pf_gap} apart.",
             "{lo} runs {pf_gap} cooler than {hi} in points scored, {lo_rank} to {hi_rank} in the table.",
         ],
         "f.blow": [
@@ -595,7 +595,7 @@ FAMILY = {
         "c.gap": [
             "On the table, {hi} ({hi_rank}, {hi_rec}) sits above {lo} ({lo_rank}, {lo_rec}), with a {pf_gap} gradient in points scored.",
             "{hi} reads {hi_rank} and {lo} reads {lo_rank}, and the points-scored gap measures {pf_gap}.",
-            "The pressure difference is clear: {hi} at {hi_rank} ({hi_rec}), {lo} at {lo_rank} ({lo_rec}), and {pf_gap} apart in points scored.",
+            "The pressure difference is clear: {hi} at {hi_rank} ({hi_rec}), {lo} at {lo_rank} ({lo_rec}), and {pf_gap} apart.",
         ],
         "c.pick": [
             "My forecast is {fav} over {dog}, with the {fav_why} as the leading indicator.",

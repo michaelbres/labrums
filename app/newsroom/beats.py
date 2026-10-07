@@ -101,7 +101,7 @@ class Beats(Book):
     def _sg_phrase(self, items: list[dict]) -> str:
         players = [f"{s['player']['name']} ({s['player']['position']})" for s in items if s["reason"] in ("negative", "zero", "low")]
         empties = [f"an empty {s['slot']} slot" for s in items if s["reason"] == "empty_slot"]
-        rules = [f"the {s['label']} rule" for s in items if s["reason"] == "rule"]
+        rules = [self.rule_ref(s["label"]) for s in items if s["reason"] == "rule"]
         groups = []
         if players:
             groups.append("starting " + join_and(players))
@@ -317,11 +317,14 @@ class Beats(Book):
         ng = po.get("next_game") or {}
         return {"rid": rid, "name": self.name(rid), "team": self.tname(rid), "rec": S["teams"][rid]["record"],
                 "avg": fmt1(t["avg"]), "avg_v": t["avg"], "std": t["std"], "rank": S["teams"][rid]["rank"],
-                "pct": po.get("playoff_pct"), "if_win": ng.get("if_win"), "if_loss": ng.get("if_loss")}
+                "pct": po.get("playoff_pct"), "win": ng.get("win_pct"), "if_win": ng.get("if_win"), "if_loss": ng.get("if_loss")}
 
     def _favorite(self, A: dict, B: dict) -> tuple[dict | None, dict | None, str | None]:
-        if A["pct"] is not None and B["pct"] is not None and round(A["pct"] * 100) != round(B["pct"] * 100):
-            fav, dog, why = (A, B, "playoff odds") if A["pct"] > B["pct"] else (B, A, "playoff odds")
+        """The favorite of a game: by the simulated probability of winning THAT game (not playoff odds)."""
+        if A["win"] is not None and B["win"] is not None:
+            if round(A["win"] * 100) == round(B["win"] * 100):
+                return None, None, None
+            fav, dog, why = (A, B, "win probability") if A["win"] > B["win"] else (B, A, "win probability")
         elif A["avg_v"] != B["avg_v"]:
             fav, dog, why = (A, B, "scoring average") if A["avg_v"] > B["avg_v"] else (B, A, "scoring average")
         else:
@@ -347,7 +350,7 @@ class Beats(Book):
             sit, facts = "trash_h2h_trail", {"opp": opp["name"], "h2h": f"{wins}-{losses}"}
         elif me["rank"] < opp["rank"]:
             sit, facts = "trash_standings", {"opp": opp["name"], "rank": ordinal(me["rank"]), "opp_rank": ordinal(opp["rank"])}
-        elif (me["pct"] is not None and opp["pct"] is not None and round(me["pct"] * 100) < round(opp["pct"] * 100)):
+        elif (me["win"] is not None and opp["win"] is not None and round(me["win"] * 100) < round(opp["win"] * 100)):
             sit, facts = "trash_underdog", {"opp": opp["name"]}    # "spoiler" talk only from the side with the worse odds
         else:
             sit, facts = "trash_even", {"opp": opp["name"]}
@@ -391,6 +394,8 @@ class Beats(Book):
         for g in games:
             A, B = self._pv(g["a"], S), self._pv(g["b"], S)
             fav, dog, why = self._favorite(A, B)
+            if why != "win probability":
+                fav = dog = why = None   # the underdog/favorite lines quote the game's win probability; without it, no claim
             rows.append({"g": g, "A": A, "B": B, "fav": fav, "dog": dog, "why": why, "swing": self._swing(A, B),
                          "rv": self.rivalry_between(g["a"], g["b"])})
 
@@ -404,7 +409,7 @@ class Beats(Book):
             A, B = x["A"], x["B"]
             f = {"a": A["name"], "b": B["name"], "a_team": A["team"], "b_team": B["team"], "a_rec": A["rec"], "b_rec": B["rec"],
                  "a_avg": A["avg"], "b_avg": B["avg"], "wk": str(week), "wl": wl,
-                 "a_odds": pct(A["pct"]), "b_odds": pct(B["pct"])}
+                 "a_odds": pct(A["pct"]), "b_odds": pct(B["pct"]), "a_win_pct": pct(A["win"]), "b_win_pct": pct(B["win"])}
             if x["swing"] > 0.5:
                 f["swing"] = str(round(x["swing"] * 100))
             if A["if_win"] is not None and A["if_loss"] is not None:
@@ -413,11 +418,11 @@ class Beats(Book):
                 f.update(b_win=pct(B["if_win"]), b_loss=pct(B["if_loss"]))
             if x["fav"]:
                 f.update(fav=x["fav"]["name"], dog=x["dog"]["name"], fav_odds=pct(x["fav"]["pct"]), dog_odds=pct(x["dog"]["pct"]),
-                         fav_why=x["why"])
+                         fav_win=pct(x["fav"]["win"]), dog_win=pct(x["dog"]["win"]), fav_why=x["why"])
             return f
 
         gf = gfacts(gotw)
-        gap = abs((gotw["A"]["pct"] or 0) - (gotw["B"]["pct"] or 0)) * 100
+        gap = abs((gotw["A"]["win"] or 0) - (gotw["B"]["win"] or 0)) * 100
         if gotw["swing"] > 0.5:
             bucket, head_fav = "lev", None
         elif gotw["fav"] and gap >= 10:
@@ -465,6 +470,8 @@ class Beats(Book):
                  "games": [{"teams": [x["A"]["name"], x["B"]["name"]], "records": [x["A"]["rec"], x["B"]["rec"]],
                             "avg_ppg": [x["A"]["avg"], x["B"]["avg"]],
                             "playoff_odds": [pct(x["A"]["pct"]), pct(x["B"]["pct"])],
+                            "win_pct_a": pct(x["A"]["win"]), "win_pct_b": pct(x["B"]["win"]),
+                            "win_pct": [pct(x["A"]["win"]), pct(x["B"]["win"])],
                             "favorite": x["fav"]["name"] if x["fav"] else None, "favorite_basis": x["why"],
                             "swing_points": round(x["swing"] * 100), "rivalry": x["rv"]["name"] if x["rv"] else None}
                            for x in order]}
@@ -491,10 +498,13 @@ class Beats(Book):
         s1 = [w.line("v.lede", f, repeat=True), w.line("v.form", f, repeat=True)]
         w.add(s1, {"teams": [A["name"], B["name"]]})
         fav, dog, why = self._favorite(A, B)
+        if why != "win probability":
+            fav = dog = None
         s2 = [self._h2h_line(w, A, B, last)]
         if fav:
             s2.append(w.line("p.favorite", {**f, "fav": fav["name"], "dog": dog["name"], "fav_odds": pct(fav["pct"]),
-                                            "dog_odds": pct(dog["pct"]), "fav_why": why}))
+                                            "dog_odds": pct(dog["pct"]), "fav_win": pct(fav["win"]), "dog_win": pct(dog["win"]),
+                                            "fav_why": why}))
         w.add(s2, {"teams": [A["name"], B["name"]]})
         w.add(self._exchange(w, A, B, last) + [w.line("v.close", f, repeat=True)], {"teams": [A["name"], B["name"]]})
         facts = {"type": "rivalry", "week": week, "rivalry": rv["name"], "backstory": rv["backstory"],

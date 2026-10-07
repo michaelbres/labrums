@@ -187,7 +187,7 @@ FAMILY = {
         ],
         "h.p.fav": [
             "{fav} is the stronger contender against {dog} in {wl}",
-            "{wl}: {fav} ({fav_odds}) approaches {dog} ({dog_odds}) as the likelier survivor",
+            "{wl}: {fav} ({fav_win}) approaches {dog} ({dog_win}) as the likelier survivor",
             "The odds favor {fav} over {dog} in {wl}",
         ],
         "h.p.even": [
@@ -240,9 +240,9 @@ FAMILY = {
             "{a} and {b} contest {swing} points of playoff odds, the greatest stake of the week.",
         ],
         "p.favorite": [
-            "{fav} is the stronger contender on {fav_why}, with {fav_odds} to {dog}'s {dog_odds}.",
-            "By {fav_why}, {fav} ({fav_odds}) holds the advantage over {dog} ({dog_odds}).",
-            "{dog} is the weaker contender at {dog_odds}, while {fav} stands at {fav_odds}.",
+            "{fav} is the stronger contender on {fav_why}, with {fav_win} to win against {dog}'s {dog_win}.",
+            "By {fav_why}, {fav} ({fav_win} to win) holds the advantage over {dog} ({dog_win}).",
+            "{dog} is the weaker contender at {dog_win} to win, while {fav} stands at {fav_win}.",
         ],
         "p.vol": [
             "{vol_n} is unpredictable, their weekly scoring swinging {vol_std} points, while {other}'s is steadier at {other_std}.",
@@ -288,8 +288,8 @@ FAMILY = {
         ],
         "t.count": [
             "It is {n}'s {nth} trade of the season, a restless creature.",
-            "{n} has completed the {nth} exchange of the season, a restless forager.",
-            "For {n}, this is the {nth} exchange of the season.",
+            "This is the {nth} exchange {n} has completed this season, a restless forager.",
+            "This is {n}'s {nth} exchange of the season.",
         ],
         "t.rec": [
             "Before the exchange, {a} stood {a_rank} at {a_rec}, and {b} stood {b_rank} at {b_rec}.",
@@ -353,7 +353,7 @@ FAMILY = {
         ],
         "h.s": [
             "The Beer Report, Week {wk}: {total_n} owed in the ancient ritual",
-            "{top} observes the ritual {topn} times in Week {wk}",
+            "{top} observes the ritual {top_times} in Week {wk}",
             "Week {wk} yields {total_n} for the ritual",
             "In Week {wk}, {top} leads the ritual with {topn}",
         ],
@@ -363,7 +363,7 @@ FAMILY = {
             "Week {wk} leaves {total_n} to be settled by {owners_n}.",
         ],
         "s.owner": [
-            "{n} must observe the ritual {sgn}: {list}.",
+            "{n} must observe the ritual {sgn_times}: {list}.",
             "{sgn} from {n}, for {list}.",
             "The ledger notes, for {n}, {sgn}: {list}.",
             "The ledger notes {sgn} for {n}: {list}.",
@@ -409,7 +409,7 @@ FAMILY = {
         ],
         "n.luck": [
             "Fortune favors the few: {lucky} is {lucky_luck} wins above the all-play expectation, and {unlucky} is {unlucky_luck}.",
-            "By all-play, {lucky} has {lucky_luck} wins it has not earned; {unlucky} has {unlucky_luck}.",
+            "By all-play, {lucky} has {lucky_luck} wins they have not earned; {unlucky} has {unlucky_luck}.",
             "{lucky} ({lucky_luck}) enjoys fortune; {unlucky} ({unlucky_luck}) endures its absence.",
         ],
         "n.clinch": [
@@ -479,7 +479,7 @@ FAMILY = {
             "In Week {twk}, {b_got} passed to {b}, and {a_got} to {a}.",
         ],
         "f.adj": [
-            "In the hierarchy, {hi} ({hi_rec}, {hi_rank}) holds ground just above {lo} ({lo_rec}, {lo_rank}), {pf_gap} apart in points scored.",
+            "In the hierarchy, {hi} ({hi_rec}, {hi_rank}) holds ground just above {lo} ({lo_rec}, {lo_rank}), {pf_gap} apart.",
             "{hi} stands {hi_rank} and {lo} stands {lo_rank}, separated by {pf_gap} in points scored: close neighbors.",
             "{lo} lags {hi} by {pf_gap} of resources, {lo_rank} to {hi_rank} on the ladder.",
         ],

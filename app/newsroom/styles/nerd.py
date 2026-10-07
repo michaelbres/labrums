@@ -188,14 +188,14 @@ FAMILY = {
             "{ngames} in {wl}. The tails: {big_w}'s {big_m}-point win over {big_l}, and {top_w}'s {top_pts}.",
         ],
         "h.p.fav": [
-            "{fav} ({fav_odds}) over {dog} ({dog_odds}): what the model says about {wl}",
+            "{fav} ({fav_win}) over {dog} ({dog_win}): what the model says about {wl}",
             "{wl}: the model favors {fav} over {dog}",
-            "{fav} has the edge on {dog} in {wl}, {fav_odds} to {dog_odds} in playoff odds",
+            "{fav} has the edge on {dog} in {wl}, {fav_win} to {dog_win} to win",
         ],
         "h.p.even": [
-            "{a} vs. {b} in {wl}: indistinguishable at {a_odds} and {b_odds}",
+            "{a} vs. {b} in {wl}: indistinguishable at {a_win_pct} and {b_win_pct} to win",
             "{wl}: the model cannot separate {a} from {b}",
-            "{a} and {b} meet in {wl} with near-identical playoff odds",
+            "{a} and {b} meet in {wl} with near-identical odds to win",
         ],
         "h.p.lev": [
             "{wl}'s highest-leverage game: {a} vs. {b}, {swing} points of swing",
@@ -242,9 +242,9 @@ FAMILY = {
             "Of every game this week, {a} vs. {b} moves the most playoff probability: {swing} points.",
         ],
         "p.favorite": [
-            "{fav} is the model favorite on {fav_why} ({fav_odds} to {dog}'s {dog_odds}).",
-            "On {fav_why}, {fav} ({fav_odds}) rates ahead of {dog} ({dog_odds}), though the margin of error is wide.",
-            "The model has {dog} at {dog_odds} and {fav} at {fav_odds}, which makes {dog} the underdog.",
+            "{fav} is the model favorite on {fav_why} ({fav_win} to win, against {dog}'s {dog_win}).",
+            "On {fav_why}, {fav} ({fav_win} to win) rates ahead of {dog} ({dog_win}), though the margin of error is wide.",
+            "The model has {dog} at {dog_win} to win and {fav} at {fav_win}, which makes {dog} the underdog.",
         ],
         "p.vol": [
             "{vol_n}'s weekly scoring has a standard deviation of {vol_std}, against {other_std} for {other}, so the higher-variance team has the better shot at an upset.",
@@ -274,7 +274,7 @@ FAMILY = {
             "{b} received {b_got} and sent {a_got} to {a} in the {wl} deal.",
         ],
         "t.returns": [
-            "Over the {since_wk} since the trade, {a}'s incoming players scored {a_pts} and {b}'s scored {b_pts}. {lead} leads on production; the sample is small.",
+            "Over the {since_wk} since the trade, {a}'s incoming players scored {a_pts} and {b}'s scored {b_pts}. {lead} leads on production; {sample_note}.",
             "Production check: {lead}'s new players have {lead_pts} to {trail}'s {trail_pts} across {since_wk}.",
             "{a}'s side has produced {a_pts} and {b}'s side {b_pts} in {since_wk}. {lead} is ahead, but production in small samples is unstable.",
         ],
@@ -289,9 +289,9 @@ FAMILY = {
             "Nothing to measure yet.",
         ],
         "t.count": [
-            "It is the {nth} trade of the season for {n}.",
+            "It is {n}'s {nth} trade of the season.",
             "That is {n}'s {nth} trade of the season, a small sample of a large appetite.",
-            "For {n}, this is the {nth} trade of the season.",
+            "For {n}, this is the {nth} trade this season.",
         ],
         "t.rec": [
             "Going into the deal, {a} was {a_rec} ({a_rank}) and {b} was {b_rec} ({b_rank}).",

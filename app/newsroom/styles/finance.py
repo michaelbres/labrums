@@ -187,12 +187,12 @@ FAMILY = {
         ],
         "h.p.fav": [
             "{wl} outlook: overweight {fav}, underweight {dog}",
-            "{fav} ({fav_odds}) rated above {dog} ({dog_odds}) for {wl}",
+            "{fav} ({fav_win}) rated above {dog} ({dog_win}) for {wl}",
             "Upgrade: {fav} over {dog} in {wl}",
         ],
         "h.p.even": [
             "{wl} outlook: {a} and {b} priced evenly",
-            "{a} ({a_odds}) and {b} ({b_odds}): no edge in {wl}",
+            "{a} ({a_win_pct} to win) and {b} ({b_win_pct}): no edge in {wl}",
             "A hold on {a} vs. {b} in {wl}",
         ],
         "h.p.lev": [
@@ -240,9 +240,9 @@ FAMILY = {
             "{a} and {b} are playing for {swing} points of playoff odds. No other matchup compares.",
         ],
         "p.favorite": [
-            "{fav} is the favorite on {fav_why}: {fav_odds} against {dog}'s {dog_odds}.",
-            "On {fav_why}, {fav} ({fav_odds}) is rated above {dog} ({dog_odds}).",
-            "{dog} is the underdog at {dog_odds}; {fav} is priced at {fav_odds}.",
+            "{fav} is the favorite on {fav_why}: {fav_win} to win against {dog}'s {dog_win}.",
+            "On {fav_why}, {fav} ({fav_win} to win) is rated above {dog} ({dog_win}).",
+            "{dog} is the underdog at {dog_win} to win; {fav} is priced at {fav_win}.",
         ],
         "p.vol": [
             "Risk note: {vol_n}'s weekly scoring has a volatility of {vol_std} points, against {other_std} for {other}.",
@@ -289,8 +289,8 @@ FAMILY = {
         ],
         "t.count": [
             "It is {n}'s {nth} acquisition of the season, a serial acquirer in the making.",
-            "{n} has now closed the {nth} deal of the season.",
-            "For {n}, this is the {nth} merger of the year.",
+            "This is the {nth} deal {n} has closed this season.",
+            "It is {n}'s {nth} merger of the year.",
         ],
         "t.rec": [
             "Before the deal, {a} was {a_rec} ({a_rank}) and {b} was {b_rec} ({b_rank}).",

@@ -187,12 +187,12 @@ FAMILY = {
         ],
         "h.p.fav": [
             "{fav} favourites against {dog} in {wl}",
-            "{wl}: {fav} ({fav_odds}) the bookies' pick over {dog} ({dog_odds})",
+            "{wl}: {fav} ({fav_win}) the bookies' pick over {dog} ({dog_win})",
             "Can {dog} spring a surprise on {fav} in {wl}?",
         ],
         "h.p.even": [
             "{a} against {b} in {wl}: too close to call",
-            "{wl}: {a} and {b} neck and neck at {a_odds} and {b_odds}",
+            "{wl}: {a} and {b} neck and neck at {a_win_pct} and {b_win_pct} to win",
             "{a} and {b} meets in {wl}, with no clear favourite",
         ],
         "h.p.lev": [
@@ -240,9 +240,9 @@ FAMILY = {
             "{a} and {b} is playing for {swing} points of playoff odds. Nothing else comes close.",
         ],
         "p.favorite": [
-            "{fav} is the favourites on {fav_why}: {fav_odds} to {dog}'s {dog_odds}.",
-            "The numbers favour {fav} ({fav_odds}) over {dog} ({dog_odds}), going by {fav_why}.",
-            "{dog} is the underdogs at {dog_odds}, with {fav} at {fav_odds}. Stranger things have happened.",
+            "{fav} is the favourites on {fav_why}: {fav_win} to win against {dog}'s {dog_win}.",
+            "The numbers favour {fav} ({fav_win} to win) over {dog} ({dog_win}), going by {fav_why}.",
+            "{dog} is the underdogs at {dog_win} to win, with {fav} at {fav_win}. Stranger things have happened.",
         ],
         "p.vol": [
             "{vol_n} is the unpredictable ones, swinging {vol_std} points a week, against {other_std} for {other}.",
@@ -288,8 +288,8 @@ FAMILY = {
         ],
         "t.count": [
             "That's {n}'s {nth} trade of the season. Busy, busy.",
-            "{n} has now done the {nth} deal of the season.",
-            "The {nth} trade for {n} this term, and counting.",
+            "This is the {nth} deal {n} has made this season.",
+            "{n}'s {nth} trade this term, and counting.",
         ],
         "t.rec": [
             "Before the deal, {a} sat on {a_rec} ({a_rank}), and {b} on {b_rec} ({b_rank}).",
@@ -479,8 +479,8 @@ FAMILY = {
             "In Week {twk}, {b_got} went to {b}, and {a_got} to {a}.",
         ],
         "f.adj": [
-            "In the table, {hi} ({hi_rec}, {hi_rank}) sit just above {lo} ({lo_rec}, {lo_rank}), {pf_gap} apart in points scored. Neighbours, and not friendly ones.",
-            "{hi} is {hi_rank}, {lo} is {lo_rank}, and only {pf_gap} apart in points scored.",
+            "In the table, {hi} ({hi_rec}, {hi_rank}) sit just above {lo} ({lo_rec}, {lo_rank}), {pf_gap} apart. Neighbours, and not friendly ones.",
+            "{hi} is {hi_rank}, {lo} is {lo_rank}, and only {pf_gap} apart.",
             "{lo} trails {hi} by {pf_gap} in points scored, {lo_rank} to {hi_rank} in the table.",
         ],
         "f.blow": [

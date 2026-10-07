@@ -262,6 +262,8 @@ class Beats3(Beats2):
                 if st_x != wd_x and round(spread[st_x][0], 2) != round(spread[wd_x][0], 2):
                     def band(x):
                         lo_r, hi_r = spread[x][2], spread[x][3]
+                        if lo_r == hi_r:
+                            return f"{ordinal(lo_r)} every week"
                         return f"{ordinal(lo_r)} to {ordinal(hi_r)}"
                     steady_f = {"steady_n": nm(st_x), "steady_avg": f"{spread[st_x][1]:.1f}", "steady_band": band(st_x),
                                 "wild_n": nm(wd_x), "wild_band": band(wd_x)}

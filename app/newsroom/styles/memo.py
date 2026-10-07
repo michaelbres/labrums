@@ -187,12 +187,12 @@ FAMILY = {
         ],
         "h.p.fav": [
             "{wl} outlook: {fav} favored over {dog}",
-            "Forecast for {wl}: {fav} ({fav_odds}) ahead of {dog} ({dog_odds})",
+            "Forecast for {wl}: {fav} ({fav_win}) ahead of {dog} ({dog_win})",
             "{fav} projected to outperform {dog} in {wl}",
         ],
         "h.p.even": [
             "{wl} outlook: {a} and {b} projected at parity",
-            "Forecast for {wl}: {a} ({a_odds}) and {b} ({b_odds}) too close to call",
+            "Forecast for {wl}: {a} ({a_win_pct} to win) and {b} ({b_win_pct}) too close to call",
             "{a} vs. {b}: no clear projection for {wl}",
         ],
         "h.p.lev": [
@@ -240,9 +240,9 @@ FAMILY = {
             "{a} and {b} are playing for {swing} points of playoff odds. No other game is comparable.",
         ],
         "p.favorite": [
-            "{fav} is the projected favorite on {fav_why}: {fav_odds} against {dog}'s {dog_odds}.",
-            "Based on {fav_why}, {fav} ({fav_odds}) is ahead of {dog} ({dog_odds}).",
-            "{dog} is the underdog at {dog_odds}; {fav} is at {fav_odds}. Risks are noted.",
+            "{fav} is the projected favorite on {fav_why}: {fav_win} to win against {dog}'s {dog_win}.",
+            "Based on {fav_why}, {fav} ({fav_win} to win) is ahead of {dog} ({dog_win}).",
+            "{dog} is the underdog at {dog_win} to win; {fav} is at {fav_win}. Risks are noted.",
         ],
         "p.vol": [
             "Risk factor: {vol_n}'s weekly output varies by {vol_std} points, compared with {other_std} for {other}.",
@@ -288,8 +288,8 @@ FAMILY = {
         ],
         "t.count": [
             "This is {n}'s {nth} trade this season.",
-            "{n} has now completed the {nth} trade of this season.",
-            "For {n}, this marks the {nth} trade of the year.",
+            "This is the {nth} trade {n} has completed this season.",
+            "This marks {n}'s {nth} trade of the year.",
         ],
         "t.rec": [
             "At the time of the trade, {a} was {a_rec} ({a_rank}) and {b} was {b_rec} ({b_rank}).",

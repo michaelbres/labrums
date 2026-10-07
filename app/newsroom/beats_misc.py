@@ -6,7 +6,7 @@ from typing import Any
 from ..loader import is_offseason
 from .beats import Beats
 from .engine import BUSY_RX, Writer
-from .util import fmt, fmt1, join_and, mclass, num_word, ordinal, ord_word, pct, plural, pts, signed
+from .util import fmt, fmt1, join_and, mclass, num_word, ordinal, ord_word, pct, plural, pts, signed, times
 
 
 WAIVER_HI = 15.0    # points since the claim: at or above, a good pickup
@@ -79,6 +79,7 @@ class Beats2(Beats):
             lead, trail = T["lead"], T["trail"]
             ret = {**f, "a_pts": pts(T["since"][a]), "b_pts": pts(T["since"][b]), "lead": self.name(lead), "trail": self.name(trail),
                    "lead_pts": pts(T["since"][lead]), "trail_pts": pts(T["since"][trail]), "since_wk": plural(T["weeks"], "week")}
+            ret["sample_note"] = "the sample is small" if T["weeks"] <= 3 else "the sample is growing"   # "small" only for 3 weeks or fewer
             s_ret = w.line("t.returns", ret, repeat=True)
         else:
             picks_only = [x for x in (a, b) if T["got"][x]["picks"] and not T["got"][x]["players"]]
@@ -218,7 +219,8 @@ class Beats2(Beats):
         for s in items:
             if s["reason"] == "rule":
                 d = s.get("detail", "")
-                parts.append(f"the {s['label']} rule ({d[:1].lower() + d[1:]})" if d else f"the {s['label']} rule")
+                ref = self.rule_ref(s["label"])
+                parts.append(f"{ref} ({d[:1].lower() + d[1:]})" if d else ref)
             elif s["reason"] == "empty_slot":
                 parts.append(f"an empty {s['slot']} slot")
             else:
@@ -237,12 +239,12 @@ class Beats2(Beats):
         ranked = sorted(per.items(), key=lambda kv: (-len(kv[1]), self.name(kv[0])))
         top_rid, top_items = ranked[0]
         f = {"total_n": plural(len(items), "shotgun"), "owners_n": plural(len(per), "owner"), "top": self.name(top_rid),
-             "topn": plural(len(top_items), "shotgun"), "wk": str(week), "wl": f"Week {week}"}
+             "topn": plural(len(top_items), "shotgun"), "top_times": times(len(top_items)), "wk": str(week), "wl": f"Week {week}"}
         headline = w.head("h.s", f)
         w.add([w.line("s.total", f, repeat=True)], {"shotgun": True})
         lines = []
         for rid, its in ranked:
-            lines.append(w.line("s.owner", {"n": self.name(rid), "sgn": plural(len(its), "shotgun"), "list": self._sg_list(its), "wk": str(week)}, repeat=True))
+            lines.append(w.line("s.owner", {"n": self.name(rid), "sgn": plural(len(its), "shotgun"), "sgn_times": times(len(its)), "list": self._sg_list(its), "wk": str(week)}, repeat=True))
         w.add(lines, {"shotgun": True})
         extra: list[str | None] = []
         neg = [s for s in items if s["reason"] == "negative"]
@@ -261,7 +263,7 @@ class Beats2(Beats):
         all_rule = all(s["reason"] == "rule" for s in top_items)
         qf: dict[str, Any] = {"sgn": sg_words(len(top_items))}
         if all_rule:
-            qf["rule"] = top_items[0]["label"]
+            qf["rule"] = self.rule_ref(top_items[0]["label"], "\u2018\u2019")[4:-5]
             sit = "rule_owed"
         else:
             sit = "shotgun_owed"
@@ -454,14 +456,16 @@ class Beats2(Beats):
         if ta and tb:
             inc["trait"] = {"a": nm(a), "b": nm(b), "a_trait": r.choice(ta), "b_trait": r.choice(tb)}
         # background only: one party's blowout over somebody else this season
-        third = None
+        third = third_key = None
         blows = [g for g in self.st["games"] if g["week"] <= week and g["margin"] >= 30 and g["winner"] in (a, b)
-                 and (g["b"] if g["winner"] == g["a"] else g["a"]) not in (a, b)]
+                 and (g["b"] if g["winner"] == g["a"] else g["a"]) not in (a, b)
+                 and (g["week"], g["a"], g["b"]) not in self.third_cited]   # one blowout is cited once per build, not in four feuds
         if blows:
             g = max(blows, key=lambda x: (x["margin"], x["week"]))
             ww = g["winner"]; ll = g["b"] if ww == g["a"] else g["a"]
             wp = g["a_pts"] if ww == g["a"] else g["b_pts"]; lp = g["b_pts"] if ww == g["a"] else g["a_pts"]
             third = {"w": nm(ww), "l": nm(ll), "m": fmt(g["margin"]), "gwk": str(g["week"]), "wp": fmt(wp), "lp": fmt(lp), "mclass": "blowout"}
+            third_key = (g["week"], g["a"], g["b"])
         weights = {"h2h": 5, "trade": 4.5, "story": 3.5, "adj": 3, "sg": 2.5, "trait": 1}
         kinds = list(inc)
         if not kinds:
@@ -480,6 +484,8 @@ class Beats2(Beats):
         if second == "third":
             # a third team may only appear in a sentence that says "over <third>"
             p2.append(w.line("f.blow", third, need="over {l}"))
+            if p2[-1]:
+                self.third_cited.add(third_key)
         elif second:
             p2.append(w.line(slot[second], inc[second], repeat=True))
         if S["week"] >= 1:
@@ -506,7 +512,7 @@ class Beats2(Beats):
         if kind == "trade":
             return f"{n(a)} and {n(b)} traded in Week {d['twk']}"
         if kind == "adj":
-            return f"{d['hi']} ({d['hi_rec']}, {d['hi_rank']}) and {d['lo']} ({d['lo_rec']}, {d['lo_rank']}), {d['pf_gap']} apart in points"
+            return f"{d['hi']} ({d['hi_rec']}, {d['hi_rank']}) and {d['lo']} ({d['lo_rec']}, {d['lo_rank']}), {d['pf_gap']} apart"
         if kind == "sg":
             return f"Shotgun ledger: {d['a']} {d['a_sg']}, {d['b']} {d['b_sg']}"
         if kind == "story":

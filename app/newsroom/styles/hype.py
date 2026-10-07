@@ -187,12 +187,12 @@ FAMILY = {
         ],
         "h.p.fav": [
             "{fav} is the favorite over {dog} in {wl}!",
-            "{wl}: {fav} ({fav_odds}) vs. {dog} ({dog_odds}), and the odds say {fav}!",
+            "{wl}: {fav} ({fav_win}) vs. {dog} ({dog_win}), and the odds say {fav}!",
             "Can {dog} pull the upset on {fav} in {wl}?",
         ],
         "h.p.even": [
             "{a} vs. {b} in {wl}: a TOSS-UP!",
-            "{a_odds} vs. {b_odds}! {a} and {b} are neck and neck in {wl}",
+            "{a_win_pct} vs. {b_win_pct} to win! {a} and {b} are neck and neck in {wl}",
             "Nobody's safe: {a} and {b} meet in {wl} with near-identical odds",
         ],
         "h.p.lev": [
@@ -240,9 +240,9 @@ FAMILY = {
             "{a} and {b} are playing for {swing} points of playoff odds. Nothing else on the slate comes close!",
         ],
         "p.favorite": [
-            "{fav} is the favorite on {fav_why}: {fav_odds} playoff odds to {dog}'s {dog_odds}!",
-            "The numbers like {fav}: {fav_odds} to {dog}'s {dog_odds}, going by {fav_why}!",
-            "{dog} is the underdog at {dog_odds}, with {fav} at {fav_odds}!",
+            "{fav} is the favorite on {fav_why}: {fav_win} to win against {dog}'s {dog_win}!",
+            "The numbers like {fav}: {fav_win} to win, against {dog}'s {dog_win}, going by {fav_why}!",
+            "{dog} is the underdog at {dog_win} to win, with {fav} at {fav_win}!",
         ],
         "p.vol": [
             "Fireworks warning! {vol_n} swings by {vol_std} points a week, while {other} is steadier at {other_std}!",
@@ -287,9 +287,9 @@ FAMILY = {
             "The jury is out, because the games haven't happened yet!",
         ],
         "t.count": [
-            "That's the {nth} trade of the season for {n}!",
-            "{n} is on the move! The {nth} trade of the year!",
-            "It's the {nth} trade of the season for {n}!",
+            "That's the {nth} deal {n} has made this season!",
+            "{n} is on the move! That's {n}'s {nth} trade of the year!",
+            "It's {n}'s {nth} trade of the season!",
         ],
         "t.rec": [
             "Before the deal, {a} was {a_rec} ({a_rank}) and {b} was {b_rec} ({b_rank})!",
@@ -480,7 +480,7 @@ FAMILY = {
         ],
         "f.adj": [
             "In the standings, {hi} ({hi_rec}, {hi_rank}) is right ahead of {lo} ({lo_rec}, {lo_rank}), and {pf_gap} separate them in points scored!",
-            "{hi} is {hi_rank}, {lo} is {lo_rank}, and just {pf_gap} apart in points scored!",
+            "{hi} is {hi_rank}, {lo} is {lo_rank}, and just {pf_gap} apart!",
             "{lo} is chasing {hi}! They're {lo_rank} and {hi_rank}, with {pf_gap} between them in points scored!",
         ],
         "f.blow": [

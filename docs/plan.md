@@ -1,7 +1,7 @@
 # Plan / status board
 
 ## Right now
-- Newsroom v2 shipped (50 reporters, 14 families, grounded facts, weekly roundup/preview, as-of-week snapshots); editorial desk + daily release calendar shipped; fix round 1 (feud incidents, ordinals, trade timing, grammar, catchphrase share) in progress.
+- Newsroom v2 shipped (50 reporters, 14 families, grounded facts, weekly roundup/preview, as-of-week snapshots); editorial desk + daily release calendar shipped; fix rounds 1-2 done (feud incidents, ordinals, trade timing, grammar, catchphrase share, game win probability in previews). Refuter7: all numbers verified, dates match calendar. 294 tests.
 - Daily routine "Labrums daily desk" (trig_01SvKFQhrc9AixSX936kn4Qp) fires 5:29 am America/New_York, fresh session, writes today's edition into content/articles/ and pushes to claude/magical-edison-g0t0m1. Update its prompt if the branch is merged to main.
 - Owner declined an Anthropic API key; the desk routine (their Claude Code subscription) is the "AI-written" path instead.
 - Pending from owner: iMessage group chat export (imessage-exporter) to build per-person voice profiles; Vercel import + Upstash.

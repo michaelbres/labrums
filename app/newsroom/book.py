@@ -10,7 +10,7 @@ from .. import shotguns, stats
 from . import calendar
 from ..loader import is_offseason
 from ..sleeper import player_label
-from .util import fmt, num_word, ordinal, pts, split_sentences
+from .util import fmt, num_word, ordinal, pts, rule_ref, split_sentences
 
 
 class Book:
@@ -28,6 +28,7 @@ class Book:
         self.seen: Counter = Counter()        # normalized sentence -> times written in this build
         self.quote_use: Counter = Counter()   # (situation, variant) -> times quoted in this build
         self.once_used: set[str] = set()      # family tics / voice tics already spent in this build (each runs once)
+        self.third_cited: set[tuple] = set()  # (week, a, b) of third-team blowouts already cited as feud background
         self.catch_week: set[tuple] = set()   # (roster_id, week) pairs that already got their catchphrase
         self.n_articles = 0                   # finished articles so far (the catchphrase budget is a share of these)
         self.n_catch = 0                      # of which carry a catchphrase
@@ -46,6 +47,10 @@ class Book:
     def nickname(self, rid: int) -> str:
         t = self.teams[rid]
         return str(t.get("nickname") or "").strip() or self.name(rid)
+
+    def rule_ref(self, label: str, quote: str = "\u201c\u201d") -> str:
+        """'the “scored less than Nick” rule' (first letter lowercased unless it is an owner's name)."""
+        return rule_ref(label, {self.name(r) for r in self.teams}, quote)
 
     def tname(self, rid: int) -> str:
         return " ".join(str(self.teams[rid]["team_name"]).split())

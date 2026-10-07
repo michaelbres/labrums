@@ -45,6 +45,7 @@ _COUNT_SING = {"were": "was", "are liable": "is liable", "are": "is", "have": "h
                "account": "accounts", "go": "goes", "come": "comes", "change": "changes", "drift": "drifts", "find": "finds"}
 _COUNT_RE = re.compile(r"(?<![\d.,-])\b1 (?:owner|player|shotgun|pick|add|game|trade|move|week|point) (are liable|were|are|have|owe|observe|"
                        r"account|go|come|change|drift|find)\b")
+_EVERY_WEEK = re.compile(r"\bfrom (\d+(?:st|nd|rd|th) every week)")   # a one-rank band: 'from 3rd every week' -> 'at 3rd every week'
 _COMBINED_ONE = re.compile(r"\ba combined (1 shotgun)\b")
 _COMBINED_OWNER = re.compile(r"(\b1 owner [^.!?]*?)\ba combined ")
 # Weather metaphors are for recaps, previews and standings; trades, waivers and the Beer Report read plain.
@@ -57,6 +58,7 @@ BUSY_RX = re.compile(r"busy|likes a deal|handshake|sit still|restless|appetite|p
 def agree(text: str, facts: dict) -> str:
     """Lists of names may hold one name: 'Nick are out' becomes 'Nick is out'; '1 owner owe' becomes '1 owner owes'."""
     text = _COUNT_RE.sub(lambda m: m.group(0)[: m.start(1) - m.start(0)] + _COUNT_SING[m.group(1)], text)
+    text = _EVERY_WEEK.sub(r"at \1", text)
     text = _COMBINED_ONE.sub(r"\1", text)
     text = _COMBINED_OWNER.sub(r"\1", text)
     for key in ("names", "in_names", "out_names"):

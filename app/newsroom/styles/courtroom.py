@@ -187,12 +187,12 @@ FAMILY = {
         ],
         "h.p.fav": [
             "The court presumes for {fav} over {dog} in {wl}",
-            "{wl}: the court finds for {fav} ({fav_odds}) over {dog} ({dog_odds})",
+            "{wl}: the court finds for {fav} ({fav_win}) over {dog} ({dog_win})",
             "{fav} v. {dog}: the presumption favors {fav}",
         ],
         "h.p.even": [
             "{a} v. {b}: no presumption in {wl}",
-            "{wl}: {a} and {b} presented as equals at {a_odds} and {b_odds}",
+            "{wl}: {a} and {b} presented as equals at {a_win_pct} and {b_win_pct} to win",
             "A toss-up in {wl}: {a} v. {b}",
         ],
         "h.p.lev": [
@@ -240,9 +240,9 @@ FAMILY = {
             "{a} and {b} contest {swing} points of playoff odds, more than any other case this week.",
         ],
         "p.favorite": [
-            "The presumption favors {fav} on {fav_why}: {fav_odds} to {dog}'s {dog_odds}.",
-            "On {fav_why}, the court finds {fav} ({fav_odds}) ahead of {dog} ({dog_odds}).",
-            "{dog} bears the burden at {dog_odds}; {fav} stands at {fav_odds}.",
+            "The presumption favors {fav} on {fav_why}: {fav_win} to win, against {dog}'s {dog_win}.",
+            "On {fav_why}, the court finds {fav} ({fav_win} to win) ahead of {dog} ({dog_win}).",
+            "{dog} bears the burden at {dog_win} to win; {fav} stands at {fav_win}.",
         ],
         "p.vol": [
             "The court notes that {vol_n} is the less predictable witness: {vol_std} points of weekly variation to {other_std} for {other}.",
@@ -288,7 +288,7 @@ FAMILY = {
         ],
         "t.count": [
             "The record shows this is {n}'s {nth} trade of the season.",
-            "{n} has now executed the {nth} trade of this season.",
+            "This is the {nth} trade {n} has executed this season.",
             "For {n}, this is the {nth} such agreement of the year.",
         ],
         "t.rec": [
@@ -409,7 +409,7 @@ FAMILY = {
         ],
         "n.luck": [
             "Fortune, as entered: {lucky} is {lucky_luck} wins above all-play expectation, and {unlucky} is {unlucky_luck}.",
-            "By all-play, {lucky} holds {lucky_luck} wins it has not earned; {unlucky} holds {unlucky_luck}.",
+            "By all-play, {lucky} holds {lucky_luck} wins they have not earned; {unlucky} holds {unlucky_luck}.",
             "{lucky} ({lucky_luck}) is the beneficiary of fortune; {unlucky} ({unlucky_luck}) is their victim.",
         ],
         "n.clinch": [

@@ -189,7 +189,7 @@ FAMILY = {
         ],
         "h.p.fav": [
             "{fav} is the favorite over {dog} in {wl}, and I would not argue",
-            "{wl}: {fav} ({fav_odds}) against {dog} ({dog_odds})",
+            "{wl}: {fav} ({fav_win}) against {dog} ({dog_win})",
             "Why I like {fav} over {dog} in {wl}",
         ],
         "h.p.even": [
@@ -242,9 +242,9 @@ FAMILY = {
             "{a} and {b} are playing for {swing} points of playoff odds, and nothing else this week comes close.",
         ],
         "p.favorite": [
-            "{fav} is the favorite on {fav_why}, {fav_odds} to {dog}'s {dog_odds}, and I would take that.",
-            "By {fav_why}, {fav} ({fav_odds}) stands ahead of {dog} ({dog_odds}).",
-            "{dog} is the underdog at {dog_odds}, with {fav} at {fav_odds}, and I have seen stranger things.",
+            "{fav} is the favorite on {fav_why}, {fav_win} to win against {dog}'s {dog_win}, and I would take that.",
+            "By {fav_why}, {fav} ({fav_win} to win) stands ahead of {dog} ({dog_win}).",
+            "{dog} is the underdog at {dog_win} to win, with {fav} at {fav_win}, and I have seen stranger things.",
         ],
         "p.vol": [
             "{vol_n} is the less predictable of the two, swinging {vol_std} points a week against {other_std} for {other}.",
@@ -290,8 +290,8 @@ FAMILY = {
         ],
         "t.count": [
             "It is {n}'s {nth} trade of the season, and I begin to wonder about the phone bills.",
-            "{n} has now made the {nth} trade of the year.",
-            "That makes the {nth} trade of the year for {n}, a busy hand.",
+            "This is the {nth} deal {n} has made this year.",
+            "That makes {n}'s {nth} trade of the year, a busy hand.",
         ],
         "t.rec": [
             "Going in, {a} stood {a_rank} at {a_rec} and {b} stood {b_rank} at {b_rec}.",
@@ -481,7 +481,7 @@ FAMILY = {
             "In Week {twk}, {b_got} went to {b} and {a_got} to {a}.",
         ],
         "f.adj": [
-            "{hi} ({hi_rec}, {hi_rank}) and {lo} ({lo_rec}, {lo_rank}) live in the same neighborhood of the standings, {pf_gap} apart in points scored.",
+            "{hi} ({hi_rec}, {hi_rank}) and {lo} ({lo_rec}, {lo_rank}) live in the same neighborhood of the standings, {pf_gap} apart.",
             "Neighbors in the table, {hi} is {hi_rank} and {lo} is {lo_rank}, with {pf_gap} between them in points.",
             "{lo} trails {hi} by {pf_gap} in points scored, {lo_rank} to {hi_rank}, and watches closely.",
         ],
