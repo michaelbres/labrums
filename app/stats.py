@@ -250,14 +250,14 @@ def compute(ctx: dict) -> dict[str, Any]:
         division_standings[d] = [t["roster_id"] for t in members]
     division_leaders = {d: rids[0] for d, rids in division_standings.items() if rids}
 
-    # Power rating (1-100): 35% win pct, 40% all-play pct, 25% scoring (min-max scaled league avg).
+    # Power rating (1-99): 35% win pct, 40% all-play pct, 25% scoring (min-max scaled league avg).
     avgs = [t["avg"] for t in team_stats.values()]
     lo_avg, hi_avg = (min(avgs), max(avgs)) if avgs else (0.0, 0.0)
     for t in team_stats.values():
         scoring_pct = (t["avg"] - lo_avg) / (hi_avg - lo_avg) if hi_avg > lo_avg else 0.0
         raw = 0.35 * t["win_pct"] + 0.40 * t["all_play"]["pct"] + 0.25 * scoring_pct
-        t["power_rating"] = max(1, min(100, round(100 * raw)))
-        t["power_score"] = t["power_rating"] / 100  # backwards compatibility
+        t["power_rating"] = max(1, min(99, round(99 * raw)))
+        t["power_score"] = t["power_rating"] / 99  # backwards compatibility
     power = sorted(team_stats.values(), key=lambda t: (-t["power_rating"], -t["all_play"]["pct"], -t["avg"]))
     for i, t in enumerate(power):
         t["power_rank"] = i + 1

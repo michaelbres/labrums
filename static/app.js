@@ -27,7 +27,7 @@
     const subText = sub === 'team' ? t.team_name : sub === 'record' ? t.record : '';
     return `<a class="team-cell" href="#/teams/${rid}">${avatar(t)}<span class="names"><b>${esc(t.name)}</b><small>${esc(subText)}</small></span></a>`;
   };
-  const POWER_CAPTION = 'Rating 1–100: 35% record · 40% all-play · 25% scoring';
+  const POWER_CAPTION = 'Rating 1–99: 35% record · 40% all-play · 25% scoring';
   const powerTable = (d, { eff = true } = {}) => {
     const rows = d.power_rankings.map((rid, i) => {
       const t = team(rid), diff = t.rank - (i + 1);

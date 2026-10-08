@@ -53,8 +53,8 @@ def test_schedule_only_future_regular_weeks(ctx, st):
 def test_power_rating_scale_and_order(st):
     teams = st["teams"]
     for t in teams.values():
-        assert isinstance(t["power_rating"], int) and 1 <= t["power_rating"] <= 100
-        assert t["power_score"] == t["power_rating"] / 100
+        assert isinstance(t["power_rating"], int) and 1 <= t["power_rating"] <= 99
+        assert t["power_score"] == t["power_rating"] / 99
     order = [teams[r] for r in st["power_rankings"]]
     keys = [(-t["power_rating"], -t["all_play"]["pct"], -t["avg"]) for t in order]
     assert keys == sorted(keys)
