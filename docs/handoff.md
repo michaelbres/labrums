@@ -48,6 +48,6 @@ Modeled on davidsasser.com (brief saved during the session; the tokens live at t
 
 ## Waiting on the owner
 - Sleeper display names of the 3 owners under the special rule and the target team → `special_rules` in config.yaml.
-- Owner profiles (nickname, bio, traits, catchphrase) → `owners`.
+- Owner profiles (nickname, traits, catchphrase) → `owners`.
 - Rivalry pairs and backstories → `rivalries`.
 - Whether empty starting slots should count as shotguns (currently yes).

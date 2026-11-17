@@ -60,7 +60,6 @@ Older seasons are also found by following `previous_league_id`, so the newest ID
 owners:
   "Mike":
     nickname: "The Commish"
-    bio: "Three-time runner-up, zero-time champion."
     traits: ["overpays for rookies", "never sets his lineup before Sunday"]
     catchphrase: "It's a marathon, not a sprint."
     hometown: "Philly"

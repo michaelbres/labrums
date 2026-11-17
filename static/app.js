@@ -234,7 +234,7 @@
     const prof = t.profile || {};
     const seedDist = (po.seed_dist || []).map((p, i) => `<div class="hbar"><span>Seed ${i + 1}</span><div class="meter ${i < d.league.playoff_teams ? '' : 'bad'}"><i style="width:${p * 100}%"></i></div><span class="num">${pct(p)}</span></div>`).join('');
     return `
-      <div class="page-h team-head">${avatar(t, 'lg')}<div><div class="eyebrow">02 / Teams / ${ordinal(t.rank)} place</div><h1>${esc(t.team_name)}</h1><div class="lead">${esc(t.name)} <small class="handle">@${esc(t.display_name)}</small>${t.division_name ? ` · ${esc(t.division_name)}` : ''}${t.nickname ? ` · “${esc(t.nickname)}”` : ''}${prof.hometown ? ` · ${esc(prof.hometown)}` : ''}</div>${prof.bio ? `<div class="lead" style="margin-top:4px">${esc(prof.bio)}</div>` : ''}</div>
+      <div class="page-h team-head">${avatar(t, 'lg')}<div><div class="eyebrow">02 / Teams / ${ordinal(t.rank)} place</div><h1>${esc(t.team_name)}</h1><div class="lead">${esc(t.name)} <small class="handle">@${esc(t.display_name)}</small>${t.division_name ? ` · ${esc(t.division_name)}` : ''}${t.nickname ? ` · “${esc(t.nickname)}”` : ''}${prof.hometown ? ` · ${esc(prof.hometown)}` : ''}</div></div>
         <div class="team-status">${statusBadge(po.status)}</div></div>
       <div class="tiles section">
         <div class="tile"><div class="label">Record</div><div class="value">${t.record}</div><div class="sub">${ordinal(t.rank)} place · power #${t.power_rank}</div></div>
