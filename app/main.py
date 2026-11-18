@@ -60,6 +60,7 @@ class State:
         self._models: dict[str, tuple[float, dict]] = {}
         self._seasons: tuple[float, list[dict]] | None = None
         self._network: tuple[float, dict] | None = None
+        self._net_lock = threading.Lock()
 
     def reload_config(self):
         self.cfg = load_config()
@@ -221,13 +222,19 @@ def network():
         hit = state._network
         if hit and time.time() - hit[0] < MODEL_TTL:
             return hit[1]
-    try:
-        out = load_network(state.client, state.cfg, state.seasons())
-    except SleeperError as e:
-        raise HTTPException(503, f"Sleeper API unavailable: {e}") from e
-    with state._lock:
-        state._network = (time.time(), out)
-    return out
+    with state._net_lock:  # single-flight: concurrent cold requests share one load
+        with state._lock:
+            hit = state._network
+            if hit and time.time() - hit[0] < MODEL_TTL:
+                return hit[1]
+        try:
+            out = load_network(state.client, state.cfg, state.seasons())
+        except SleeperError as e:
+            raise HTTPException(503, f"Sleeper API unavailable: {e}") from e
+        if not out.get("skipped"):  # a partial result is served but never cached
+            with state._lock:
+                state._network = (time.time(), out)
+        return out
 
 
 @app.post("/api/season/{season}/refresh", dependencies=[Depends(require_admin)])

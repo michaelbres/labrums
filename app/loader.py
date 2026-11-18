@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from .config import clean_profile
-from .sleeper import avatar_url
+from .sleeper import SleeperError, avatar_url
 
 log = logging.getLogger("labrums.loader")
 
@@ -231,6 +231,8 @@ def load_network(client, cfg: dict, season_infos: list[dict] | None = None) -> d
             continue
         loaded.append(s)
         drafts[s["season"]] = load_draft_picks(client, info["league_id"])
+    if infos and not loaded:
+        raise SleeperError("no season could be loaded: " + "; ".join(f"{x['season']}: {x['error']}" for x in skipped))
     out = build_network(build_stints(loaded, drafts))
     out["seasons"] = [s["season"] for s in loaded]
     out["skipped"] = skipped

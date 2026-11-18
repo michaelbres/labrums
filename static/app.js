@@ -427,19 +427,20 @@
   const NET_POS = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'];
   const netPos = (p) => NET_POS.includes(p) ? p : 'X';
   const netNet = () => state.net || (state.net = { data: null, loading: false, error: null, minTeams: 2, pos: 'all', q: '', sel: null, raf: 0 });
-  const wkRange = (s) => s.start_week === s.end_week ? `Wk ${s.start_week}` : `Wk ${s.start_week}–${s.end_week}`;
-  const VIA_LABEL = { draft: 'Drafted', trade: 'Trade', waiver: 'Waiver', free_agent: 'Free agent', kept: 'Kept', unknown: 'Unknown' };
+  const wkRange = (s) => s.brief ? 'Offseason / under a week' : s.start_week === s.end_week ? `Wk ${s.start_week}` : `Wk ${s.start_week}–${s.end_week}`;
+  const VIA_LABEL = { draft: 'Drafted', trade: 'Trade', waiver: 'Waiver', free_agent: 'Free agent', kept: 'Kept', inherited: 'Inherited', unknown: 'Unknown' };
 
   function viewNetwork() {
     const n = netNet();
     const head = pageHead('07 / Network', 'Player network', 'Who has been on whose roster, across every season of the league. Big circles are teams, dots are players coloured by position; a line means the player has spent time on that team. Players on one team only are hidden by default.');
     if (!n.data) {
+      if (n.error) return head + `<div class="error">Couldn't load the network: ${esc(n.error)} <button type="button" class="btn" data-net-retry>Retry</button></div>`;
       if (!n.loading) {
-        n.loading = true; n.error = null;
-        api('/api/network').then((d) => { n.data = d; }).catch((e) => { n.error = e.message; })
+        n.loading = true;
+        api('/api/network').then((d) => { n.data = d; }).catch((e) => { n.error = e.message || 'request failed'; })
           .finally(() => { n.loading = false; if (location.hash.startsWith('#/network')) route(); });
       }
-      return head + (n.error ? `<div class="error">Couldn't load the network: ${esc(n.error)}</div>` : '<div class="loading">Building the player network…</div>');
+      return head + '<div class="loading">Building the player network…</div>';
     }
     const d = n.data;
     const poss = NET_POS.filter((p) => d.players.some((x) => x.position === p));
@@ -492,7 +493,7 @@
       const p = d.players.find((x) => x.player_id === sel.id);
       if (!p) return '<div class="empty">Unknown player.</div>';
       const st = d.stints.filter((s) => s.player_id === sel.id).sort((a, b) => a.season.localeCompare(b.season) || a.start_week - b.start_week);
-      const rows = st.map((s) => `<tr><td data-label="Season">${esc(s.season)}</td><td data-label="Weeks">${esc(wkRange(s))} <span class="dim">(${s.weeks})</span></td><td data-label="Team"><b>${esc(s.owner)}</b> <small>${esc(s.team_name)}</small></td><td data-label="How"><span class="badge ${s.acquired_via === 'unknown' ? '' : 'accent'}">${esc(VIA_LABEL[s.acquired_via] || s.acquired_via)}</span></td></tr>`).join('');
+      const rows = st.map((s) => `<tr><td data-label="Season">${esc(s.season)}</td><td data-label="Weeks">${esc(wkRange(s))}${s.brief ? '' : ` <span class="dim">(${s.weeks})</span>`}</td><td data-label="Team"><b>${esc(s.owner)}</b> <small>${esc(s.team_name)}</small></td><td data-label="How"><span class="badge ${s.acquired_via === 'unknown' ? '' : 'accent'}">${esc(VIA_LABEL[s.acquired_via] || s.acquired_via)}</span></td></tr>`).join('');
       return `<div class="card-h"><h3>${esc(p.name)} <span class="badge">${esc(p.position)}</span></h3><span class="dim">${p.team_count} team${p.team_count === 1 ? '' : 's'} · ${p.total_weeks} weeks</span></div>
         <div class="table-wrap"><table class="net-table"><thead><tr><th>Season</th><th>Weeks</th><th>Team</th><th>Acquired</th></tr></thead><tbody>${rows}</tbody></table></div>`;
     }
@@ -514,9 +515,9 @@
     const n = netNet(), d = n.data;
     if (!d) return;
     cancelAnimationFrame(n.raf);
-    const host = $('#net-graph');
-    $('#net-panel').innerHTML = netPanelHtml();
-    if (!host) return;
+    const host = $('#net-graph'), panel = $('#net-panel');
+    if (!host || !panel) return;
+    panel.innerHTML = netPanelHtml();
     const players = netVisible();
     $('#net-count').textContent = `${players.length} player${players.length === 1 ? '' : 's'} shown`;
     if (!players.length) { host.innerHTML = '<div class="empty">No players match these filters.</div>'; return; }
@@ -615,13 +616,15 @@
   function netSelect(type, id) {
     const n = netNet();
     n.sel = (n.sel && n.sel.type === type && n.sel.id === id) ? null : { type, id };
-    $('#net-panel').innerHTML = netPanelHtml();
+    const panel = $('#net-panel');
+    if (panel) panel.innerHTML = netPanelHtml();
     if (n.highlight) n.highlight();
   }
 
   // Delegated handlers (the page is re-rendered by route(), so they live on #app once).
   app.addEventListener('click', (e) => {
     const n = state.net;
+    if (n && e.target.closest('[data-net-retry]')) { n.error = null; route(); return; }
     if (!n || !$('#net-panel')) return;
     const t = e.target.closest('[data-net-team]'), p = e.target.closest('[data-net-player]');
     if (t) netSelect('team', t.dataset.netTeam);
@@ -660,7 +663,7 @@
       case 'network': html = viewNetwork(); break;
       default: html = viewHome();
     }
-    cancelAnimationFrame(state.net && state.net.raf);
+    if (state.net) { cancelAnimationFrame(state.net.raf); clearTimeout(state.net.qt); }
     app.innerHTML = html;
     if ((view || 'home') === 'network') netMount();
     window.scrollTo({ top: 0 });

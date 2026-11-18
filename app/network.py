@@ -27,13 +27,29 @@ def _runs(weeks: list[int]) -> list[tuple[int, int]]:
     return out
 
 
+def _last_week(s: dict) -> int | None:
+    """Last counted week of a completed season: league settings last_scored_leg, else the last week with points.
+    Sleeper lists extra NFL weeks after the playoffs end."""
+    if (s.get("league") or {}).get("status") != "complete":
+        return None
+    leg = int(((s.get("league") or {}).get("settings") or {}).get("last_scored_leg") or 0)
+    if leg > 0:
+        return leg  # Sleeper's own record of the last week that counted (later NFL weeks may still carry points)
+    scored = [int(w) for w, rows in (s.get("matchups") or {}).items()
+              if any(float(r.get("points") or 0) > 0 for r in rows or [])]
+    return max(scored) if scored else None
+
+
 def _snapshots(s: dict) -> dict[int, dict[int, set[str]]]:
     """week -> roster_id -> player ids, from the weekly matchup entries (commissioner moves included)."""
     complete = (s.get("league") or {}).get("status") == "complete"
     cur = s.get("current_week")
+    last = _last_week(s)
     snaps: dict[int, dict[int, set[str]]] = {}
     for week, rows in (s.get("matchups") or {}).items():
         week = int(week)
+        if last and week > last:
+            continue  # empty weeks after the real end of the season
         if not complete and cur and week > int(cur):
             continue  # future weeks of an in-progress season are just a copy of today's rosters
         for r in rows or []:
@@ -79,12 +95,13 @@ def build_stints(seasons: list[dict], drafts: dict[str, list[dict]] | None = Non
         players = {**players, **(s.get("players") or {})}
 
     stints: list[dict] = []
-    prev_last: dict[str, dict] = {}  # pid -> that player's final stint in the previous season
+    prev_last: dict[str, tuple[dict, int]] = {}  # pid -> (final stint, roster_id) in the previous season
     for s in seasons:
         season = str(s["season"])
         teams = s.get("teams") or {}
         snaps = _snapshots(s)
-        events = _tx_events(s)
+        last = _last_week(s)
+        events = [e for e in _tx_events(s) if not last or e["week"] <= last]
         first_week = min(snaps) if snaps else 1
         picks = drafts.get(season) if season in drafts else s.get("draft_picks")
         drafted = {(int(p["roster_id"]), str(p["player_id"])) for p in picks or []
@@ -113,26 +130,48 @@ def build_stints(seasons: list[dict], drafts: dict[str, list[dict]] | None = Non
                 spans.append((e["rid"], e["pid"], w, w))
                 seen.add((e["rid"], e["pid"]))
 
-        season_stints: list[dict] = []
+        # Brief stints: on a roster before the first weekly snapshot (or between snapshots) and gone again.
+        def covered(rid: int, pid: str, w: int, strict: bool) -> bool:
+            return any(r == rid and q == pid and (a <= w <= b or (not strict and b == w - 1))
+                       for r, q, a, b in spans)
+
+        brief: set[tuple[int, str, int]] = set()
+        for rid, pid in sorted(drafted):
+            if not covered(rid, pid, first_week, True):
+                spans.append((rid, pid, first_week, first_week))
+                brief.add((rid, pid, first_week))
+        for e in events:
+            if e["added"]:
+                continue
+            w = max(e["week"], first_week)
+            if not covered(e["rid"], e["pid"], w, False):
+                spans.append((e["rid"], e["pid"], w, w))
+                brief.add((e["rid"], e["pid"], w))
+
+        pairs: list[tuple[int, dict]] = []  # (roster_id, stint)
         for rid, pid, a, b in spans:
+            is_brief = (rid, pid, a) in brief and a == b
             t = teams.get(rid) or teams.get(str(rid)) or {}
             owner = owner_of(rid)
             via = _acquired(events, rid, pid, a, drafted, first_week, prev_last, owner)
             lab = player_label(players, pid)
-            season_stints.append({
+            pairs.append((rid, {
                 "player_id": pid, "player": lab["name"], "position": lab["position"],
                 "owner_id": owner, "owner": t.get("name") or t.get("display_name") or owner,
                 "team_name": t.get("team_name") or owner, "season": season,
-                "start_week": a, "end_week": b, "weeks": b - a + 1, "acquired_via": via,
-            })
-        season_stints.sort(key=lambda x: (x["owner"], x["start_week"], x["player"], x["player_id"]))
-        stints.extend(season_stints)
+                "start_week": a, "end_week": b, "weeks": 0 if is_brief else b - a + 1,
+                "brief": is_brief, "acquired_via": via,
+            }))
+        pairs.sort(key=lambda z: (z[1]["owner"], z[1]["start_week"], z[1]["player"], z[1]["player_id"]))
+        stints.extend(st for _, st in pairs)
         prev_last = {}
-        for st in season_stints:
+        for rid, st in pairs:
             cur = prev_last.get(st["player_id"])
-            # Same end week: the later start is the later holder (a trade processed after that week's lock).
-            if cur is None or (st["end_week"], st["start_week"]) > (cur["end_week"], cur["start_week"]):
-                prev_last[st["player_id"]] = st
+            # Same end week: the later start is the later holder (a trade processed after that week's lock);
+            # a brief stint never outranks a real one.
+            key = (st["end_week"], not st["brief"], st["start_week"])
+            if cur is None or key > (cur[0]["end_week"], not cur[0]["brief"], cur[0]["start_week"]):
+                prev_last[st["player_id"]] = (st, rid)
     return stints
 
 
@@ -153,8 +192,11 @@ def _acquired(events, rid, pid, start, drafted, first_week, prev_last, owner) ->
         if add["kind"] in ("waiver", "free_agent"):
             return add["kind"]
     prev = prev_last.get(pid)
-    if prev is not None and prev["owner_id"] == owner and start == first_week:
-        return "kept"
+    if prev is not None and start == first_week:
+        if prev[0]["owner_id"] == owner:
+            return "kept"
+        if prev[1] == rid:
+            return "inherited"  # same roster slot, new manager: the roster was handed over
     return "unknown"
 
 

@@ -127,3 +127,46 @@ def test_network_demo(api):
     pid = data["edges"][0]["player_id"]
     assert any(p["player_id"] == pid for p in data["players"])
     assert {s["acquired_via"] for s in data["stints"]} >= {"draft", "kept"}
+
+
+def test_network_total_failure_is_503_and_not_cached(api, monkeypatch):
+    import app.main as main
+    from app.sleeper import SleeperError
+    calls = []
+
+    def boom(*a, **k):
+        calls.append(1)
+        raise SleeperError("no season could be loaded")
+    monkeypatch.setattr(main, "load_network", boom)
+    assert api.get("/api/network").status_code == 503
+    assert api.get("/api/network").status_code == 503
+    assert len(calls) == 2
+
+
+def test_network_partial_result_not_cached_but_full_is_and_loads_are_single_flight(api, monkeypatch):
+    import threading
+    import time as _t
+    import app.main as main
+    calls = []
+
+    def partial(*a, **k):
+        calls.append(1)
+        return {"teams": [], "players": [], "edges": [], "stints": [], "seasons": ["2026"],
+                "skipped": [{"season": "2025", "league_id": "x", "error": "boom"}]}
+    monkeypatch.setattr(main, "load_network", partial)
+    r = api.get("/api/network")
+    assert r.status_code == 200 and r.json()["skipped"][0]["season"] == "2025"
+    api.get("/api/network")
+    assert len(calls) == 2  # partial result was not cached
+
+    calls.clear()
+
+    def full(*a, **k):
+        calls.append(1)
+        _t.sleep(0.2)
+        return {"teams": [], "players": [], "edges": [], "stints": [], "seasons": ["2025", "2026"], "skipped": []}
+    monkeypatch.setattr(main, "load_network", full)
+    res = []
+    ths = [threading.Thread(target=lambda: res.append(api.get("/api/network").status_code)) for _ in range(4)]
+    [t.start() for t in ths]; [t.join() for t in ths]
+    assert res == [200] * 4 and len(calls) == 1

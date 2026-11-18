@@ -112,3 +112,54 @@ def test_edge_aggregation_one_edge_per_player_owner_pair():
     assert (top["player_id"], top["team_count"], top["total_weeks"]) == ("p1", 2, 4)
     assert {t["owner_id"]: t["players_count"] for t in net["teams"]} == {"uA": 1, "uB": 2}
     assert len(net["stints"]) == 4
+
+
+def test_brief_stint_for_draft_then_traded_before_week_one():
+    # p1 drafted by Ann, traded to Bob in week 1: only Bob's snapshot has him.
+    s = season("2024", R24, {1: {1: [], 2: ["p1"]}, 2: {1: [], 2: ["p1"]}},
+               {1: [tx("trade", {"p1": 2}, {"p1": 1})]})
+    st = build_stints([s], {"2024": [{"roster_id": 1, "player_id": "p1"}]})
+    ann = by(st, "p1", "uA")
+    assert [(x["start_week"], x["weeks"], x["brief"], x["acquired_via"]) for x in ann] == [(1, 0, True, "draft")]
+    bob = by(st, "p1", "uB")
+    assert [(x["weeks"], x["brief"], x["acquired_via"]) for x in bob] == [(2, False, "trade")]
+    net = build_network(st)
+    assert {(e["owner_id"]) for e in net["edges"]} == {"uA", "uB"}
+    assert net["players"][0]["team_count"] == 2 and net["players"][0]["total_weeks"] == 2
+
+
+def test_brief_stint_for_carried_over_player_dropped_before_week_one_and_no_duplicates():
+    s25 = season("2025", R24, {1: {1: ["p2"], 2: ["p3"]}})
+    # p2 stays on Ann through 2025; in 2026 week 1 she drops p2 (never in a snapshot). p3 is dropped in week 3
+    # after being held in weeks 1-2: no extra brief stint.
+    s26 = season("2026", R24, {1: {1: [], 2: ["p3"]}, 2: {1: [], 2: ["p3"]}, 3: {1: [], 2: []}},
+                 {1: [tx("waiver", {"p5": 2}, {"p2": 1})], 3: [tx("free_agent", {}, {"p3": 2})]})
+    st = build_stints([s25, s26])
+    p2 = by(st, "p2", "uA", "2026")
+    assert [(x["weeks"], x["brief"], x["acquired_via"]) for x in p2] == [(0, True, "kept")]
+    assert len(by(st, "p3", "uB", "2026")) == 1 and not by(st, "p3", "uB", "2026")[0]["brief"]
+
+
+def test_completed_season_ignores_unscored_trailing_week():
+    s = season("2024", R24, {1: {1: ["p1"]}, 2: {1: ["p1"]}, 3: {1: ["p1"]}})
+    for w, pts in ((1, 10), (2, 10), (3, 0)):
+        for row in s["matchups"][w]:
+            row["points"] = pts
+    st = build_stints([s])
+    assert [(x["start_week"], x["end_week"], x["weeks"]) for x in st] == [(1, 2, 2)]
+    # Sleeper's own last_scored_leg wins even when the extra week carries points.
+    s2 = season("2024", R24, {1: {1: ["p1"]}, 2: {1: ["p1"]}, 3: {1: ["p1"]}})
+    for rows in s2["matchups"].values():
+        rows[0]["points"] = 10
+    s2["league"]["settings"] = {"last_scored_leg": 2}
+    assert [(x["end_week"], x["weeks"]) for x in build_stints([s2])] == [(2, 2)]
+
+
+def test_inherited_roster_handed_to_new_owner():
+    s25 = season("2025", {1: ("uA", "Ann", "Ann FC"), 2: ("uB", "Bob", "Bob FC")}, {1: {1: ["p1"], 2: ["p2"]}})
+    s26 = season("2026", {1: ("uC", "Cy", "Cy FC"), 2: ("uB", "Bob", "Bob FC")}, {1: {1: ["p1", "p3"], 2: ["p2"]}})
+    st = build_stints([s25, s26])
+    via = lambda pid, o: [x["acquired_via"] for x in by(st, pid, o, "2026")]
+    assert via("p1", "uC") == ["inherited"]
+    assert via("p2", "uB") == ["kept"]
+    assert via("p3", "uC") == ["unknown"]
