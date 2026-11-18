@@ -399,7 +399,8 @@ ul.clean { list-style: none; padding: 0; margin: 0; }
 .pos-K { fill: var(--c-analytics); background: var(--c-analytics); }
 .pos-DEF { fill: var(--c-trade); background: var(--c-trade); }
 .pos-X { fill: var(--muted); background: var(--muted); }
-.net-svg.has-sel .net-e, .net-svg.has-sel .net-p, .net-svg.has-sel .net-team { opacity: .12; }
+.net-svg.has-sel .net-e, .net-svg.has-sel .net-p { opacity: .12; }
+.net-svg.has-sel .net-team { opacity: .3; }
 .net-svg.has-sel .net-e.on { opacity: 1; stroke: var(--accent); stroke-width: 1.5; }
 .net-svg.has-sel .net-p.on, .net-svg.has-sel .net-team.on { opacity: 1; }
 .net-svg.has-sel .net-team.on circle { fill: var(--accent); }

@@ -11,6 +11,8 @@ A fantasy football league site powered by the Sleeper API. It turns your league'
 - Past seasons are discovered automatically through Sleeper's previous league chain.
 - Demo mode with fake data, so you can try everything offline.
 
+The **Network** page (`#/network`) charts which players each team has rostered across all seasons; `uv run python scripts/export_stints.py [out.csv]` dumps the same data as CSV (default `data/stints.csv`).
+
 ## Quick start
 
 With [uv](https://docs.astral.sh/uv/):

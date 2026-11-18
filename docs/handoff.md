@@ -51,3 +51,10 @@ Modeled on davidsasser.com (brief saved during the session; the tokens live at t
 - Owner profiles (nickname, traits, catchphrase) → `owners`.
 - Rivalry pairs and backstories → `rivalries`.
 - Whether empty starting slots should count as shotguns (currently yes).
+
+## Player network (2026-11-18)
+- app/network.py: pure `build_stints(seasons, drafts)` / `build_network(stints)`. Roster truth = weekly matchup `players` (so commissioner moves show); owner identity = Sleeper user_id; sub-week stints from transactions; in-progress season also uses current rosters. acquired_via: draft > trade/waiver/free_agent (latest add at or before start, ignoring adds dropped in an earlier week) > kept (previous season's last holder was the same owner) > unknown.
+- loader.load_network + load_draft_picks feed `GET /api/network` (skips failed seasons -> `skipped`, 5 min cache) and scripts/export_stints.py (data/stints.csv, gitignored). SleeperClient/DemoClient gained drafts()/draft_picks().
+- Frontend `#/network` (viewNetwork/netMount in static/app.js): lazy fetch, SVG force graph, filters, player/team panel, most-traveled table, shared-player matrix.
+- Real league: 4 seasons, 12 distinct owners (ownership changed: EvanKlein/rsepe left, Jimmy/Nick joined), 1711 stints, ~2% unknown. Unknown = adds made by commissioner (dropped by loader) or takeovers.
+- Gotcha: populating data/cache with real data makes the live-2026 newsroom tests run (and fail); tests assume no cache.
