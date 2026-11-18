@@ -492,7 +492,7 @@
     if (sel.type === 'player') {
       const p = d.players.find((x) => x.player_id === sel.id);
       if (!p) return '<div class="empty">Unknown player.</div>';
-      const st = d.stints.filter((s) => s.player_id === sel.id).sort((a, b) => a.season.localeCompare(b.season) || a.start_week - b.start_week);
+      const st = d.stints.filter((s) => s.player_id === sel.id).sort((a, b) => a.season.localeCompare(b.season) || a.start_week - b.start_week || (b.brief ? 1 : 0) - (a.brief ? 1 : 0));
       const rows = st.map((s) => `<tr><td data-label="Season">${esc(s.season)}</td><td data-label="Weeks">${esc(wkRange(s))}${s.brief ? '' : ` <span class="dim">(${s.weeks})</span>`}</td><td data-label="Team"><b>${esc(s.owner)}</b> <small>${esc(s.team_name)}</small></td><td data-label="How"><span class="badge ${s.acquired_via === 'unknown' ? '' : 'accent'}">${esc(VIA_LABEL[s.acquired_via] || s.acquired_via)}</span></td></tr>`).join('');
       return `<div class="card-h"><h3>${esc(p.name)} <span class="badge">${esc(p.position)}</span></h3><span class="dim">${p.team_count} team${p.team_count === 1 ? '' : 's'} · ${p.total_weeks} weeks</span></div>
         <div class="table-wrap"><table class="net-table"><thead><tr><th>Season</th><th>Weeks</th><th>Team</th><th>Acquired</th></tr></thead><tbody>${rows}</tbody></table></div>`;
