@@ -162,6 +162,16 @@ class SleeperClient:
     def transactions(self, league_id: str, week: int, final: bool) -> list[dict]:
         return self.get(f"league/{league_id}/transactions/{week}", FINAL_TTL if final else LIVE_TTL) or []
 
+    def drafts(self, league_id: str) -> list[dict]:
+        """All drafts of a league. Finished drafts never change, so they are cached long."""
+        return self.get(f"league/{league_id}/drafts", FINAL_TTL,
+                        ttl_for=lambda d: FINAL_TTL if d and all(x.get("status") == "complete" for x in d)
+                        else LIVE_TTL) or []
+
+    def draft_picks(self, draft_id: str, final: bool = False) -> list[dict]:
+        """Picks of one draft; pass final=True once the draft is complete to cache them long."""
+        return self.get(f"draft/{draft_id}/picks", FINAL_TTL if final else LIVE_TTL) or []
+
     def winners_bracket(self, league_id: str) -> list[dict]:
         return self.get(f"league/{league_id}/winners_bracket", LIVE_TTL) or []
 

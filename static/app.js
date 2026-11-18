@@ -421,6 +421,228 @@
       <div class="grid grid-3 section">${hotCards}</div>`;
   }
 
+  // ---------- player network ----------
+  // Lazy: /api/network is only fetched when #/network is opened. The graph is hand-rolled SVG with a small
+  // force simulation (teams = big nodes, players = small nodes coloured by position) that stops once settled.
+  const NET_POS = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'];
+  const netPos = (p) => NET_POS.includes(p) ? p : 'X';
+  const netNet = () => state.net || (state.net = { data: null, loading: false, error: null, minTeams: 2, pos: 'all', q: '', sel: null, raf: 0 });
+  const wkRange = (s) => s.start_week === s.end_week ? `Wk ${s.start_week}` : `Wk ${s.start_week}–${s.end_week}`;
+  const VIA_LABEL = { draft: 'Drafted', trade: 'Trade', waiver: 'Waiver', free_agent: 'Free agent', kept: 'Kept', unknown: 'Unknown' };
+
+  function viewNetwork() {
+    const n = netNet();
+    const head = pageHead('07 / Network', 'Player network', 'Who has been on whose roster, across every season of the league. Big circles are teams, dots are players coloured by position; a line means the player has spent time on that team. Players on one team only are hidden by default.');
+    if (!n.data) {
+      if (!n.loading) {
+        n.loading = true; n.error = null;
+        api('/api/network').then((d) => { n.data = d; }).catch((e) => { n.error = e.message; })
+          .finally(() => { n.loading = false; if (location.hash.startsWith('#/network')) route(); });
+      }
+      return head + (n.error ? `<div class="error">Couldn't load the network: ${esc(n.error)}</div>` : '<div class="loading">Building the player network…</div>');
+    }
+    const d = n.data;
+    const poss = NET_POS.filter((p) => d.players.some((x) => x.position === p));
+    const opt = (v, label, cur) => `<option value="${esc(v)}" ${String(cur) === String(v) ? 'selected' : ''}>${esc(label)}</option>`;
+    const skipped = (d.skipped || []).length ? `<p class="dim">Skipped seasons that failed to load: ${esc(d.skipped.map((x) => x.season).join(', '))}.</p>` : '';
+    return `${head}
+      <div class="card net-card section">
+        <div class="net-controls">
+          <label>Min teams <select class="select" id="net-min">${opt(2, '2+ teams', n.minTeams)}${opt(3, '3+ teams', n.minTeams)}${opt(4, '4+ teams', n.minTeams)}</select></label>
+          <label>Position <select class="select" id="net-pos">${opt('all', 'All positions', n.pos)}${poss.map((p) => opt(p, p, n.pos)).join('')}</select></label>
+          <label class="net-search">Player <input class="input" id="net-q" type="search" placeholder="Search name" value="${esc(n.q)}" autocomplete="off"></label>
+        </div>
+        <div class="net-legend">${poss.map((p) => `<span><i class="net-sw pos-${p}"></i>${esc(p)}</span>`).join('')}<span class="dim" id="net-count"></span></div>
+        <div id="net-graph" class="net-graph"></div>
+      </div>
+      <div class="card net-card section" id="net-panel"></div>
+      <div class="section-head"><div class="eyebrow">Most traveled</div><h2>Players who've seen the most teams</h2></div>
+      <div class="card net-card section">${netTravelTable(d)}</div>
+      <div class="section-head"><div class="eyebrow">Shared players</div><h2>Team by team</h2><p class="lead">Each cell counts the players who have been on both teams at some point.</p></div>
+      <div class="card net-card section">${netMatrix(d)}</div>
+      ${skipped}`;
+  }
+
+  function netTravelTable(d) {
+    const top = d.players.slice(0, 15);
+    const rows = top.map((p, i) => `<tr class="net-row" data-net-player="${esc(p.player_id)}" tabindex="0"><td class="num">${i + 1}</td><td><b>${esc(p.name)}</b></td><td><span class="badge">${esc(p.position)}</span></td><td class="num" data-label="Teams">${p.team_count}</td><td class="num" data-label="Weeks">${p.total_weeks}</td></tr>`).join('');
+    return `<div class="table-wrap"><table class="net-table"><thead><tr><th class="num">#</th><th>Player</th><th>Pos</th><th class="num">Teams</th><th class="num">Weeks rostered</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+
+  function netMatrix(d) {
+    const owners = {};
+    d.edges.forEach((e) => { (owners[e.player_id] = owners[e.player_id] || []).push(e.owner_id); });
+    const shared = {};
+    Object.values(owners).forEach((os) => os.forEach((a) => os.forEach((b) => { if (a !== b) { shared[a + '|' + b] = (shared[a + '|' + b] || 0) + 1; } })));
+    const max = Math.max(1, ...Object.values(shared));
+    const ts = d.teams;
+    const head = ts.map((t) => `<th class="num" title="${esc(t.owner)}">${esc(t.owner.slice(0, 4))}</th>`).join('');
+    const rows = ts.map((a) => `<tr><th class="net-rowh">${esc(a.owner)}</th>${ts.map((b) => {
+      if (a.owner_id === b.owner_id) return '<td class="num net-self">·</td>';
+      const v = shared[a.owner_id + '|' + b.owner_id] || 0;
+      return `<td class="num" style="background:color-mix(in srgb, var(--accent) ${Math.round((v / max) * 55)}%, transparent)" title="${esc(a.owner)} & ${esc(b.owner)}: ${v}">${v}</td>`;
+    }).join('')}</tr>`).join('');
+    return `<div class="table-wrap"><table class="net-matrix"><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+
+  function netPanelHtml() {
+    const n = netNet(), d = n.data, sel = n.sel;
+    if (!sel) return '<div class="empty">Click a team or a player in the graph (or a row below) to see how they connect.</div>';
+    if (sel.type === 'player') {
+      const p = d.players.find((x) => x.player_id === sel.id);
+      if (!p) return '<div class="empty">Unknown player.</div>';
+      const st = d.stints.filter((s) => s.player_id === sel.id).sort((a, b) => a.season.localeCompare(b.season) || a.start_week - b.start_week);
+      const rows = st.map((s) => `<tr><td data-label="Season">${esc(s.season)}</td><td data-label="Weeks">${esc(wkRange(s))} <span class="dim">(${s.weeks})</span></td><td data-label="Team"><b>${esc(s.owner)}</b> <small>${esc(s.team_name)}</small></td><td data-label="How"><span class="badge ${s.acquired_via === 'unknown' ? '' : 'accent'}">${esc(VIA_LABEL[s.acquired_via] || s.acquired_via)}</span></td></tr>`).join('');
+      return `<div class="card-h"><h3>${esc(p.name)} <span class="badge">${esc(p.position)}</span></h3><span class="dim">${p.team_count} team${p.team_count === 1 ? '' : 's'} · ${p.total_weeks} weeks</span></div>
+        <div class="table-wrap"><table class="net-table"><thead><tr><th>Season</th><th>Weeks</th><th>Team</th><th>Acquired</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    }
+    const t = d.teams.find((x) => x.owner_id === sel.id);
+    if (!t) return '<div class="empty">Unknown team.</div>';
+    const pl = netVisible().filter((p) => d.edges.some((e) => e.owner_id === t.owner_id && e.player_id === p.player_id)).sort((a, b) => b.team_count - a.team_count || a.name.localeCompare(b.name));
+    const shown = pl.slice(0, 40);
+    return `<div class="card-h"><h3>${esc(t.owner)} <small>${esc(t.team_name)}</small></h3><span class="dim">${esc(t.seasons.join(', '))} · ${t.players_count} players overall</span></div>
+      <p class="dim">${pl.length} player${pl.length === 1 ? '' : 's'} in the current graph${pl.length > shown.length ? ` (first ${shown.length} shown)` : ''}. Click one for details.</p>
+      <div class="net-pills">${shown.map((p) => `<button type="button" class="net-pill" data-net-player="${esc(p.player_id)}"><i class="net-sw pos-${netPos(p.position)}"></i>${esc(p.name)}</button>`).join('')}</div>`;
+  }
+
+  function netVisible() {
+    const n = netNet(), q = n.q.trim().toLowerCase();
+    return n.data.players.filter((p) => p.team_count >= n.minTeams && (n.pos === 'all' || p.position === n.pos) && (!q || p.name.toLowerCase().includes(q)));
+  }
+
+  function netMount() {
+    const n = netNet(), d = n.data;
+    if (!d) return;
+    cancelAnimationFrame(n.raf);
+    const host = $('#net-graph');
+    $('#net-panel').innerHTML = netPanelHtml();
+    if (!host) return;
+    const players = netVisible();
+    $('#net-count').textContent = `${players.length} player${players.length === 1 ? '' : 's'} shown`;
+    if (!players.length) { host.innerHTML = '<div class="empty">No players match these filters.</div>'; return; }
+    const W = Math.max(300, Math.min(1100, host.clientWidth || 900)), H = W < 560 ? Math.round(W * 1.3) : Math.round(W * 0.62);
+    const small = W < 560, R = small ? 14 : 19, PR = small ? 3.6 : 4.2;
+    const keep = new Set(players.map((p) => p.player_id));
+    const edges = d.edges.filter((e) => keep.has(e.player_id));
+    const ids = new Set(edges.map((e) => e.owner_id));
+    const teams = d.teams.map((t) => ({ ...t, kind: 'team' }));   // every team gets a node; it just sits idle if unconnected
+    const idx = {}, nodes = [];
+    const hash = (str) => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967296; };
+    teams.forEach((t, i) => {
+      const a = (i / teams.length) * Math.PI * 2 - Math.PI / 2;
+      t.hx = W / 2 + Math.cos(a) * (W / 2 - R * 2.6); t.hy = H / 2 + Math.sin(a) * (H / 2 - R * 2.8);
+      t.x = t.hx; t.y = t.hy; t.vx = t.vy = 0; t.r = R; idx[t.owner_id] = nodes.length; nodes.push(t);
+    });
+    players.forEach((p) => {
+      const q = { ...p, kind: 'player', r: PR, vx: 0, vy: 0, x: W / 2 + (hash(p.player_id) - 0.5) * W * 0.4, y: H / 2 + (hash(p.player_id + 'y') - 0.5) * H * 0.4 };
+      idx[p.player_id] = nodes.length; nodes.push(q);
+    });
+    const links = edges.map((e) => ({ s: idx[e.player_id], t: idx[e.owner_id], e }));
+    const pad = R + 6;
+    let alpha = 1, ticks = 0;
+    const tick = () => {
+      const N = nodes.length;
+      for (let i = 0; i < N; i++) {
+        const a = nodes[i];
+        for (let j = i + 1; j < N; j++) {
+          const b = nodes[j];
+          let dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy;
+          const min = (a.kind === 'team' || b.kind === 'team') ? (a.kind === b.kind ? 140 : 50) : 46;
+          if (d2 > min * min * 4) continue;
+          if (d2 < 0.01) { dx = Math.random() - 0.5; dy = Math.random() - 0.5; d2 = 0.5; }
+          const dist = Math.sqrt(d2), f = ((a.kind === b.kind && a.kind === 'team' ? 900 : 260) / d2) * alpha;
+          const fx = (dx / dist) * f, fy = (dy / dist) * f;
+          a.vx -= fx; a.vy -= fy; b.vx += fx; b.vy += fy;
+        }
+      }
+      links.forEach((l) => {
+        const a = nodes[l.s], b = nodes[l.t];
+        const dx = b.x - a.x, dy = b.y - a.y, dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const rest = small ? 50 : 70, k = 0.03 * alpha * (dist - rest) / dist;
+        a.vx += dx * k; a.vy += dy * k; b.vx -= dx * k * 0.08; b.vy -= dy * k * 0.08;
+      });
+      nodes.forEach((o) => {
+        if (o.kind === 'team') { o.vx += (o.hx - o.x) * 0.08; o.vy += (o.hy - o.y) * 0.08; }
+        else { o.vx += (W / 2 - o.x) * 0.002 * alpha; o.vy += (H / 2 - o.y) * 0.002 * alpha; }
+        o.vx *= 0.82; o.vy *= 0.82;
+        o.x = Math.max(pad, Math.min(W - pad, o.x + o.vx)); o.y = Math.max(pad, Math.min(H - pad, o.y + o.vy));
+      });
+      alpha *= 0.985; ticks++;
+    };
+    for (let i = 0; i < 160; i++) tick();   // settle most of the way before the first paint
+
+    const teamSvg = nodes.filter((o) => o.kind === 'team').map((t) => `<g class="net-team${ids.has(t.owner_id) ? '' : ' idle'}" data-net-team="${esc(t.owner_id)}" tabindex="0" role="button" aria-label="${esc(t.owner)}"><title>${esc(t.owner)} · ${esc(t.team_name)} · ${t.players_count} players</title><circle r="${R}"/><text class="net-ini" dy="0.35em">${esc(initials(t.owner))}</text><text class="net-lab" dy="${R + 12}">${esc(t.owner)}</text></g>`).join('');
+    const playerSvg = nodes.filter((o) => o.kind === 'player').map((p) => `<circle class="net-p pos-${netPos(p.position)}" data-net-player="${esc(p.player_id)}" r="${PR}"><title>${esc(p.name)} · ${esc(p.position)} · ${p.team_count} teams</title></circle>`).join('');
+    const edgeSvg = links.map(() => '<line class="net-e"/>').join('');
+    host.innerHTML = `<svg class="net-svg" viewBox="0 0 ${W} ${H}" role="group" aria-label="Player network graph"><g class="net-edges">${edgeSvg}</g><g class="net-players">${playerSvg}</g><g class="net-teams">${teamSvg}</g></svg>`;
+    const svg = $('svg', host);
+    const edgeEls = [...svg.querySelectorAll('.net-e')];
+    const teamEls = {}, playerEls = {};
+    svg.querySelectorAll('[data-net-team]').forEach((el) => { teamEls[el.dataset.netTeam] = el; });
+    svg.querySelectorAll('[data-net-player]').forEach((el) => { playerEls[el.dataset.netPlayer] = el; });
+    const draw = () => {
+      links.forEach((l, i) => { const a = nodes[l.s], b = nodes[l.t], el = edgeEls[i]; el.setAttribute('x1', a.x.toFixed(1)); el.setAttribute('y1', a.y.toFixed(1)); el.setAttribute('x2', b.x.toFixed(1)); el.setAttribute('y2', b.y.toFixed(1)); });
+      nodes.forEach((o) => {
+        if (o.kind === 'team') teamEls[o.owner_id].setAttribute('transform', `translate(${o.x.toFixed(1)},${o.y.toFixed(1)})`);
+        else { const el = playerEls[o.player_id]; el.setAttribute('cx', o.x.toFixed(1)); el.setAttribute('cy', o.y.toFixed(1)); }
+      });
+    };
+    const highlight = () => {
+      const sel = n.sel;
+      let tOn = null, pOn = null, eOn = null;
+      if (sel) {
+        tOn = new Set(); pOn = new Set();
+        if (sel.type === 'team') { tOn.add(sel.id); eOn = (e) => e.owner_id === sel.id; }
+        else { pOn.add(sel.id); eOn = (e) => e.player_id === sel.id; }
+        edges.forEach((e) => { if (eOn(e)) { tOn.add(e.owner_id); pOn.add(e.player_id); } });
+      }
+      svg.classList.toggle('has-sel', !!sel);
+      Object.entries(teamEls).forEach(([id, el]) => el.classList.toggle('on', !!tOn && tOn.has(id)));
+      Object.entries(playerEls).forEach(([id, el]) => el.classList.toggle('on', !!pOn && pOn.has(id)));
+      links.forEach((l, i) => edgeEls[i].classList.toggle('on', !!sel && eOn(l.e)));
+    };
+    n.highlight = highlight;
+    draw(); highlight();
+    const step = () => {
+      if (!document.body.contains(svg)) return;
+      for (let i = 0; i < 3; i++) tick();
+      draw();
+      if (alpha > 0.03 && ticks < 420) n.raf = requestAnimationFrame(step);
+    };
+    n.raf = requestAnimationFrame(step);
+  }
+
+  function netSelect(type, id) {
+    const n = netNet();
+    n.sel = (n.sel && n.sel.type === type && n.sel.id === id) ? null : { type, id };
+    $('#net-panel').innerHTML = netPanelHtml();
+    if (n.highlight) n.highlight();
+  }
+
+  // Delegated handlers (the page is re-rendered by route(), so they live on #app once).
+  app.addEventListener('click', (e) => {
+    const n = state.net;
+    if (!n || !$('#net-panel')) return;
+    const t = e.target.closest('[data-net-team]'), p = e.target.closest('[data-net-player]');
+    if (t) netSelect('team', t.dataset.netTeam);
+    else if (p) { const was = n.sel; netSelect('player', p.dataset.netPlayer); if (n.sel && was && was.id === n.sel.id) return; if (p.closest('.net-table, .net-pills')) $('#net-panel').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+  });
+  app.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const el = e.target.closest('[data-net-team], tr[data-net-player]');
+    if (el && state.net) { e.preventDefault(); el.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
+  });
+  app.addEventListener('input', (e) => {
+    if (e.target.id !== 'net-q') return;
+    const n = netNet(); n.q = e.target.value;
+    clearTimeout(n.qt); n.qt = setTimeout(netMount, 180);
+  });
+  app.addEventListener('change', (e) => {
+    const n = netNet();
+    if (e.target.id === 'net-min') { n.minTeams = Number(e.target.value); netMount(); }
+    if (e.target.id === 'net-pos') { n.pos = e.target.value; netMount(); }
+  });
+
   // ---------- router ----------
   function route() {
     const hash = location.hash.replace(/^#\/?/, '');
@@ -435,9 +657,12 @@
       case 'shotguns': html = viewShotguns(); break;
       case 'news': html = viewNews(arg); break;
       case 'rivalries': html = viewRivalries(); break;
+      case 'network': html = viewNetwork(); break;
       default: html = viewHome();
     }
+    cancelAnimationFrame(state.net && state.net.raf);
     app.innerHTML = html;
+    if ((view || 'home') === 'network') netMount();
     window.scrollTo({ top: 0 });
   }
 

@@ -18,7 +18,7 @@ from . import articles, playoffs, shotguns, stats
 from .newsroom import calendar as release_calendar, desk
 from .config import DATA_DIR, ROOT, load_config, on_vercel, redis_settings
 from .db import Store, manual_to_items
-from .loader import LeagueNotFound, discover_seasons, load_season
+from .loader import LeagueNotFound, discover_seasons, load_network, load_season
 from .redis_client import RedisError, UpstashRedis
 from .sleeper import SleeperClient, SleeperError
 from .storage import RedisCache, RedisStore
@@ -59,13 +59,14 @@ class State:
         self._lock = threading.Lock()
         self._models: dict[str, tuple[float, dict]] = {}
         self._seasons: tuple[float, list[dict]] | None = None
+        self._network: tuple[float, dict] | None = None
 
     def reload_config(self):
         self.cfg = load_config()
         if self.demo:
             self.cfg["seasons"] = {"2026": "demo2026"}
             self.cfg["current_season"] = "2026"
-        self._models.clear(); self._seasons = None
+        self._models.clear(); self._seasons = None; self._network = None
 
     def seasons(self) -> list[dict]:
         with self._lock:
@@ -212,6 +213,21 @@ def season(season: str, preview: int = 0, x_admin_pin: str | None = Header(defau
     if preview:   # unreleased articles: admin only
         require_admin(x_admin_pin)
     return serialize(season, state.base_model(season), preview=bool(preview))
+
+
+@app.get("/api/network")
+def network():
+    with state._lock:
+        hit = state._network
+        if hit and time.time() - hit[0] < MODEL_TTL:
+            return hit[1]
+    try:
+        out = load_network(state.client, state.cfg, state.seasons())
+    except SleeperError as e:
+        raise HTTPException(503, f"Sleeper API unavailable: {e}") from e
+    with state._lock:
+        state._network = (time.time(), out)
+    return out
 
 
 @app.post("/api/season/{season}/refresh", dependencies=[Depends(require_admin)])

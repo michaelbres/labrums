@@ -8,3 +8,4 @@ data/*.db-journal
 .DS_Store
 *.egg-info/
 content/facts/
+data/stints.csv

@@ -116,3 +116,14 @@ def test_admin_pin_required(locked_api):
     assert c.get("/api/season/2026").json()["meta"]["admin_locked"] is True
     # Reads stay open.
     assert c.get("/api/health").status_code == 200
+
+
+def test_network_demo(api):
+    r = api.get("/api/network")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["skipped"] == [] and data["seasons"] == ["2025", "2026"]
+    assert len(data["teams"]) == 12 and data["players"] and data["edges"] and data["stints"]
+    pid = data["edges"][0]["player_id"]
+    assert any(p["player_id"] == pid for p in data["players"])
+    assert {s["acquired_via"] for s in data["stints"]} >= {"draft", "kept"}

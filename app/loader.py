@@ -199,3 +199,39 @@ def load_season(client, cfg: dict, league_id: str) -> dict[str, Any]:
         "players": players,
         "config": cfg,
     }
+
+
+def load_draft_picks(client, league_id: str) -> list[dict]:
+    """Picks from every draft of the league (a league can have several). Failures yield what we have."""
+    picks: list[dict] = []
+    try:
+        drafts = client.drafts(league_id) or []
+    except Exception as e:
+        log.warning("drafts for %s failed: %s", league_id, e)
+        return picks
+    for d in drafts:
+        try:
+            picks.extend(client.draft_picks(d["draft_id"], final=d.get("status") == "complete") or [])
+        except Exception as e:
+            log.warning("draft %s picks failed: %s", d.get("draft_id"), e)
+    return picks
+
+
+def load_network(client, cfg: dict, season_infos: list[dict] | None = None) -> dict:
+    """Load every discovered season (skipping any that fail) and build the player network."""
+    from .network import build_network, build_stints
+    infos = season_infos if season_infos is not None else discover_seasons(client, cfg)
+    loaded, drafts, skipped = [], {}, []
+    for info in sorted(infos, key=lambda s: s["season"]):
+        try:
+            s = load_season(client, cfg, info["league_id"])
+        except Exception as e:
+            log.warning("network: skipping season %s: %s", info["season"], e)
+            skipped.append({"season": info["season"], "league_id": info["league_id"], "error": str(e)[:200]})
+            continue
+        loaded.append(s)
+        drafts[s["season"]] = load_draft_picks(client, info["league_id"])
+    out = build_network(build_stints(loaded, drafts))
+    out["seasons"] = [s["season"] for s in loaded]
+    out["skipped"] = skipped
+    return out

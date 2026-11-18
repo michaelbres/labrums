@@ -300,6 +300,24 @@ class DemoClient:
     def winners_bracket(self, league_id: str):
         return []
 
+    def drafts(self, league_id: str):
+        d = self._l(league_id)
+        return [{"draft_id": f"draft-{league_id}", "league_id": league_id, "status": "complete",
+                 "season": d["league"]["season"]}] if d else []
+
+    def draft_picks(self, draft_id: str, final: bool = False):
+        """Each roster 'drafts' its first 3 players (the season's opening roster)."""
+        d = self._l(draft_id.removeprefix("draft-"))
+        if not d:
+            return []
+        out, n = [], 0
+        for rnd in range(3):
+            for r in d["rosters"]:
+                n += 1
+                out.append({"draft_id": draft_id, "round": rnd + 1, "pick_no": n, "roster_id": r["roster_id"],
+                            "player_id": r["players"][rnd], "picked_by": r["owner_id"]})
+        return out
+
     def clear_cache(self, keep_players: bool = True, league_id: str | None = None) -> None:
         pass
 
