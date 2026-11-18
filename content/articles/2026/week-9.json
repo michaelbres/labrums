@@ -37,6 +37,46 @@
         "This one isn't settled. Not even close.",
         "That's the card. See you at the next show."
       ]
+    },
+    {
+      "key": "2026:recap:9:all",
+      "headline": "Week 9: Bowie posts 191.95 and beats first-place Jimmy by 68.26",
+      "dek": "Week 9: 5 games · biggest margin 68.26 (Bowie over Jimmy) · high score 191.95 (Bowie)",
+      "body": [
+        "From the league ledger: Bowie scored 191.95 in Week 9, the highest total of the week, and defeated Jimmy, who scored 123.69. The margin was 68.26. The league average was 130.22. Jimmy entered the week 1st and Bowie entered 5th. Jordan Love (QB) supplied 36.18 points, 19% of Bowie's total. Jimmy left 53.32 points on the bench, including 27.50 points from Kayshon Boutte (WR).",
+        "“It was over after the first Sunday window. Jimmy can have the highlights. I'll keep the 191.95,” Bowie wrote in a message to the group chat. “Tell Bowie congratulations. Tell Bowie it won't happen again. Don't tell Bowie I said either,” Jimmy said.",
+        "Michael defeated Adam, 148.84 to 105.20, a margin of 43.64. Bucky Irving (RB) led Michael with 27 points. Michael has won 3 straight and stands 5th at 6-3. Adam's 5-4 record is 1.2 wins better than the weekly scoring suggests. “I'd say it was close, but I don't lie in public. 43.64 points,” Michael said.",
+        "Steven defeated Tom, 168.20 to 164.25, a margin of 3.95. Steven has won 4 consecutive games and stands 4th at 6-3. CeeDee Lamb (WR) scored 30 points for Steven. Tom has lost 3 consecutive games and stands 2nd at 6-3.",
+        "Nick defeated Patrick, 117.09 to 89.40. Matthew Golden (WR) scored 30.40 points for Nick. Nick owes 1 shotgun for starting Adonai Mitchell (WR). Patrick owes 2 shotguns: one for starting Ladd McConkey (WR), who scored 0 points, and one under the “scored less than Nick” rule.",
+        "Colin defeated Cian, 101.38 to 92.25. Cian owes 1 shotgun for starting Emanuel Wilson (RB). The best possible lineup would have added 18.36 points for Cian. Attribution: the box score.",
+        "After Week 9, Jimmy is first at 7-2. The sixth and last playoff spot belongs to Adam at 5-4.",
+        "That is the record as it stands."
+      ]
+    },
+    {
+      "key": "2026:shotgun:9:all",
+      "headline": "Beer Report: 4 shotguns in the Week 9 forecast, and the storm sits over Patrick",
+      "dek": "4 shotguns owed across 3 owners · Patrick leads with 2",
+      "body": [
+        "Grab an umbrella; it's been a busy week. The Week 9 gauge reads 4 shotguns across 3 owners, a steady drizzle with one real downpour, and wouldn't you know it, the radar has it parked right over the same house again.",
+        "That house is Patrick's. Two systems collided there: a zero-point reading from Ladd McConkey (WR), and the “scored less than Nick” rule, triggered when Patrick's 89.40 came in under Nick's 117.09. That's 2 shotguns, folks, the heaviest accumulation of the week.",
+        "Scattered showers elsewhere! Cian picks up 1 shotgun after Emanuel Wilson (RB) registered a flat 0 on the instruments. And Nick, even on the sunny side of that rule, couldn't stay completely dry: Adonai Mitchell (WR) also read 0, good for 1 shotgun.",
+        "The seasonal totals? Patrick leads the league with 9 shotguns, and that front shows no sign of moving out. Pressure is building.",
+        "“I owe two shotguns, and I'd like it noted that I'm taking it well,” Patrick said. Lovely attitude for a man standing in a puddle.",
+        "Stay dry, stay safe, and set your lineups."
+      ]
+    },
+    {
+      "key": "2026:waiver:9:all",
+      "headline": "Nick bids $45 on Corey Kiner; the first data point is 2.50",
+      "dek": "14 adds · top move: Nick adds Corey Kiner (RB) for $45",
+      "body": [
+        "First, a note on sample size: it is small. With that caveat registered (and it will be registered again), the largest bid of Week 9 was Nick's $45 for Corey Kiner (RB), which is nine times the next-highest bid on the wire.",
+        "The return so far: 2.50 points over 1 week. That is a negative return on $45 by any accounting I am willing to sign, though one week is a single observation, and a single observation is an anecdote wearing a lab coat.",
+        "The rest of the distribution is cheap. Cian added Mack Hollins (WR) for $5, and Tom added Kyle McCord (QB) for $2. Jimmy added three players for nothing: Drew Lock (QB), Daniel Jones (QB) and Jahan Dotson (WR). In total, 14 players were added by 7 owners, so the median claim cost considerably less than Nick's.",
+        "“I'm not saying the claim for Corey Kiner was a mistake. I'm saying I'd like to see the tape,” Nick said. The tape, for the record, is 2.50 points long. Correlation is not a lineup decision.",
+        "Further analysis pending more weeks."
+      ]
     }
   ]
 }
