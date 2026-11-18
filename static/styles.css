@@ -68,13 +68,13 @@ code { font-family: var(--mono); font-size: .85em; border: 1px solid var(--borde
 
 /* top bar */
 .topbar { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--paper) 92%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-bottom: 1px solid color-mix(in srgb, var(--border) 85%, transparent); }
-.topbar-inner { display: flex; align-items: center; gap: 24px; min-height: 72px; }
+.topbar-inner { display: flex; align-items: center; gap: 16px; min-height: 72px; }
 .brand { display: flex; align-items: center; gap: 12px; color: var(--ink); font-weight: 600; min-width: 0; }
 .brand:hover { color: var(--ink); }
 .brand-mark { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border: 1px solid var(--ink); font-family: var(--mono); font-size: 15px; font-weight: 600; letter-spacing: -.04em; flex: none; }
-.brand-text { display: flex; align-items: baseline; gap: 10px; min-width: 0; white-space: nowrap; font-size: 15px; letter-spacing: -.01em; }
+.brand-text { display: flex; align-items: baseline; gap: 10px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; letter-spacing: -.01em; }
 .brand-text small { font-family: var(--mono); font-weight: 400; font-size: 11px; color: var(--muted); letter-spacing: 0; }
-.nav { display: flex; gap: 24px; margin-left: auto; white-space: nowrap; }
+.nav { display: flex; gap: 16px; margin-left: auto; white-space: nowrap; }
 .nav a { position: relative; padding: 6px 0; color: var(--muted); font-size: 14px; }
 .nav a:hover, .nav a.active { color: var(--ink); }
 .nav a.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: var(--ink); }
@@ -104,6 +104,9 @@ main { padding-bottom: 80px; }
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 20px; }
 @media (max-width: 900px) {
   .grid-3, .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* seven nav links + brand + tools need ~1170px: below that the nav drops to its own row */
+@media (max-width: 1180px) {
   .topbar-inner { flex-wrap: wrap; gap: 8px 16px; padding-block: 12px; min-height: 64px; }
   .topbar-tools { margin-left: auto; }
   .nav { order: 3; width: 100%; margin-left: 0; flex-wrap: wrap; gap: 4px 18px; white-space: normal; }
