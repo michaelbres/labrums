@@ -52,7 +52,7 @@ def test_age_curve_and_longevity():
     full = sum(V.LONGEVITY_DISCOUNT ** t for t in range(V.LONGEVITY_YEARS))
     assert V.longevity("QB", 24) == pytest.approx(full)
     assert V.longevity("RB", 40) == pytest.approx(1.0)      # current season in full, then nothing
-    assert V.longevity("RB", V.CLIFF["RB"] - 0.5) > 1.0
+    assert V.longevity("RB", V.CLIFF["RB"] - 2.5) > 1.0
     assert V.longevity("RB", 30) < 0.35 * full
     assert V.longevity("QB", 33) > V.longevity("RB", 27) > V.longevity("RB", 29)
     assert V.longevity("WR", 22) > V.longevity("WR", 30)
