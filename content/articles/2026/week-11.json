@@ -1,0 +1,18 @@
+{
+ "week": 11,
+ "articles": [
+  {
+   "key": "2026:preview:11:all",
+   "headline": "Bowie at 68%, Adam at 32%: the Week 11 model, annotated",
+   "body": [
+    "Before the narrative, the numbers. Week 11's featured game is Bowie (7-3, 159.0 points per game) against Adam (5-5, 130.2), and Bowie already holds the season series 1-0 (a sample of one). The stakes are lopsided: Bowie sits at 100% playoff odds and Adam at 37%, with the simulations moving Adam to 54% with a win and 28% with a loss. The model makes Bowie the favorite at 68% to Adam's 32%. Variance note: Adam swings by 35.7 points a week, Bowie by 19.9. “1-0. That's not trash talk, that's a citation,” said Bowie. Adam, uncited: “I'd answer Bowie, but I try not to reward noise.”",
+    "Tom (7-3, 182.1) meets Cian (1-9, 113.2); they have not played each other this season, so the head-to-head column is blank. Playoff odds are 100% and 0% either way, and Tom is the favorite at 85% to 15%. Tom's standard deviation is 38.5 against Cian's 29.8 (the wider distribution belongs to the better team). “I'm going to play the spoiler, the villain, and the fan who refuses to leave early,” Cian said, confidence interval unknown.",
+    "Steven (7-3, 162.2) leads Nick (2-8, 114.8) 1-0 on the season, and the model concurs at 82% to 18%. The spreads are nearly identical (25.0 for Steven, 26.4 for Nick). “0-1. I've got a lot of notes on how Steven did it, and I'm going to use every one,” Nick said.",
+    "Michael (7-3, 163.7) is 1-0 against Colin (5-5, 138.5) and favored 70% to 30%. “Michael has me 0-1 this year. A person can only be owned for so long,” said Colin, with no controls.",
+    "Jimmy (7-3, 150.5) leads Patrick (2-8, 134.4) 1-0. Jimmy is at 100% playoff odds and Patrick at 0%, so the leverage is cosmetic, and the model has Jimmy at 61% to 39% (the closest line on the slate). “I've beaten Patrick this year and I plan on doing it again, so whatever Patrick is working on, work on it harder,” Jimmy said, n = 1.",
+    "Yes, but (and the confidence interval is wide): Tom's schedule has been soft.",
+    "The model will be revised as the season is."
+   ]
+  }
+ ]
+}
