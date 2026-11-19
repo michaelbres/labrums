@@ -415,7 +415,7 @@
     for (let i = Math.max(0, cut - 3); i < Math.min(d.standings.length - 1, cut + 2); i++) hot.push([d.standings[i], d.standings[i + 1]]);
     const hotCards = hot.map(([a, b]) => `<div class="card"><div class="card-h"><h3>${esc(team(a).name)} vs. ${esc(team(b).name)}</h3><span class="badge warn">${ordinal(team(a).rank)} / ${ordinal(team(b).rank)}</span></div><div class="dim">${team(a).record} vs ${team(b).record} · ${fmt(Math.abs(team(a).pf - team(b).pf), 1)} PF apart · playoff odds ${pct(d.playoffs.teams[a].playoff_pct)} vs ${pct(d.playoffs.teams[b].playoff_pct)}</div></div>`).join('');
     return `
-      ${pageHead('06 / Rivalries', 'Rivalries', 'Configured in <code>config.yaml</code> under <code>rivalries</code>. The newsroom writes hype pieces when rivals meet.')}
+      ${pageHead('06 / Rivalries', 'Rivalries', 'The newsroom writes hype pieces when rivals meet.')}
       ${cards ? `<div class="grid grid-2 section">${cards}</div>` : '<div class="card section"><div class="empty">No rivalries configured yet. Add them to config.yaml, then hit ↻.</div></div>'}
       <div class="section-head"><div class="eyebrow">Heat</div><h2>Fighting for the cut line</h2><p class="lead">Teams stacked around the ${ordinal(cut)} seed, where every week is a grudge match whether they like it or not.</p></div>
       <div class="grid grid-3 section">${hotCards}</div>`;
