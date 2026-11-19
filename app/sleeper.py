@@ -21,10 +21,12 @@ AVATAR_BASE = "https://sleepercdn.com/avatars/thumbs"
 
 LIVE_TTL = 5 * 60          # league / rosters / users / state / current week
 PLAYERS_TTL = 24 * 3600    # the big players blob
+STATS_TTL = 3 * 3600       # season stats of the season in progress
+STATS_FINAL_TTL = 10 * 365 * 24 * 3600  # completed seasons never change
 FINAL_TTL = 7 * 24 * 3600  # finished weeks: re-pull weekly to pick up stat corrections
 
 PLAYER_FIELDS = ("full_name", "first_name", "last_name", "position", "team",
-                 "fantasy_positions", "number", "injury_status", "status", "age")
+                 "fantasy_positions", "number", "injury_status", "status", "age", "years_exp")
 
 
 class SleeperError(RuntimeError):
@@ -171,6 +173,19 @@ class SleeperClient:
     def draft_picks(self, draft_id: str, final: bool = False) -> list[dict]:
         """Picks of one draft; pass final=True once the draft is complete to cache them long."""
         return self.get(f"draft/{draft_id}/picks", FINAL_TTL if final else LIVE_TTL) or []
+
+    def traded_picks(self, league_id: str) -> list[dict]:
+        return self.get(f"league/{league_id}/traded_picks", LIVE_TTL) or []
+
+    def season_stats(self, season: str, final: bool = False) -> dict[str, dict]:
+        """pid -> {gp, pts_half_ppr} for a regular season (the raw blob is ~8,000 players, so it is trimmed)."""
+        def trim(raw: dict) -> dict:
+            out = {}
+            for pid, st in (raw or {}).items():
+                if isinstance(st, dict) and st.get("gp") and st.get("pts_half_ppr") is not None:
+                    out[str(pid)] = {"gp": st["gp"], "pts_half_ppr": st["pts_half_ppr"]}
+            return out
+        return self.get(f"stats/nfl/regular/{season}", STATS_FINAL_TTL if final else STATS_TTL, transform=trim) or {}
 
     def winners_bracket(self, league_id: str) -> list[dict]:
         return self.get(f"league/{league_id}/winners_bracket", LIVE_TTL) or []

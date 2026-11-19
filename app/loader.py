@@ -237,3 +237,53 @@ def load_network(client, cfg: dict, season_infos: list[dict] | None = None) -> d
     out["seasons"] = [s["season"] for s in loaded]
     out["skipped"] = skipped
     return out
+
+
+def load_drafts(client, league_id: str) -> list[dict]:
+    """Every draft of the league with its picks: {draft_id, season, status, type, rounds, picks}."""
+    out = []
+    for d in client.drafts(league_id) or []:
+        picks = client.draft_picks(d["draft_id"], final=d.get("status") == "complete") or []
+        rounds = int((d.get("settings") or {}).get("rounds") or 0) or max((int(p.get("round") or 0) for p in picks), default=0)
+        out.append({"draft_id": d["draft_id"], "season": str(d.get("season")), "status": d.get("status"),
+                    "type": d.get("type"), "rounds": rounds, "picks": picks})
+    return out
+
+
+def load_power(client, cfg: dict, ctx: dict, standings: list[int], season_infos: list[dict] | None = None) -> dict:
+    """Power rankings for the season in `ctx`. Current stats and traded picks are essential (SleeperError if they
+    fail); older stats and drafts that fail are skipped and listed under `skipped` (the result is then partial)."""
+    from .values import build_power_rankings
+    cur = int(ctx["season"])
+    skipped = []
+    stats: dict[str, dict] = {}
+    for i in range(3):
+        season = str(cur - i)
+        final = i > 0 or (ctx.get("league") or {}).get("status") == "complete"
+        try:
+            stats[season] = client.season_stats(season, final=final) or {}
+        except Exception as e:
+            if i == 0:
+                raise SleeperError(f"season stats {season}: {e}") from e
+            log.warning("power: stats %s failed: %s", season, e)
+            skipped.append({"what": f"stats {season}", "error": str(e)[:200]})
+    try:
+        traded = client.traded_picks(ctx["league_id"]) or []
+    except Exception as e:
+        raise SleeperError(f"traded picks: {e}") from e
+    infos = season_infos if season_infos is not None else discover_seasons(client, cfg)
+    drafts, seen = [], set()
+    for info in infos:
+        if info.get("status") == "unavailable":
+            continue
+        try:
+            for d in load_drafts(client, info["league_id"]):
+                if d["draft_id"] not in seen:
+                    seen.add(d["draft_id"])
+                    drafts.append(d)
+        except Exception as e:
+            log.warning("power: drafts for %s failed: %s", info["season"], e)
+            skipped.append({"what": f"drafts {info['season']}", "error": str(e)[:200]})
+    out = build_power_rankings(ctx["teams"], ctx["players"], stats, drafts, traded, list(standings), str(cur))
+    out["skipped"] = skipped
+    return out

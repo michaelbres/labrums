@@ -646,6 +646,144 @@
     if (e.target.id === 'net-pos') { n.pos = e.target.value; netMount(); }
   });
 
+  // ---------- power rankings (our own player-value model) ----------
+  // Lazy: /api/power-rankings is only fetched when #/power is opened; a failure shows Retry and is never retried
+  // automatically. Tabs / team selection / filters re-render only their own container (no scroll jump).
+  const POW_TABS = [['combined', 'Combined'], ['QB', 'QB'], ['RB', 'RB'], ['WR', 'WR'], ['TE', 'TE'], ['picks', 'Picks']];
+  const POW_CHIPS = [['QB', 'QB'], ['RB', 'RB'], ['WR', 'WR'], ['TE', 'TE'], ['picks', 'Picks']];
+  const powSt = () => state.pow || (state.pow = { data: null, loading: false, error: null, sort: 'combined', sel: null, pos: 'all', q: '', qt: 0 });
+  const powRk = (r, n) => `<span class="rk ${r <= 3 ? 'rk-top' : r > n - 3 ? 'rk-low' : ''}">${esc(r)}</span>`;
+  const powTeamCell = (t) => `<span class="team-cell">${avatar(t)}<span class="names"><b>${esc(t.name)}</b><small>${esc(t.team_name)}</small></span></span>`;
+
+  function viewPower() {
+    const p = powSt();
+    const head = pageHead('08 / Power', 'Power rankings', 'Every team ranked by what its roster and its future rookie picks are worth in our own player-value model, not by record. Click a team to see its players and picks.');
+    if (!p.data) {
+      if (p.error) return head + `<div class="error">Couldn't load the power rankings: ${esc(p.error)} <button type="button" class="btn" data-pow-retry>Retry</button></div>`;
+      if (!p.loading) {
+        p.loading = true;
+        api('/api/power-rankings').then((d) => { p.data = d; }).catch((e) => { p.error = e.message || 'request failed'; })
+          .finally(() => { p.loading = false; if (location.hash.startsWith('#/power')) route(); });
+      }
+      return head + '<div class="loading">Valuing every player in the league…</div>';
+    }
+    const d = p.data, c = d.constants || {}, cv = d.curve.values || {};
+    const opt = (v, label, cur) => `<option value="${esc(v)}" ${String(cur) === String(v) ? 'selected' : ''}>${esc(label)}</option>`;
+    const skipped = (d.skipped || []).length ? `<p class="dim">Some data failed to load and was left out: ${esc(d.skipped.map((x) => x.what).join(', '))}.</p>` : '';
+    const w = c.season_weights || [], rr = c.replacement_rank || {};
+    const curveNote = d.curve.source === 'fit'
+      ? `fitted to ${d.curve.samples} picks from this league's own past rookie drafts`
+      : 'estimated from default values, because there is not enough rookie-draft history yet';
+    return `${head}
+      <div class="card pow-card section"><div id="pow-main">${powMainHtml()}</div></div>
+      <div class="section-head"><div class="eyebrow">Players</div><h2>Player rankings</h2><p class="lead">The ${d.players.length} most valuable rostered players, from the same model. Filter by position or search by name.</p></div>
+      <div class="card pow-card section">
+        <div class="net-controls">
+          <label>Position <select class="select" id="pow-pos">${opt('all', 'All positions', p.pos)}${['QB', 'RB', 'WR', 'TE'].map((x) => opt(x, x, p.pos)).join('')}</select></label>
+          <label class="net-search">Player <input class="input" id="pow-q" type="search" placeholder="Search name" value="${esc(p.q)}" autocomplete="off"></label>
+        </div>
+        <div id="pow-players">${powPlayersHtml()}</div>
+      </div>
+      <div class="section-head"><div class="eyebrow">Method</div><h2>How this is calculated</h2></div>
+      <div class="card pow-card pow-how section">
+        <ol>
+          <li><b>Production.</b> Each player's points per game (half PPR) from this season and the two before, weighted ${esc(w.map((x) => Math.round(x * 100) + '%').join(' / '))}. A season counts less the fewer games he played, and everyone is pulled a little toward a replacement-level player (worth about ${esc(c.prior_games)} games) so a hot week or two does not fool the model.</li>
+          <li><b>Replacement level.</b> The points per game of a player you could pick up for free: the ${esc(rr.QB)}th best QB, ${esc(rr.RB)}th RB, ${esc(rr.WR)}th WR and ${esc(rr.TE)}th TE in the NFL (${esc(Object.entries(d.replacement || {}).map(([k, v]) => `${k} ${v}`).join(', '))} points per game right now). The QB bar is deeper because this is a superflex league where teams stash several QBs. Only the points above that level count.</li>
+          <li><b>Age.</b> Value is multiplied by how many good seasons are left over the next ${esc(c.longevity_years)} years, with each year further out counting ${esc(Math.round((c.longevity_discount || 0) * 100))}% as much as the one before. Production holds until a prime age (RB ${esc((c.prime_end || {}).RB)}, WR ${esc((c.prime_end || {}).WR)}, TE ${esc((c.prime_end || {}).TE)}, QB ${esc((c.prime_end || {}).QB)}) and fades to nothing at ${esc((c.cliff || {}).RB)} / ${esc((c.cliff || {}).WR)} / ${esc((c.cliff || {}).TE)} / ${esc((c.cliff || {}).QB)}.</li>
+          <li><b>Young players.</b> Rookies and second- and third-year players who were drafted in this league are blended with what their draft slot has been worth: the fewer games they have played, the more the draft slot counts.</li>
+          <li><b>Draft picks.</b> A pick is worth what a player taken at that slot has turned out to be worth (${esc(curveNote)}): about ${esc(cv['1'])} for the 1st overall pick, ${esc(cv['10'])} for the 10th, ${esc(cv['20'])} for the 20th and ${esc(cv['40'])} for the last pick of round 4. Next year's draft order assumes the worst teams pick first; later years use the middle of each round. Picks a year further away are worth ${esc(Math.round((c.pick_year_discount || 0) * 100))}% as much per year, and traded picks count for whoever owns them now.</li>
+          <li><b>Teams.</b> A team's value at a position is the sum of its rostered players' values there (taxi and reserve included); players plus picks gives the combined number. Ranks run 1 (best) to ${d.teams.length}.</li>
+        </ol>
+      </div>
+      ${skipped}`;
+  }
+
+  function powMainHtml() {
+    const p = powSt(), d = p.data, n = d.teams.length;
+    const key = p.sort;
+    const ordered = d.teams.slice().sort((a, b) => (b.values[key] - a.values[key]) || (a.ranks.combined - b.ranks.combined));
+    const posCol = ['QB', 'RB', 'WR', 'TE'].includes(key);
+    const hl = (k) => (key === k ? ' sorted' : '');
+    const rows = ordered.map((t, i) => `<tr class="pow-row ${p.sel === t.roster_id ? 'sel' : ''}" data-pow-team="${t.roster_id}" tabindex="0" aria-expanded="${p.sel === t.roster_id}">
+        <td class="pw2-rank"><span class="rank ${i === 0 ? 'top' : ''}">${i + 1}</span></td>
+        <td class="pw2-team">${powTeamCell(t)}</td>
+        <td class="num pw2-comb${hl('combined')}" data-label="Combined">${fmt(t.values.combined, 1)}</td>
+        <td class="num pw2-pl${hl('players')}" data-label="Players">${fmt(t.values.players, 1)}</td>
+        <td class="num pw2-pk${hl('picks')}" data-label="Picks">${fmt(t.values.picks, 1)}</td>
+        ${posCol ? `<td class="num pw2-x sorted" data-label="${esc(key)}">${fmt(t.values[key], 1)}</td>` : ''}
+        ${POW_CHIPS.map(([k, l]) => `<td class="pw2-c${hl(k)}" data-label="${esc(l)}">${powRk(t.ranks[k], n)}</td>`).join('')}
+      </tr>`).join('');
+    const tabs = POW_TABS.map(([k, l]) => `<button type="button" class="pow-chip ${key === k ? 'active' : ''}" data-pow-sort="${k}" aria-pressed="${key === k}">${esc(l)}</button>`).join('');
+    return `<div class="card-h"><h2>Team rankings</h2><small>Season ${esc(d.season)}</small></div>
+      <div class="chips pow-tabs" role="group" aria-label="Sort teams by">${tabs}</div>
+      <div class="table-wrap power-wrap"><table class="pow-table ${posCol ? 'has-x' : ''}"><thead><tr><th class="pw2-rank">#</th><th>Team</th><th class="num">Combined</th><th class="num">Players</th><th class="num">Picks</th>${posCol ? `<th class="num">${esc(key)}</th>` : ''}${POW_CHIPS.map(([k, l]) => `<th class="pw2-c">${esc(l)}<span class="pw2-sub"> rank</span></th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>
+      <div id="pow-detail" class="pow-detail">${powDetailHtml()}</div>`;
+  }
+
+  function powDetailHtml() {
+    const p = powSt(), d = p.data;
+    const t = d.teams.find((x) => x.roster_id === p.sel);
+    if (!t) return '<p class="dim pow-hint">Select a team above to see its top players at each position and every pick it owns.</p>';
+    const mine = d.players.filter((x) => x.roster_id === t.roster_id);
+    const blocks = ['QB', 'RB', 'WR', 'TE'].map((pos) => {
+      const ps = mine.filter((x) => x.position === pos);
+      const list = ps.slice(0, 6).map((x) => `<li><span class="pw-nm">${esc(x.name)}</span><span class="dim">${x.age == null ? '' : esc(x.age)}</span><b class="num">${fmt(x.value, 1)}</b></li>`).join('');
+      return `<div class="pow-block"><div class="pow-bh"><b>${esc(pos)}</b><span class="dim">rank ${esc(t.ranks[pos])} · ${fmt(t.values[pos], 1)}</span></div>
+        ${list ? `<ul>${list}</ul>` : '<div class="dim">No valued players</div>'}${ps.length > 6 ? `<div class="dim pow-more">+${ps.length - 6} more</div>` : ''}</div>`;
+    }).join('');
+    const picks = t.picks.map((x) => `<tr><td>${esc(x.season)}</td><td class="num">${esc(x.round)}</td><td>${esc(x.original)}${x.traded ? ' <span class="badge">via trade</span>' : ''}</td><td class="num">${fmt(x.slot, 1)}</td><td class="num">${fmt(x.value, 1)}</td></tr>`).join('');
+    return `<div class="pow-dh"><h3>${esc(t.name)}<small>${esc(t.team_name)}</small></h3><span class="dim">players ${fmt(t.values.players, 1)} · picks ${fmt(t.values.picks, 1)} (${t.picks.length}) · combined ${fmt(t.values.combined, 1)}</span></div>
+      <div class="pow-blocks">${blocks}</div>
+      <div class="pow-bh pow-picks-h"><b>Pick inventory</b><span class="dim">rank ${esc(t.ranks.picks)} · ${t.picks.length} picks</span></div>
+      <div class="table-wrap"><table class="pow-picks"><thead><tr><th>Draft</th><th class="num">Rd</th><th>Original team</th><th class="num">Proj. slot</th><th class="num">Value</th></tr></thead><tbody>${picks || '<tr><td colspan="5" class="dim">No picks</td></tr>'}</tbody></table></div>`;
+  }
+
+  function powPlayersHtml() {
+    const p = powSt(), q = p.q.trim().toLowerCase();
+    const list = p.data.players.filter((x) => (p.pos === 'all' || x.position === p.pos) && (!q || String(x.name).toLowerCase().includes(q))).slice(0, 50);
+    if (!list.length) return '<p class="dim">No players match.</p>';
+    const rows = list.map((x) => `<tr><td class="num">${x.rank}</td><td class="pw3-pl"><b>${esc(x.name)}</b><small>${esc([x.nfl_team, x.owner].filter(Boolean).join(' · '))}</small></td><td><span class="badge">${esc(x.position)}</span></td><td class="num">${x.age == null ? '—' : esc(x.age)}</td><td class="num">${fmt(x.value, 1)}</td><td class="num">${esc(x.position)}${x.pos_rank}</td></tr>`).join('');
+    return `<div class="table-wrap"><table class="pow-players"><thead><tr><th class="num">#</th><th>Player</th><th>Pos</th><th class="num">Age</th><th class="num">Value</th><th class="num">Pos rank</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+
+  function powRerender(focusTeam) {
+    const main = $('#pow-main');
+    if (!main) return;
+    main.innerHTML = powMainHtml();
+    if (focusTeam != null) { const r = $(`[data-pow-team="${focusTeam}"]`); if (r) r.focus({ preventScroll: true }); }
+  }
+
+  app.addEventListener('click', (e) => {
+    const p = state.pow;
+    if (!p) return;
+    if (e.target.closest('[data-pow-retry]')) { p.error = null; route(); return; }
+    if (!p.data || !$('#pow-main')) return;
+    const sort = e.target.closest('[data-pow-sort]');
+    if (sort) { p.sort = sort.dataset.powSort; powRerender(); return; }
+    const row = e.target.closest('[data-pow-team]');
+    if (row) {
+      const id = Number(row.dataset.powTeam);
+      p.sel = p.sel === id ? null : id;
+      powRerender(id);
+      if (p.sel != null) { const det = $('#pow-detail'); if (det) det.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+    }
+  });
+  app.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const el = e.target.closest('tr[data-pow-team]');
+    if (el && state.pow) { e.preventDefault(); el.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
+  });
+  app.addEventListener('input', (e) => {
+    if (e.target.id !== 'pow-q' || !state.pow) return;
+    const p = state.pow; p.q = e.target.value;
+    clearTimeout(p.qt); p.qt = setTimeout(() => { const el = $('#pow-players'); if (el && p.data) el.innerHTML = powPlayersHtml(); }, 150);
+  });
+  app.addEventListener('change', (e) => {
+    if (e.target.id !== 'pow-pos' || !state.pow) return;
+    state.pow.pos = e.target.value;
+    const el = $('#pow-players'); if (el && state.pow.data) el.innerHTML = powPlayersHtml();
+  });
+
   // ---------- router ----------
   function route() {
     const hash = location.hash.replace(/^#\/?/, '');
@@ -661,9 +799,11 @@
       case 'news': html = viewNews(arg); break;
       case 'rivalries': html = viewRivalries(); break;
       case 'network': html = viewNetwork(); break;
+      case 'power': html = viewPower(); break;
       default: html = viewHome();
     }
     if (state.net) { cancelAnimationFrame(state.net.raf); clearTimeout(state.net.qt); }
+    if (state.pow) clearTimeout(state.pow.qt);
     app.innerHTML = html;
     if ((view || 'home') === 'network') netMount();
     window.scrollTo({ top: 0 });
@@ -716,7 +856,7 @@
   $('#season-select').addEventListener('change', (e) => loadSeason(e.target.value));
   $('#refresh-btn').addEventListener('click', async () => {
     $('#refresh-btn').disabled = true; toast('Refreshing from Sleeper…');
-    try { await api(`/api/season/${state.season}/refresh`, { method: 'POST' }); await loadSeason(state.season, true); toast('Refreshed'); }
+    try { await api(`/api/season/${state.season}/refresh`, { method: 'POST' }); state.pow = null; await loadSeason(state.season, true); toast('Refreshed'); }
     catch (err) { toast(`Error: ${err.message}`); }
     $('#refresh-btn').disabled = false;
   });

@@ -13,6 +13,7 @@
 - Vercel (free Hobby) deployment is ready: api/index.py + vercel.json; Upstash Redis for check-offs and the Sleeper cache; SQLite/disk stay the local defaults. 105 tests. UNVERIFIED on real Vercel until the owner imports the repo.
 - Next for the owner: import the repo in Vercel, add Upstash Redis from Storage, set LABRUMS_ADMIN_PIN, redeploy (steps in README). Then report back the URL so the next session can smoke-test it.
 
+- Power Rankings page shipped (2026-11-19): own player-value model (app/values.py), #/power, /api/power-rankings. Needs refuter pass.
 - Player network shipped (2026-11-18): stints dataset, /api/network, scripts/export_stints.py, #/network page. Needs refuter pass.
 
 ## Next
@@ -22,6 +23,7 @@
 - Idea (owner asked 2026-10-06, NOT started): "Adam Schefter" bot in the league iMessage group. Options: always-on Mac + BlueBubbles (two-way), iPhone Shortcuts scheduled posts (one-way), or a Discord/GroupMe bot. Would use the site API + Claude API for the persona. Waiting on: spare device? two-way or scheduled?
 
 ## Completed
+- 2026-11-19: power rankings by position / picks / combined from our own valuation model (13 tests).
 - 2026-11-18: player network (app/network.py, /api/network, CSV export, Network page, 7 tests).
 - 2026-10-06 (live): network allowlist opened; rounds 3-4 on real data (divisions + Sleeper seeding/tiebreaks, offseason roundup, regular-season schedule, ppts efficiency, per-season start date, seed column).
 - 2026-10-06 (later): test suite, README, Dockerfile; refuter round 1 (17 findings fixed) and round 2 (4 leftovers fixed).

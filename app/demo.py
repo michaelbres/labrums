@@ -270,6 +270,9 @@ class DemoClient:
         self._prev = build_demo("2025", DEMO_PREV_LEAGUE_ID, current_week=18, seed=3,
                                 status="complete", previous_league_id=None)
         self._leagues = {DEMO_LEAGUE_ID: self._cur, DEMO_PREV_LEAGUE_ID: self._prev}
+        arng = random.Random("demo-ages")  # separate stream so the league fixtures above are unchanged
+        for pid in sorted(self._cur["players"]):
+            self._cur["players"][pid].update(age=arng.randint(21, 33), years_exp=arng.randint(0, 9))
 
     def _l(self, league_id: str) -> dict | None:
         return self._leagues.get(league_id)
@@ -316,6 +319,27 @@ class DemoClient:
                 n += 1
                 out.append({"draft_id": draft_id, "round": rnd + 1, "pick_no": n, "roster_id": r["roster_id"],
                             "player_id": r["players"][rnd], "picked_by": r["owner_id"]})
+        return out
+
+    def traded_picks(self, league_id: str):
+        if league_id != DEMO_LEAGUE_ID:
+            return []
+        return [{"season": "2027", "round": 1, "roster_id": 3, "owner_id": 1, "previous_owner_id": 3},
+                {"season": "2027", "round": 2, "roster_id": 5, "owner_id": 2, "previous_owner_id": 5},
+                {"season": "2028", "round": 1, "roster_id": 2, "owner_id": 7, "previous_owner_id": 2}]
+
+    def season_stats(self, season: str, final: bool = False):
+        """Deterministic fake season stats (gp + pts_half_ppr) for the offensive players."""
+        rng = random.Random(f"demo-stats-{season}")
+        scale = {"QB": (18, 5), "RB": (11, 5), "WR": (10, 5), "TE": (7, 4)}
+        top = self.current_week - 1 if season == str(self._cur["league"]["season"]) else 17
+        out = {}
+        for pid in sorted(self._cur["players"]):
+            pos = self._cur["players"][pid].get("position")
+            if pos not in scale or top < 1:
+                continue
+            gp = rng.randint(max(1, top - 5), top)
+            out[pid] = {"gp": gp, "pts_half_ppr": round(gp * max(1.0, rng.gauss(*scale[pos])), 1)}
         return out
 
     def clear_cache(self, keep_players: bool = True, league_id: str | None = None) -> None:

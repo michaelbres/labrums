@@ -58,3 +58,11 @@ Modeled on davidsasser.com (brief saved during the session; the tokens live at t
 - Frontend `#/network` (viewNetwork/netMount in static/app.js): lazy fetch, SVG force graph, filters, player/team panel, most-traveled table, shared-player matrix.
 - Real league: 4 seasons, 12 distinct owners (ownership changed: EvanKlein/rsepe left, Jimmy/Nick joined), 1711 stints, ~2% unknown. Unknown = adds made by commissioner (dropped by loader) or takeovers.
 - Gotcha: populating data/cache with real data makes the live-2026 newsroom tests run (and fail); tests assume no cache.
+
+## Power rankings (2026-11-19)
+- app/values.py: our own valuation model, all constants named at the top. PPG blend (0.55/0.30/0.15 x games share, shrunk to replacement worth 4 games) -> VORP vs Nth-best at position (QB 30, RB 30, WR 40, TE 12) -> x 5-year age-curve longevity. Rookie pick curve a*exp(-b*slot) is fit to this league's own rookie drafts (>=1 season old; fallback constants if <30 picks). Young league-drafted players (years_exp<=2) blend toward curve(slot).
+- Picks: traded_picks resolved per (season, round, original roster); future seasons derived from the latest completed rookie draft (+3); next draft ordered worst-standing first, later years mid-round; x0.9 per year out.
+- Tuned: QB replacement rank 20 -> 30 (at 20, elite SF QBs sat outside the top 5 because QB PPG spread is narrow); fallback curve set to the real fit (14.0, 0.145).
+- Plumbing: SleeperClient/DemoClient season_stats + traded_picks; loader.load_drafts/load_power; GET /api/power-rankings (lazy, 5 min cache, single-flight, 503 if current stats/traded picks fail, partial not cached); #/power page (viewPower). Tests: tests/test_values.py.
+- Known simplification: the 2027 order is reverse standings (no playoff/consolation nuance); snake drafts supported, 3rd-round reversal is not.
+

@@ -18,7 +18,7 @@ from . import articles, playoffs, shotguns, stats
 from .newsroom import calendar as release_calendar, desk
 from .config import DATA_DIR, ROOT, load_config, on_vercel, redis_settings
 from .db import Store, manual_to_items
-from .loader import LeagueNotFound, discover_seasons, load_network, load_season
+from .loader import LeagueNotFound, discover_seasons, load_network, load_power, load_season
 from .redis_client import RedisError, UpstashRedis
 from .sleeper import SleeperClient, SleeperError
 from .storage import RedisCache, RedisStore
@@ -61,13 +61,15 @@ class State:
         self._seasons: tuple[float, list[dict]] | None = None
         self._network: tuple[float, dict] | None = None
         self._net_lock = threading.Lock()
+        self._power: tuple[float, dict] | None = None
+        self._power_lock = threading.Lock()
 
     def reload_config(self):
         self.cfg = load_config()
         if self.demo:
             self.cfg["seasons"] = {"2026": "demo2026"}
             self.cfg["current_season"] = "2026"
-        self._models.clear(); self._seasons = None; self._network = None
+        self._models.clear(); self._seasons = None; self._network = None; self._power = None
 
     def seasons(self) -> list[dict]:
         with self._lock:
@@ -234,6 +236,29 @@ def network():
         if not out.get("skipped"):  # a partial result is served but never cached
             with state._lock:
                 state._network = (time.time(), out)
+        return out
+
+
+@app.get("/api/power-rankings")
+def power_rankings():
+    with state._lock:
+        hit = state._power
+        if hit and time.time() - hit[0] < MODEL_TTL:
+            return hit[1]
+    with state._power_lock:  # single-flight: concurrent cold requests share one load
+        with state._lock:
+            hit = state._power
+            if hit and time.time() - hit[0] < MODEL_TTL:
+                return hit[1]
+        cur = str(state.cfg.get("current_season") or (state.seasons() or [{}])[0].get("season"))
+        m = state.base_model(cur)  # 503/404 HTTPException on failure
+        try:
+            out = load_power(state.client, state.cfg, m["ctx"], m["stats"]["standings"], state.seasons())
+        except SleeperError as e:
+            raise HTTPException(503, f"Sleeper API unavailable: {e}") from e
+        if not out.get("skipped"):  # a partial result is served but never cached
+            with state._lock:
+                state._power = (time.time(), out)
         return out
 
 

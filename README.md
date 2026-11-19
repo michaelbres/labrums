@@ -12,6 +12,7 @@ A fantasy football league site powered by the Sleeper API. It turns your league'
 - Demo mode with fake data, so you can try everything offline.
 
 The **Network** page (`#/network`) charts which players each team has rostered across all seasons; `uv run python scripts/export_stints.py [out.csv]` dumps the same data as CSV (default `data/stints.csv`).
+The **Power** page (`#/power`) ranks the teams by roster and draft-pick value from our own player-valuation model (`app/values.py`; per position, picks, combined).
 
 ## Quick start
 
