@@ -29,7 +29,7 @@ PLAYER_FIELDS = ("full_name", "first_name", "last_name", "position", "team",
                  "fantasy_positions", "number", "injury_status", "status", "age", "years_exp")
 # Cache keys carry a version so blobs trimmed by older code (missing fields) are never reused.
 PLAYERS_CACHE_KEY = "players/nfl/v2"
-STATS_CACHE_VERSION = "v2"
+STATS_CACHE_VERSION = "v3"
 # Offensive stat fields kept from the season stat lines (everything a league may score; analytics are dropped).
 STAT_FIELDS = (
     "pass_yd", "pass_td", "pass_int", "pass_2pt", "pass_fd", "pass_att", "pass_cmp", "pass_inc", "pass_sack",
@@ -39,7 +39,7 @@ STAT_FIELDS = (
     "rec", "rec_yd", "rec_td", "rec_2pt", "rec_fd", "rec_40p", "rec_td_40p", "rec_td_50p",
     "bonus_rec_te", "bonus_rec_rb", "bonus_rec_wr", "bonus_rec_yd_100", "bonus_rec_yd_200", "bonus_fd_rb",
     "bonus_fd_wr", "bonus_fd_te", "bonus_rush_rec_yd_100", "bonus_rush_rec_yd_200",
-    "fum", "fum_lost", "fum_rec_td",
+    "fum", "fum_lost", "fum_rec", "fum_rec_td", "st_td", "st_fum_rec", "st_ff", "ff", "pts_half_ppr",
 )
 
 

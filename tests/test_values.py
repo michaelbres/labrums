@@ -275,5 +275,5 @@ def test_stale_players_blob_is_refetched_and_stats_trimmed(tmp_path):
              "2": {"gp": 0, "rec": 1}, "3": {"gp": 4, "sack": 3}}
     c._fetch = lambda path: calls.append(path) or rawst
     st = c.season_stats("2026")
-    assert st == {"1": {"rec": 30, "bonus_rec_te": 30, "gp": 5}}
-    assert c._read_cache("stats/nfl/regular/2026/v2") is not None and c._read_cache("stats/nfl/regular/2026") is None
+    assert st == {"1": {"rec": 30, "bonus_rec_te": 30, "pts_half_ppr": 99, "gp": 5}}
+    assert c._read_cache("stats/nfl/regular/2026/v3") is not None and c._read_cache("stats/nfl/regular/2026") is None
