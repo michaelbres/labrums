@@ -27,6 +27,20 @@ FINAL_TTL = 7 * 24 * 3600  # finished weeks: re-pull weekly to pick up stat corr
 
 PLAYER_FIELDS = ("full_name", "first_name", "last_name", "position", "team",
                  "fantasy_positions", "number", "injury_status", "status", "age", "years_exp")
+# Cache keys carry a version so blobs trimmed by older code (missing fields) are never reused.
+PLAYERS_CACHE_KEY = "players/nfl/v2"
+STATS_CACHE_VERSION = "v2"
+# Offensive stat fields kept from the season stat lines (everything a league may score; analytics are dropped).
+STAT_FIELDS = (
+    "pass_yd", "pass_td", "pass_int", "pass_2pt", "pass_fd", "pass_att", "pass_cmp", "pass_inc", "pass_sack",
+    "pass_int_td", "pass_cmp_40p", "bonus_pass_yd_300", "bonus_pass_yd_400", "bonus_pass_cmp_25", "bonus_fd_qb",
+    "rush_yd", "rush_td", "rush_2pt", "rush_fd", "rush_att", "bonus_rush_yd_100", "bonus_rush_yd_200",
+    "bonus_rush_att_20", "rush_40p", "rush_td_40p", "rush_td_50p",
+    "rec", "rec_yd", "rec_td", "rec_2pt", "rec_fd", "rec_40p", "rec_td_40p", "rec_td_50p",
+    "bonus_rec_te", "bonus_rec_rb", "bonus_rec_wr", "bonus_rec_yd_100", "bonus_rec_yd_200", "bonus_fd_rb",
+    "bonus_fd_wr", "bonus_fd_te", "bonus_rush_rec_yd_100", "bonus_rush_rec_yd_200",
+    "fum", "fum_lost", "fum_rec_td",
+)
 
 
 class SleeperError(RuntimeError):
@@ -104,9 +118,11 @@ class SleeperClient:
         except (urllib.error.URLError, TimeoutError, OSError) as e:
             raise SleeperError(f"network error for {url}: {e}") from e
 
-    def get(self, path: str, ttl: float = LIVE_TTL, transform=None, ttl_for=None) -> Any:
-        """`ttl_for(data) -> seconds` may shorten the ttl based on what was cached."""
-        cached = self._read_cache(path)
+    def get(self, path: str, ttl: float = LIVE_TTL, transform=None, ttl_for=None, cache_key: str | None = None) -> Any:
+        """`ttl_for(data) -> seconds` may shorten the ttl based on what was cached. `cache_key` stores the
+        (transformed) result under a different key than the API path."""
+        key = cache_key or path
+        cached = self._read_cache(key)
         if cached is not None:
             data, fetched_at = cached
             eff = ttl_for(data) if ttl_for is not None else ttl
@@ -116,12 +132,12 @@ class SleeperClient:
             data = self._fetch(path)
         except SleeperError as e:
             if cached is not None:
-                log.warning("Sleeper unreachable (%s); serving stale cache for %s", e, path)
+                log.warning("Sleeper unreachable (%s); serving stale cache for %s", e, key)
                 return cached[0]
             raise
         if transform is not None:
             data = transform(data)
-        self._write_cache(path, data)
+        self._write_cache(key, data)
         return data
 
     def clear_cache(self, keep_players: bool = True, league_id: str | None = None) -> None:
@@ -133,7 +149,7 @@ class SleeperClient:
         prefix = f"league/{league_id}" if league_id else None
 
         def doomed(path: str) -> bool:
-            if keep_players and path == "players/nfl":
+            if keep_players and path.startswith("players/nfl"):
                 return False
             if prefix and not (path == prefix or path.startswith(prefix + "/") or path.startswith("state/")):
                 return False
@@ -178,14 +194,20 @@ class SleeperClient:
         return self.get(f"league/{league_id}/traded_picks", LIVE_TTL) or []
 
     def season_stats(self, season: str, final: bool = False) -> dict[str, dict]:
-        """pid -> {gp, pts_half_ppr} for a regular season (the raw blob is ~8,000 players, so it is trimmed)."""
+        """pid -> {gp, <offensive stat fields in STAT_FIELDS>} for a regular season. The raw blob is ~8,000 players
+        with hundreds of fields each, so it is trimmed to what a league's scoring_settings can use."""
         def trim(raw: dict) -> dict:
             out = {}
             for pid, st in (raw or {}).items():
-                if isinstance(st, dict) and st.get("gp") and st.get("pts_half_ppr") is not None:
-                    out[str(pid)] = {"gp": st["gp"], "pts_half_ppr": st["pts_half_ppr"]}
+                if not isinstance(st, dict) or not st.get("gp"):
+                    continue
+                row = {k: st[k] for k in STAT_FIELDS if st.get(k)}
+                if row:
+                    row["gp"] = st["gp"]
+                    out[str(pid)] = row
             return out
-        return self.get(f"stats/nfl/regular/{season}", STATS_FINAL_TTL if final else STATS_TTL, transform=trim) or {}
+        return self.get(f"stats/nfl/regular/{season}", STATS_FINAL_TTL if final else STATS_TTL, transform=trim,
+                        cache_key=f"stats/nfl/regular/{season}/{STATS_CACHE_VERSION}") or {}
 
     def winners_bracket(self, league_id: str) -> list[dict]:
         return self.get(f"league/{league_id}/winners_bracket", LIVE_TTL) or []
@@ -202,7 +224,7 @@ class SleeperClient:
         memo = self._players
         if memo is not None and time.time() - memo[0] < PLAYERS_TTL:
             return memo[1]
-        out = self.get("players/nfl", PLAYERS_TTL, transform=trim) or {}
+        out = self.get("players/nfl", PLAYERS_TTL, transform=trim, cache_key=PLAYERS_CACHE_KEY) or {}
         if out:
             self._players = (time.time(), out)
         return out

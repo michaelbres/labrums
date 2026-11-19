@@ -251,7 +251,8 @@ def build_demo(season: str = "2026", league_id: str = DEMO_LEAGUE_ID, current_we
         "settings": {"playoff_teams": 6, "playoff_week_start": season_weeks + 1, "num_teams": n, "leg": current_week,
                      "last_scored_leg": current_week - 1, "playoff_type": 0, "playoff_seed_type": 0, "divisions": 2,
                      "waiver_type": 2, "waiver_budget": 100},
-        "scoring_settings": {"rec": 0.5, "pass_td": 4, "rush_td": 6, "rec_td": 6},
+        "scoring_settings": {"rec": 0.5, "pass_td": 4, "rush_td": 6, "rec_td": 6, "pass_yd": 0.04, "rush_yd": 0.1,
+                             "rec_yd": 0.1, "pass_int": -2},
     }
     state = {"week": current_week, "leg": current_week, "season": season, "season_type": "regular",
              "display_week": current_week, "league_season": season, "previous_season": str(int(season) - 1),
@@ -329,7 +330,7 @@ class DemoClient:
                 {"season": "2028", "round": 1, "roster_id": 2, "owner_id": 7, "previous_owner_id": 2}]
 
     def season_stats(self, season: str, final: bool = False):
-        """Deterministic fake season stats (gp + pts_half_ppr) for the offensive players."""
+        """Deterministic fake season stats stat lines under the demo scoring_settings for the offensive players."""
         rng = random.Random(f"demo-stats-{season}")
         scale = {"QB": (18, 5), "RB": (11, 5), "WR": (10, 5), "TE": (7, 4)}
         top = self.current_week - 1 if season == str(self._cur["league"]["season"]) else 17
@@ -339,7 +340,14 @@ class DemoClient:
             if pos not in scale or top < 1:
                 continue
             gp = rng.randint(max(1, top - 5), top)
-            out[pid] = {"gp": gp, "pts_half_ppr": round(gp * max(1.0, rng.gauss(*scale[pos])), 1)}
+            pts = gp * max(1.0, rng.gauss(*scale[pos]))
+            if pos == "QB":
+                line = {"pass_yd": round(pts * 0.8 / 0.04), "pass_td": round(pts * 0.2 / 4)}
+            elif pos == "RB":
+                line = {"rush_yd": round(pts * 0.7 / 0.1), "rush_td": round(pts * 0.3 / 6)}
+            else:
+                line = {"rec_yd": round(pts * 0.5 / 0.1), "rec": round(pts * 0.3 / 0.5), "rec_td": round(pts * 0.2 / 6)}
+            out[pid] = {"gp": gp, **line}
         return out
 
     def clear_cache(self, keep_players: bool = True, league_id: str | None = None) -> None:

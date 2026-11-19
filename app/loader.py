@@ -284,6 +284,7 @@ def load_power(client, cfg: dict, ctx: dict, standings: list[int], season_infos:
         except Exception as e:
             log.warning("power: drafts for %s failed: %s", info["season"], e)
             skipped.append({"what": f"drafts {info['season']}", "error": str(e)[:200]})
-    out = build_power_rankings(ctx["teams"], ctx["players"], stats, drafts, traded, list(standings), str(cur))
+    out = build_power_rankings(ctx["teams"], ctx["players"], stats, drafts, traded, list(standings), str(cur),
+                               scoring=(ctx.get("league") or {}).get("scoring_settings"))
     out["skipped"] = skipped
     return out

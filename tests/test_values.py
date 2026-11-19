@@ -51,7 +51,9 @@ def test_age_curve_and_longevity():
     assert V.age_curve(pos, mid) == pytest.approx(0.5)
     full = sum(V.LONGEVITY_DISCOUNT ** t for t in range(V.LONGEVITY_YEARS))
     assert V.longevity("QB", 24) == pytest.approx(full)
-    assert V.longevity("RB", 30) < 0.3 * full
+    assert V.longevity("RB", 40) == pytest.approx(1.0)      # current season in full, then nothing
+    assert V.longevity("RB", V.CLIFF["RB"] - 0.5) > 1.0
+    assert V.longevity("RB", 30) < 0.35 * full
     assert V.longevity("QB", 33) > V.longevity("RB", 27) > V.longevity("RB", 29)
     assert V.longevity("WR", 22) > V.longevity("WR", 30)
 
@@ -70,9 +72,51 @@ def test_compute_production_replacement_and_value():
     assert repl["WR"] == pytest.approx((V.REPLACEMENT_RANK["WR"] and sorted(
         [30.0 - i * 0.4 for i in range(60)] + [40.0], reverse=True)[V.REPLACEMENT_RANK["WR"] - 1]))
     assert prod["w0"]["production"] > prod["w10"]["production"] > 0
-    assert prod["old"]["production"] == 0.0     # past the cliff: nothing left no matter the PPG
+    # past the cliff: only the current season is left (t = 0 counts in full, nothing after)
+    assert prod["old"]["production"] == pytest.approx(prod["old"]["vorp"])
     # one-season-only players are shrunk, not treated as having three full seasons
     assert prod["w0"]["ppg"] < 30.0
+
+
+def test_fantasy_points_use_league_scoring_te_bonus_only_for_te():
+    scoring = {"rec": 0.5, "rec_yd": 0.1, "rec_td": 6, "pass_int": -2, "bonus_rec_te": 0.75, "rec_fd": 0.5, "sack": 1}
+    line = {"gp": 10, "rec": 10, "rec_yd": 100, "rec_td": 1, "rec_fd": 4, "bonus_rec_te": 10, "pass_int": 1, "other": 99}
+    base = 10 * 0.5 + 100 * 0.1 + 6 + 4 * 0.5 - 2
+    assert V.fantasy_points(line, "TE", scoring) == pytest.approx(base + 7.5)
+    assert V.fantasy_points(line, "WR", scoring) == pytest.approx(base)   # bonus never applies to a WR
+    assert V.fantasy_points({"pts_half_ppr": 12.5}, "WR", {}) == 12.5     # no scoring: Sleeper's own number
+    players = {"te": {"position": "TE", "age": 25}}
+    prod, _ = V.compute_production(players, {"2026": {"te": line}}, "2026", scoring=scoring)
+    assert prod["te"]["ppg"] > 0
+    ppg = (base + 7.5) / 10
+    assert V.blend_ppg([(ppg, 10, 9, 0.55)])[0] == pytest.approx(ppg)
+
+
+def test_fantasy_positions_fallback():
+    assert V.fantasy_pos({"position": "DB", "fantasy_positions": ["DB", "WR"]}) == "WR"
+    assert V.fantasy_pos({"position": "RB", "fantasy_positions": ["WR"]}) == "RB"
+    assert V.fantasy_pos({"position": "K", "fantasy_positions": ["K"]}) is None
+    players = {"hunter": {"position": "DB", "fantasy_positions": ["DB", "WR"], "age": 22}}
+    prod, _ = V.compute_production(players, {"2026": {"hunter": {"gp": 8, "pts_half_ppr": 80.0}}}, "2026",
+                                   include={"hunter"})
+    assert prod["hunter"]["pos"] == "WR"
+
+
+def test_blend_never_lowers_proven_player():
+    curve = {"a": 2.0, "b": 0.1, "source": "fit", "n": 99}     # tiny prior
+    prod = {"vet": {"production": 30.0, "games": 17.0}}
+    out = V.player_values(prod, {"vet": {"years_exp": 1}}, {"vet": 1.0}, curve)
+    assert out["vet"] == 30.0
+
+
+def test_current_season_bye_does_not_penalise():
+    st = {"a": {"gp": 9}, "b": {"gp": 8}}
+    assert V.season_games_possible(st, current=True) == 8       # max - 1
+    assert V.season_games_possible(st) == 9                     # past seasons: plain max
+    assert V.season_games_possible({"a": {"gp": 1}}, current=True) == 1   # floor 1
+    assert V.season_games_possible({"a": {"gp": 17}}, current=True) == 17  # finished season
+    # a player with every game but the bye has a full share (capped at 1)
+    assert V.blend_ppg([(10.0, 9, 8, 1.0)])[1] == pytest.approx(17)
 
 
 def test_fit_is_monotone_and_recovers_curve():
@@ -213,3 +257,23 @@ def test_api_power_rankings_demo(monkeypatch):
             raise main.SleeperError("down")
         monkeypatch.setattr(main.state.client, "season_stats", boom)
         assert c.get("/api/power-rankings").status_code == 503
+
+
+def test_stale_players_blob_is_refetched_and_stats_trimmed(tmp_path):
+    from app import sleeper as S
+    c = S.SleeperClient(tmp_path)
+    # a blob written by older code (old key, no years_exp / fantasy_positions) must not be reused
+    c._write_cache("players/nfl", {"1": {"full_name": "Old Blob", "position": "WR"}})
+    raw = {"1": {"full_name": "New", "position": "DB", "fantasy_positions": ["DB", "WR"], "years_exp": 1, "junk": 5}}
+    calls = []
+    c._fetch = lambda path: calls.append(path) or raw
+    p = c.players()
+    assert calls == ["players/nfl"] and p["1"]["fantasy_positions"] == ["DB", "WR"] and p["1"]["years_exp"] == 1
+    assert "junk" not in p["1"]
+    # stats: keeps gp + scoring fields only, under a versioned key
+    rawst = {"1": {"gp": 5, "rec": 30, "bonus_rec_te": 30, "rec_ypr": 11.2, "def_td": 2, "pts_half_ppr": 99},
+             "2": {"gp": 0, "rec": 1}, "3": {"gp": 4, "sack": 3}}
+    c._fetch = lambda path: calls.append(path) or rawst
+    st = c.season_stats("2026")
+    assert st == {"1": {"rec": 30, "bonus_rec_te": 30, "gp": 5}}
+    assert c._read_cache("stats/nfl/regular/2026/v2") is not None and c._read_cache("stats/nfl/regular/2026") is None

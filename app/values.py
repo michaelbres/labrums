@@ -53,10 +53,44 @@ def _f(x, default=0.0) -> float:
         return default
 
 
-def season_games_possible(season_stats: dict) -> float:
-    """Games a full-time player could have in this (possibly unfinished) season: the max games anyone has."""
+def season_games_possible(season_stats: dict, current: bool = False) -> float:
+    """Games a full-time player could have in this season: the max games anyone has. For the season in progress
+    it is one less (floor 1) so a bye week does not penalise anyone; a season where someone already played the
+    full schedule is over and uses the plain max."""
     mx = max((_f(v.get("gp")) for v in (season_stats or {}).values()), default=0.0)
-    return min(float(FULL_SEASON_GAMES), mx) if mx > 0 else float(FULL_SEASON_GAMES)
+    if mx <= 0:
+        return float(FULL_SEASON_GAMES)
+    if current and mx < FULL_SEASON_GAMES:
+        return max(1.0, mx - 1)
+    return min(float(FULL_SEASON_GAMES), mx)
+
+
+def fantasy_points(row: dict, pos: str, scoring: dict | None) -> float:
+    """Season points of a raw stat line under the league's scoring_settings: sum of stat * setting for every key
+    in both. Position-specific bonuses (bonus_rec_te, bonus_fd_rb, ...) count only for that position. Without
+    scoring_settings, falls back to Sleeper's own pts_half_ppr."""
+    if not scoring:
+        return _f(row.get("pts_half_ppr"))
+    total = 0.0
+    for k, w in scoring.items():
+        if k not in row:
+            continue
+        suffix = k.rsplit("_", 1)[-1].upper()
+        if k.startswith("bonus_") and suffix in POSITIONS and suffix != pos:
+            continue
+        total += _f(row[k]) * _f(w)
+    return total
+
+
+def fantasy_pos(p: dict) -> str | None:
+    """position if it is QB/RB/WR/TE, else the first of those in fantasy_positions (e.g. a DB listed as WR)."""
+    pos = p.get("position")
+    if pos in POSITIONS:
+        return pos
+    for q in p.get("fantasy_positions") or []:
+        if q in POSITIONS:
+            return q
+    return None
 
 
 def blend_ppg(lines: list[tuple[float, float, float, float]], replacement: float | None = None) -> tuple[float, float]:
@@ -100,7 +134,8 @@ def age_curve(pos: str, age: float) -> float:
 
 
 def longevity(pos: str, age: float) -> float:
-    return sum(LONGEVITY_DISCOUNT ** t * age_curve(pos, age + t) for t in range(LONGEVITY_YEARS))
+    """The current season counts in full (t = 0); the age curve only discounts future seasons."""
+    return sum(LONGEVITY_DISCOUNT ** t * (age_curve(pos, age + t) if t >= 1 else 1.0) for t in range(LONGEVITY_YEARS))
 
 
 def player_age(p: dict) -> float:
@@ -112,19 +147,20 @@ def player_age(p: dict) -> float:
 
 
 def compute_production(players: dict[str, dict], stats: dict[str, dict], current_season: str,
-                       include: set[str] | frozenset = frozenset()) -> tuple[dict[str, dict], dict[str, float]]:
-    """stats: season -> pid -> {gp, pts_half_ppr}. Returns (pid -> production row, replacement by position)."""
+                       include: set[str] | frozenset = frozenset(),
+                       scoring: dict | None = None) -> tuple[dict[str, dict], dict[str, float]]:
+    """stats: season -> pid -> raw stat line {gp, ...}; points use the league `scoring`. Returns (pid -> production row, replacement by position)."""
     cur = int(current_season)
     order = [str(cur - i) for i in range(len(SEASON_WEIGHTS))]
-    possible = {s: season_games_possible(stats.get(s) or {}) for s in order}
+    possible = {s: season_games_possible(stats.get(s) or {}, current=(s == order[0])) for s in order}
     pids = set(include)
     for s in order:
         pids.update((stats.get(s) or {}).keys())
     lines: dict[str, list] = {}
     pos_of: dict[str, str] = {}
     for pid in pids:
-        pos = (players.get(pid) or {}).get("position")
-        if pos not in POSITIONS:
+        pos = fantasy_pos(players.get(pid) or {})
+        if pos is None:
             continue
         pos_of[pid] = pos
         ls = []
@@ -132,7 +168,7 @@ def compute_production(players: dict[str, dict], stats: dict[str, dict], current
             row = (stats.get(s) or {}).get(pid)
             gp = _f((row or {}).get("gp"))
             if row and gp > 0:
-                ls.append((_f(row.get("pts_half_ppr")) / gp, gp, possible[s], w))
+                ls.append((fantasy_points(row, pos, scoring) / gp, gp, possible[s], w))
         lines[pid] = ls
     raw = {}
     for pid, ls in lines.items():
@@ -215,7 +251,7 @@ def player_values(production: dict[str, dict], players: dict[str, dict], slots: 
         if pid in slots and ye is not None and _f(ye, 99) <= YOUNG_MAX_YEARS_EXP:
             w = row["games"] / (row["games"] + CAREER_GAMES_HALF)
             val = w * val + (1 - w) * curve_value(curve, slots[pid])
-        out[pid] = val
+        out[pid] = max(row["production"], val)   # a prior never lowers a proven player
     return out
 
 
@@ -275,10 +311,10 @@ def _ranks(values: dict[int, dict]) -> dict[int, dict]:
 
 def build_power_rankings(rosters: dict[int, dict], players: dict[str, dict], stats: dict[str, dict],
                          drafts: list[dict], traded: list[dict], standings: list[int],
-                         current_season: str) -> dict[str, Any]:
+                         current_season: str, scoring: dict | None = None) -> dict[str, Any]:
     """rosters: roster_id -> {name, team_name, avatar, players: [pid]} (taxi/reserve included in players)."""
     rostered = {str(p) for t in rosters.values() for p in t.get("players") or [] if p not in (None, "", "0")}
-    production, repl = compute_production(players, stats, current_season, include=rostered)
+    production, repl = compute_production(players, stats, current_season, include=rostered, scoring=scoring)
     samples = rookie_samples(drafts, production, current_season)
     curve = fit_pick_curve(samples)
     slots = draft_slots(drafts, current_season)
