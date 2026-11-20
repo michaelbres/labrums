@@ -1,35 +1,70 @@
 {
- "week": 8,
- "articles": [
-  {
-   "key": "2026:analytics:8:all",
-   "headline": "Sunshine over Jimmy, steady rain on Patrick: the Week 8 luck readings",
-   "body": [
-    "Good evening, and here's your seven-day league forecast. We're reading the instruments through Week 8, 8 games per team, and the luck barometer leads the broadcast. Jimmy is 7-1 against 5.0 expected wins, a reading of +2.0 and clear skies all around. Patrick is 2-6 against an expected 3.6, a reading of -1.6, and that's a low-pressure system parked right over his roster.",
-    "On to lineup efficiency. Tom is capturing 91% of his available points and Adam just 79%, with the league at 85%. It shows on the bench gauge: Adam has left 287.80 points out in the rain, the most of anyone, while Tom has left only 146.97 points. The worst single squall belongs to Nick, who in Week 4 finished 62.25 points short of his best lineup while Keon Coleman (WR) and his 22.60 points stayed indoors.",
-    "For steadiness, Cian is our calmest station, averaging a weekly rank of 7.9 and ranging from 5th to 10th. Calm, folks, is not the same as warm. Adam is the stormiest, ranging from 2nd to 10th. And the Week 4 trade, 5 weeks on: the players Bowie received have scored 147.70 points, and the players Cian received have scored 59.05 points. Keep an eye on the radar.",
-    "That's the forecast. I'll see you at the next front."
-   ]
-  },
-  {
-   "key": "2026:column:8:5-7",
-   "headline": "Two territories, one river: Tom and Steven on the plain",
-   "body": [
-    "And so, as the light fades over the league, we observe. Through Week 8, two large animals share the upper grassland: Tom, at 6-2 and 2nd in the table, and Steven, at 5-3 and 4th. Each grazes with one eye on the other.",
-    "They have met once this season, and Tom came away with the territory, 1-0. Yet the recent tracks tell a subtler story. Tom won by 27.34, lost by 63.04, and lost by 15.89, the gait of a creature favouring one leg. Steven, meanwhile, won by 30.38, won by 60.61, and won by 38.19. Remarkable. Between them lies 128.65 points of scoring, wide as a river in the wet season, with Tom on the higher bank at 1417.25 to Steven's 1288.60. At the watering hole, the ritual count stands at 2 shotguns for Tom and 3 shotguns for Steven.",
-    "“I don't need a pep talk against Steven. I need a scoreboard, and the scoreboard says 1-0,” Tom murmured. Steven answered from the tall grass: “Tom thinks the 0-1 means something. It means I've seen the plays.” By scoring average, Tom remains the stronger of the two and this observer's pick, though a hunter on a run of three wins is seldom far behind.",
-    "And so the cycle continues."
-   ]
-  },
-  {
-   "key": "2026:feud:8:6-8",
-   "headline": "Adam and Cian: relations repriced after a 37.80-point close",
-   "body": [
-    "A flash note from the desk. The Week 8 print is in: Adam 146.54, Cian 108.74. That is a 37.80-point blowout, and goodwill between these two counterparties closed sharply lower.",
-    "Consider the management. Adam says nothing in the group chat for weeks, then makes a trade nobody understands, which is how a certain kind of fund operates. Cian has not been physically seen since the draft, which complicates due diligence. Positions through Week 8: Adam at 5-3, in 6th; Cian at 1-7, in 9th. Only one of those is trading like a going concern.",
-    "Adam, on the earnings call: “37.80 points. I'd say I feel bad for Cian, but I checked and I don't.” Cian declined to issue new guidance: “If Adam wants a response, the box score will send one.” The box score, we note, has so far sent 108.74. We are overweight on drama and maintain a negative outlook on relations between Adam and Cian.",
-    "We maintain our rating."
-   ]
-  }
- ]
+  "week": 8,
+  "articles": [
+    {
+      "key": "2026:analytics:8:all",
+      "headline": "Sunshine over Jimmy, steady rain on Patrick: the Week 8 luck readings",
+      "body": [
+        "Good evening, and here's your seven-day league forecast. We're reading the instruments through Week 8, 8 games per team, and the luck barometer leads the broadcast. Jimmy is 7-1 against 5.0 expected wins, a reading of +2.0 and clear skies all around. Patrick is 2-6 against an expected 3.6, a reading of -1.6, and that's a low-pressure system parked right over his roster.",
+        "On to lineup efficiency. Tom is capturing 91% of his available points and Adam just 79%, with the league at 85%. It shows on the bench gauge: Adam has left 287.80 points out in the rain, the most of anyone, while Tom has left only 146.97 points. The worst single squall belongs to Nick, who in Week 4 finished 62.25 points short of his best lineup while Keon Coleman (WR) and his 22.60 points stayed indoors.",
+        "For steadiness, Cian is our calmest station, averaging a weekly rank of 7.9 and ranging from 5th to 10th. Calm, folks, is not the same as warm. Adam is the stormiest, ranging from 2nd to 10th. And the Week 4 trade, 5 weeks on: the players Bowie received have scored 147.70 points, and the players Cian received have scored 59.05 points. Keep an eye on the radar.",
+        "That's the forecast. I'll see you at the next front."
+      ]
+    },
+    {
+      "key": "2026:column:8:5-7",
+      "headline": "Two territories, one river: Tom and Steven on the plain",
+      "body": [
+        "And so, as the light fades over the league, we observe. Through Week 8, two large animals share the upper grassland: Tom, at 6-2 and 2nd in the table, and Steven, at 5-3 and 4th. Each grazes with one eye on the other.",
+        "They have met once this season, and Tom came away with the territory, 1-0. Yet the recent tracks tell a subtler story. Tom won by 27.34, lost by 63.04, and lost by 15.89, the gait of a creature favouring one leg. Steven, meanwhile, won by 30.38, won by 60.61, and won by 38.19. Remarkable. Between them lies 128.65 points of scoring, wide as a river in the wet season, with Tom on the higher bank at 1417.25 to Steven's 1288.60. At the watering hole, the ritual count stands at 2 shotguns for Tom and 3 shotguns for Steven.",
+        "“I don't need a pep talk against Steven. I need a scoreboard, and the scoreboard says 1-0,” Tom murmured. Steven answered from the tall grass: “Tom thinks the 0-1 means something. It means I've seen the plays.” By scoring average, Tom remains the stronger of the two and this observer's pick, though a hunter on a run of three wins is seldom far behind.",
+        "And so the cycle continues."
+      ]
+    },
+    {
+      "key": "2026:feud:8:6-8",
+      "headline": "Adam and Cian: relations repriced after a 37.80-point close",
+      "body": [
+        "A flash note from the desk. The Week 8 print is in: Adam 146.54, Cian 108.74. That is a 37.80-point blowout, and goodwill between these two counterparties closed sharply lower.",
+        "Consider the management. Adam says nothing in the group chat for weeks, then makes a trade nobody understands, which is how a certain kind of fund operates. Cian has not been physically seen since the draft, which complicates due diligence. Positions through Week 8: Adam at 5-3, in 6th; Cian at 1-7, in 9th. Only one of those is trading like a going concern.",
+        "Adam, on the earnings call: “37.80 points. I'd say I feel bad for Cian, but I checked and I don't.” Cian declined to issue new guidance: “If Adam wants a response, the box score will send one.” The box score, we note, has so far sent 108.74. We are overweight on drama and maintain a negative outlook on relations between Adam and Cian.",
+        "We maintain our rating."
+      ]
+    },
+    {
+      "key": "2026:waiver:8:all",
+      "headline": "A modest $11 for Gardner Minshew II, and Colin does not regret it",
+      "body": [
+        "Pull up a chair. There was a time when a man bought a quarterback the way he bought a hat, which is to say carefully and hoping nobody would notice, and I was reminded of it in Week 8, when Colin put down $11 for Gardner Minshew II (QB) and that turned out to be the largest bid anyone made. Since then the purchase has returned 7.04 points. It is not a windfall. It is not a hole in the roof, either.",
+        "The rest of the shop was quieter still. Patrick paid $8 for Anthony Richardson Sr. (QB), and Cian gave $1 for Mike Gesicki (TE) and then walked off with Quentin Johnston (WR) for nothing, while Bowie picked up Xavier Hutchinson (WR) at the same price. When the door closed, 6 owners had carried home 8 players between them. A fellow learns things in this line of work, and one of them is that slow weeks are when the sensible business gets done.",
+        "“I paid $11 and I got 7.04 points, and I have had worse haircuts for more,” Colin said, and went back to what he was doing.",
+        "Draw the shades. The league will still be here in the morning."
+      ]
+    },
+    {
+      "key": "2026:shotgun:8:all",
+      "headline": "The People v. Week 8: 10 shotguns owed, 4 of them by Cian",
+      "body": [
+        "The People will show the following. For Week 8 the record reflects a total liability of 10 shotguns, apportioned among 5 owners, and the People intend to collect on every one.",
+        "Count one: Cian owes 4 shotguns, for starting Evan Engram (TE), Emanuel Wilson (RB), Cody White (WR) and Chris Godwin Jr. (WR), each of whom is entered into evidence at 0 points. Count two: Adam owes 2 shotguns, on the strength of Jake Ferguson (TE) and Carnell Tate (WR), both at 0. Count three: Steven owes 2 shotguns for Tre Tucker (WR) and Lamar Jackson (QB), likewise 0 apiece. Count four: Bowie owes 1 shotgun for Zay Flowers (WR), 0 points. Count five: Patrick owes 1 shotgun for Michael Penix Jr. (QB).",
+        "The People draw the court's particular attention to count five. Mr. Penix did not merely fail to score; he returned -1.90 points, the lowest figure on the Week 8 docket. Exhibit A is the box score.",
+        "The lead defendant was permitted a statement. “I plead guilty to all 4, and I ask the court to note that I at least started a full lineup,” Cian said. The motion for leniency is denied.",
+        "The People rest."
+      ]
+    },
+    {
+      "key": "2026:recap:8:all",
+      "headline": "Market shock in Week 8: Patrick (8th) takes down Bowie (3rd)",
+      "body": [
+        "Tickers up, tickers down, lineups sideways. The Week 8 surprise came from the bottom of the board: Patrick, ranked 8th, closed at 160.93 against 132.65 for Bowie, who opened the week 3rd. Call it a mispriced asset. Both books carry a liability: Patrick owes 1 shotgun for starting Michael Penix Jr. (QB), and Bowie owes 1 shotgun for starting Zay Flowers (WR). Bowie, who is on his fourth energy drink before the early games kick off, now has a 28.28-point loss to stay up over.",
+        "“I beat the 3rd-ranked team by 28.28. Somebody upgrade me,” Patrick told the desk. Bowie's guidance was shorter: “160.93 was not in my model.”",
+        "Adam 146.54, Cian 108.74, a 37.80-point blowout. Adam owes 2 shotguns for starting Jake Ferguson (TE) and Carnell Tate (WR), but Joe Burrow (QB) covered the position with 39.48 points. Adam is 5-3 and 6th, riding a 5-win run. “Two zeroes in the lineup and I still cleared it by 37.80. That is what a strong balance sheet looks like,” Adam said.",
+        "Steven 142.55, Colin 104.36: another blowout, spread 38.19. Colin left 29.33 points on the bench, 17.35 points of it from Gunnar Helm (TE). That is 3 straight losses for Colin, now 3-5 and 7th. Ja'Marr Chase (WR) led Steven's holdings at 28.60 points.",
+        "At the top of the index, Jimmy beat Tom, 155.58 to 139.69. Josh Allen (QB) returned 26.56 points, 17% of Jimmy's total. Tom's laggard: DK Metcalf (WR), 0.90 points.",
+        "Michael closed over Nick, 153.08 to 128.69. Nick benched Adonai Mitchell (WR) and his 26.20 points, with 33.49 points available in all, and started Keon Coleman (WR) for 0.90 points. Rating: sell.",
+        "The table after Week 8: Jimmy on top at 7-1, Adam at the cut line at 5-3.",
+        "That's the bell. Markets resume next week."
+      ]
+    }
+  ]
 }
