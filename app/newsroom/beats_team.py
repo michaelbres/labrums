@@ -12,14 +12,15 @@ import random
 import re
 from typing import Any
 
+from .. import stats
 from . import beat_text as T
 from .beat_reporters import STRUCTURES, BeatReporter, assign
 from .beats_extra import Beats3
-from .util import fill, fmt, join_and, mclass, num_word, ordinal, pct, plural, polish, pts, sentence_case, times
+from .util import fill, fmt, join_and, mclass, num_word, ordinal, pct, plural, polish, pts, sentence_case, split_sentences, times
 
 CATCH_SHARE = 0.15   # a team report may carry a catchphrase only while the whole build stays under this share
 # conflict groups: a report uses at most one fact per group (so it never says the same thing twice)
-GROUPS = {"bench": "bench", "bench_n": "bench", "bench_gt": "bench", "standing": "rank", "leader": "rank", "cellar": "rank",
+GROUPS = {"bench": "bench", "bench_n": "bench", "bench_nr": "bench", "consol": "rank", "bench_gt": "bench", "standing": "rank", "leader": "rank", "cellar": "rank",
           "up": "rank", "down": "rank", "finish": "rank", "streak": "streak", "streak_end": "streak", "snap": "streak",
           "luck_pos": "luck", "luck_neg": "luck", "subpar": "luck", "lowscore": "wk", "highscore": "wk", "luckywin": "wk",
           "unlucky": "wk", "avgweek_up": "wk", "avgweek_dn": "wk", "avg_up": "avg", "avg_dn": "avg",
@@ -27,9 +28,9 @@ GROUPS = {"bench": "bench", "bench_n": "bench", "bench_gt": "bench", "standing":
           "waiver_bid": "waiver", "waiver_free": "waiver", "waiver_multi": "waiver", "waiver_low": "waiver",
           "waiver_mid": "waiver", "waiver_hi": "waiver", "odds_low": "odds", "odds_mid": "odds", "odds_high": "odds",
           "odds_clinched": "odds", "odds_out": "odds"}
-HW_KEY = {"bench_n": "bench", "bench_gt": "bench", "trade_pending": "trade", "trade_lead": "trade", "trade_trail": "trade",
+HW_KEY = {"bench_n": "bench", "bench_nr": "bench", "bench_gt": "bench", "trade_pending": "trade", "trade_lead": "trade", "trade_trail": "trade",
           "waiver_bid": "waiver", "waiver_free": "waiver", "waiver_multi": "waiver", "luckywin": "wk", "unlucky": "wk", "lowscore": "wk"}
-HEAD_KEY = {"trade_lead": "trade_pending", "trade_trail": "trade_pending", "bench_n": "bench"}
+HEAD_KEY = {"trade_lead": "trade_pending", "trade_trail": "trade_pending", "bench_n": "bench", "bench_nr": "bench_n"}
 
 
 SENSITIVE = re.compile(r"blood sugar|diabet|insulin|cancer|disease|illness|\bsick|hospital|surgery|medic|depress|anxiety|mental|therap|rehab|"
@@ -46,6 +47,23 @@ def _cap(s: str) -> str:
     return s[:1].upper() + s[1:]
 
 
+_AM_PM = re.compile(r"\b([ap]\.m)\.(?=\s+[a-z])")
+
+
+def _polish(text: str, protect) -> str:
+    """polish() capitalizes the word after every ". ", including after "a.m." / "p.m." in the middle of a sentence
+    ("at 4 a.m. with Daft Punk on"); shield that dot for the pass."""
+    return polish(_AM_PM.sub("\\1\ue000", text), protect).replace("\ue000", ".")
+
+
+def _sent_keys(text: str) -> list[str]:
+    return [" ".join(x.casefold().split()) for x in split_sentences(text)]
+
+
+def _pos_of(ctx_players: dict, pid: str) -> set[str]:
+    return stats._player_pos(ctx_players, pid)   # noqa: SLF001  (read-only reuse of the league's own position rules)
+
+
 class BeatsTeam(Beats3):
     def __init__(self, ctx, st, po, shotgun_items):
         super().__init__(ctx, st, po, shotgun_items)
@@ -53,6 +71,9 @@ class BeatsTeam(Beats3):
         self._bt_use: dict[tuple, int] = {}
         self._bt_hist: dict[tuple, list[str]] = {}
         self._bt_week_used: set[tuple] = set()
+        self._bt_week_sent: set[str] = set()   # normalized sentences already written in the week being built
+        self._bt_bench_c: dict[tuple, tuple] = {}
+        self._bt_field_c: set[int] | None = None
         self._bt_eff: dict[int, dict] = {}
 
     # ---- masthead ------------------------------------------------------------
@@ -70,17 +91,27 @@ class BeatsTeam(Beats3):
             out = list(pool.get("L", []))
         return out
 
-    def _bt_variant(self, rep: BeatReporter, week: int, key: str, variants: list[str]) -> str:
+    def _bt_variant(self, rep: BeatReporter, week: int, key: str, variants: list[str], V: dict | None = None) -> str:
         """The next line of `key` in this reporter's own (seeded) order that this reporter has not used yet, whatever the
         tone of the earlier piece; once the pool is used up, the one used longest ago. No two teams use the same line in one
-        week while the pool still has an unused one."""
+        week while the pool still has an unused one, and (when the values `V` are given) no sentence of the filled-in
+        line has already been written that week by anyone, as long as any line of the pool avoids that."""
         order = sorted(variants, key=lambda v: random.Random(f"beat:{rep.id}:{key}:{v}").random())
         hist = self._bt_hist.setdefault((rep.id, key), [])
         fresh = [v for v in order if v not in hist]
         pool = fresh or sorted(order, key=lambda v: hist.index(v))
         cands = [v for v in pool if not hist or v != hist[-1]] or pool   # never the line this reporter used last time, if avoidable
-        pick = next((v for v in cands if (week, key, v) not in self._bt_week_used), cands[0])
+        wide = [v for v in fresh + sorted((v for v in order if v in hist), key=hist.index) if not hist or v != hist[-1]] or order
+
+        def fresh_sent(v: str) -> bool:
+            return V is None or not any(k in self._bt_week_sent for k in _sent_keys(fill(v, V)))
+        pick = (next((v for v in cands if (week, key, v) not in self._bt_week_used and fresh_sent(v)), None)
+                or next((v for v in wide if (week, key, v) not in self._bt_week_used and fresh_sent(v)), None)
+                or next((v for v in wide if fresh_sent(v)), None)
+                or next((v for v in cands if (week, key, v) not in self._bt_week_used), cands[0]))
         self._bt_week_used.add((week, key, pick))
+        if V is not None:
+            self._bt_week_sent.update(_sent_keys(fill(pick, V)))
         if pick in hist:
             hist.remove(pick)
         hist.append(pick)
@@ -90,7 +121,7 @@ class BeatsTeam(Beats3):
         variants = self._bt_pool(pool, tone)
         if not variants:
             return None
-        return fill(self._bt_variant(rep, week, pool_name, variants), V)
+        return fill(self._bt_variant(rep, week, pool_name, variants, V), V)
 
     # ---- facts -----------------------------------------------------------------
     def _bt_week_scores(self, week: int) -> dict[int, float]:
@@ -105,6 +136,86 @@ class BeatsTeam(Beats3):
         if upto not in self._bt_eff:
             self._bt_eff[upto] = self._eff_table(upto)
         return self._bt_eff[upto]
+
+    def _bt_bench(self, week: int, rid: int) -> tuple[float, dict | None]:
+        """(points the best LEGAL lineup would have added, the bench player who should have started) for that week.
+
+        Unlike book.bench_left this only lets players into the optimal lineup who could have started: taxi-squad and
+        IR/reserve players are excluded, and the lineup is built slot by slot from the league's roster_positions with the
+        same rules and greedy order as stats.optimal_lineup_points (which matches Sleeper's own ppts to the cent). A bench
+        player is only named if he is in that optimal lineup and was not in the actual one; `replaces` is the starter the
+        optimal lineup drops, when exactly one dropped starter held a slot he could have filled.
+        LIMITATION: Sleeper only gives the CURRENT taxi / IR lists (ctx["inactive"]), no weekly snapshot, so those lists are
+        applied to every week: a player who was on the taxi squad in week 4 but activated later is treated as legal
+        in no week, and one who was on the active roster then and has since been stashed is excluded from that week too."""
+        key = (week, rid)
+        if key in self._bt_bench_c:
+            return self._bt_bench_c[key]
+        res: tuple[float, dict | None] = (0.0, None)
+        row = self.week_row(week, rid)
+        pp = {str(p): float(v or 0) for p, v in ((row or {}).get("players_points") or {}).items()}
+        if row and pp:
+            res = self._bt_bench_calc(row, rid, pp)
+        self._bt_bench_c[key] = res
+        return res
+
+    def _bt_bench_calc(self, row: dict, rid: int, pp: dict[str, float]) -> tuple[float, dict | None]:
+        players = self.ctx["players"]
+        rp = list(self.ctx["roster_positions"])
+        inactive = (self.ctx.get("inactive") or {}).get(rid) or {}
+        barred = {str(p) for p in (inactive.get("taxi") or []) + (inactive.get("reserve") or [])}
+        starters = [str(p) for p in (row.get("starters") or [])]
+        started = {p for p in starters if p not in ("", "0", "None")}
+        legal = sorted((p for p in pp if p not in barred or p in started), key=lambda p: (-pp[p], p))
+        slots = [s for s in rp if s not in stats.NON_STARTING]
+        fixed = [s for s in slots if s not in stats.FLEX_ELIGIBILITY]
+        flex = sorted((s for s in slots if s in stats.FLEX_ELIGIBILITY), key=lambda s: len(stats.FLEX_ELIGIBILITY[s]))
+        chosen: list[str] = []
+        for slot in fixed + flex:
+            elig = stats.FLEX_ELIGIBILITY.get(slot)
+            for pid in legal:
+                if pid in chosen:
+                    continue
+                if (slot in _pos_of(players, pid)) if elig is None else (_pos_of(players, pid) & elig):
+                    chosen.append(pid)
+                    break
+        opt = round(sum(pp[p] for p in chosen), 2)
+        left = round(opt - float(row.get("points") or 0), 2)
+        if left <= 0:
+            return 0.0, None
+        added = sorted((p for p in chosen if p not in started), key=lambda p: (-pp[p], p))
+        if not added or pp[added[0]] <= 0:
+            return left, None
+        top = added[0]
+        dropped = [(i, p) for i, p in enumerate(starters) if p in started and p not in chosen]
+        fits = []
+        for i, p in dropped:
+            slot = rp[i] if i < len(rp) else ""
+            elig = stats.FLEX_ELIGIBILITY.get(slot)
+            if (slot in _pos_of(players, top)) if elig is None else (_pos_of(players, top) & elig):
+                fits.append(p)
+        best = {**self.label(top), "points": round(pp[top], 2), "replaces": None}
+        if len(fits) == 1:
+            best["replaces"] = {**self.label(fits[0]), "points": round(pp.get(fits[0], 0.0), 2)}
+        return left, best
+
+    def _bt_field(self) -> set[int]:
+        """The teams that made the playoffs: the top `playoff_teams` of the final regular-season standings."""
+        if self._bt_field_c is None:
+            order = self.snap(self.final_reg_week)["standings"]
+            self._bt_field_c = set(order[: self.ctx["playoff_teams"]])
+        return self._bt_field_c
+
+    def _bt_alive(self, week: int, rid: int) -> bool:
+        """True when `rid`'s game in playoff week `week` is a winners-bracket game: the team made the playoffs and has not
+        lost a playoff game yet (a bye is not a loss). Everyone else is playing a consolation (or placement) game."""
+        if rid not in self._bt_field():
+            return False
+        for w in range(self.ctx["playoff_start"], week):
+            for g in self.games_by_week.get(w, []):
+                if rid in (g["a"], g["b"]) and g["winner"] != rid:
+                    return False
+        return True
 
     def _bt_trade(self, week: int, rid: int) -> dict | None:
         for tx in self.live_txs(week):
@@ -152,12 +263,14 @@ class BeatsTeam(Beats3):
         mine, theirs = (g["a_pts"], g["b_pts"]) if me_a else (g["b_pts"], g["a_pts"])
         res = "T" if g["winner"] is None else "W" if g["winner"] == rid else "L"
         F: dict[str, Any] = {"rid": rid, "opp": opp, "week": week, "mine": mine, "theirs": theirs, "res": res,
-                             "margin": float(g["margin"]), "playoff": self.is_playoff(week)}
+                             "margin": float(g["margin"]), "playoff": self.is_playoff(week)}   # playoff: a playoff-calendar week (see alive / consol)
         sc = self._bt_week_scores(week)
         F["n_week"] = len(sc)
         F["wr"] = 1 + sum(1 for x, v in sc.items() if v > mine)
         F["lavg"] = sum(sc.values()) / len(sc) if sc else mine
-        F["left"], F["best_bench"] = self.bench_left(week, rid)
+        F["left"], F["best_bench"] = self._bt_bench(week, rid)
+        F["alive"] = F["playoff"] and self._bt_alive(week, rid)
+        F["consol"] = F["playoff"] and not F["alive"]
         F["worst"] = self.worst_starter(week, rid)
         F["star"] = self.best_starter(week, rid)
         F["sg"] = self.sg_week(week, rid)
@@ -186,12 +299,15 @@ class BeatsTeam(Beats3):
         left = F["left"]
         if left >= 12:
             bn = F["best_bench"]
-            gt = o_res == "L" and margin > 0 and left > margin
+            gt = o_res == "L" and margin > 0 and left > margin   # an avoidable loss: the legal lineup would have beaten the margin
             V = {"left": pts(left), "opt": fmt(mine + left), "left_raw": left}
-            named = bn and 0 < bn["points"] <= left
+            named = bool(bn) and bn["points"] > 0
+            rp = bn["replaces"] if named else None
             if named:
                 V.update(bench_name=bn["name"], bench_pos=bn["position"], bench_pts=pts(bn["points"]))
-            add("bench_gt" if gt else "bench_n" if named else "bench", 2.0 + min(left, 40) / 10 + (2 if gt else 0), V)
+            if rp:
+                V.update(rep_name=rp["name"], rep_pos=rp["position"], rep_pts=pts(rp["points"]))
+            add("bench_gt" if gt else "bench_nr" if rp else "bench_n" if named else "bench", 2.0 + min(left, 40) / 10 + (2 if gt else 0), V)
         w = F["worst"]
         if w and w["points"] <= 2 and w["name"] and not any(w["name"] in self._sg_phrase([x]) for x in F["sg"]):
             add("dud", 3.6 if w["points"] <= 0 else 3.2, {"dud": w["name"], "dpos": w["position"], "dpts": pts(w["points"])})
@@ -236,7 +352,7 @@ class BeatsTeam(Beats3):
         rank, rec = S["rank"], S["record"]
         base = {"rec": rec, "rank_ord": ordinal(rank)}
         if F["playoff"]:
-            add("finish", 1.5, base)
+            add("finish" if F["alive"] else "consol", 1.5, base)
             return out
         line = "inside" if rank <= self.ctx["playoff_teams"] else "outside"
         if S["games"] >= 2:
@@ -378,7 +494,8 @@ class BeatsTeam(Beats3):
         F = self._bt_facts(week, g, rid)
         tone = F["res"]
         o, opp = self.name(rid), self.name(F["opp"])
-        wl = f"playoff week {week - self.ctx['playoff_start'] + 1}" if F["playoff"] else f"Week {week}"
+        pn = week - self.ctx["playoff_start"] + 1
+        wl = (f"playoff week {pn}" if F["alive"] else f"consolation week {pn}") if F["playoff"] else f"Week {week}"
         tn = self.tname(rid)
         nick = str(self.profile(rid).get("nickname") or "").strip()
         if nick and nick.casefold() in tn.casefold():   # the lint allows a nickname only as the group-chat aside, so never inside a team name
@@ -424,14 +541,14 @@ class BeatsTeam(Beats3):
         want_jabs = 2 if structure == "verdict" else 1
         jabs = self._bt_jabs(rep, rid, week, tone, V, rng, want_jabs)
         verdict = self._bt_line(rep, week, "verdict", T.VERDICT, tone, V)
-        opener = self._bt_variant(rep, week, "opener", list(rep.openers)) if rng.random() < 0.55 else None
-        closer = self._bt_variant(rep, week, "closer", list(rep.closers)) if rng.random() < 0.65 else None
-        tic = self._bt_variant(rep, week, "tic", list(rep.tics)) if rng.random() < 0.45 else None
+        opener = self._bt_variant(rep, week, "opener", list(rep.openers), V) if rng.random() < 0.55 else None
+        closer = self._bt_variant(rep, week, "closer", list(rep.closers), V) if rng.random() < 0.65 else None
+        tic = self._bt_variant(rep, week, "tic", list(rep.tics), V) if rng.random() < 0.45 else None
         paras = self._bt_structure(structure, rep, rng, V, vv, tone, week, core, margin_line, flines, jabs, verdict, opener, closer, tic, grade, F)
         protect = self.protected_rx()
         body = []
         for p in paras:
-            p = polish(" ".join(p.split()), protect)
+            p = _polish(" ".join(p.split()), protect)
             body.append(_cap(p) if not (protect is not None and protect.match(p, 0)) else p)
         # headline
         head_kinds = [HEAD_KEY.get(k, k) for k in ([mkind] if mkind else []) + kinds]
@@ -450,7 +567,7 @@ class BeatsTeam(Beats3):
             headline = fill(self._bt_variant(rep, week, f"head:{k}", self._bt_pool(pool, tone)), title(hvals))
         else:
             headline = fill(self._bt_variant(rep, week, "head", T.HEAD[tone]), title(V))
-        headline = polish(headline, protect)
+        headline = _polish(headline, protect)
         result_word = {"W": "won", "L": "lost", "T": "tied"}[tone]
         dek = f"{wl[:1].upper() + wl[1:]}: {o} {result_word} {fmt(F['mine'])}-{fmt(F['theirs'])} against {opp} · {V['t']} beat report"
         packet = self._bt_packet(F, vv, kinds, jabs, grade, structure, rep, rid)
@@ -471,17 +588,17 @@ class BeatsTeam(Beats3):
             p4 = " ".join(x for x in (pad(j, 1), verdict, tail) if x)
             return [head, p2, p3, p4]
         if structure == "grade":
-            intro = fill(self._bt_variant(rep, week, "grade_intro", T.GRADE_INTRO), V)
-            case = fill(self._bt_variant(rep, week, "grade_case", T.GRADE_CASE), V)
+            intro = fill(self._bt_variant(rep, week, "grade_intro", T.GRADE_INTRO, V), V)
+            case = fill(self._bt_variant(rep, week, "grade_case", T.GRADE_CASE, V), V)
             hw_key = next((HW_KEY.get(k, k) for k in fk if HW_KEY.get(k, k) in T.HOMEWORK), "default")
-            hw = fill(self._bt_variant(rep, week, f"hw:{hw_key}", T.HOMEWORK[hw_key]), V)
+            hw = fill(self._bt_variant(rep, week, f"hw:{hw_key}", T.HOMEWORK[hw_key], V), V)
             return [" ".join(x for x in (intro, opener, core, margin_line) if x),
                     " ".join(x for x in [case] + f[:3] + [tic] if x),
                     " ".join(x for x in (pad(j, 0), verdict) if x),
                     " ".join(x for x in (hw, tail) if x)]
         if structure == "notebook":
             lab = self._bt_variant(rep, week, "note_label", T.NOTE_LABEL)
-            intro = fill(self._bt_variant(rep, week, "note_intro", T.NOTE_INTRO), V)
+            intro = fill(self._bt_variant(rep, week, "note_intro", T.NOTE_INTRO, V), V)
             notes = [f"{fill(lab, {'i': str(i)})} {txt}" for i, txt in enumerate(f[:3], 1)]
             last = f"{fill(lab, {'i': str(len(notes) + 1)})} {pad(j, 0)}" if pad(j, 0) else None
             paras = [" ".join(x for x in (intro, opener, core, margin_line) if x)] + notes + [x for x in (last,) if x]
@@ -491,16 +608,16 @@ class BeatsTeam(Beats3):
             qs = []
             for k, t in flines:
                 if t and k in T.QUESTIONS:
-                    qs.append(fill(self._bt_variant(rep, week, f"q:{k}", T.QUESTIONS[k]), vv[k]))
+                    qs.append(fill(self._bt_variant(rep, week, f"q:{k}", T.QUESTIONS[k], vv[k]), vv[k]))
             while len(qs) < 3:
-                qs.append(fill(self._bt_variant(rep, week, "q:default", T.Q_DEFAULT), V))
-            intro = fill(self._bt_variant(rep, week, "q_intro", T.Q_INTRO), V)
-            outro = self._bt_variant(rep, week, "q_outro", T.Q_OUTRO)
+                qs.append(fill(self._bt_variant(rep, week, "q:default", T.Q_DEFAULT, V), V))
+            intro = fill(self._bt_variant(rep, week, "q_intro", T.Q_INTRO, V), V)
+            outro = self._bt_variant(rep, week, "q_outro", T.Q_OUTRO, V)
             return [head, " ".join(x for x in [intro] + qs[:3] + [tic] if x),
                     " ".join(x for x in (pad(f, 0), pad(j, 0)) if x),
                     " ".join(x for x in (verdict, outro, tail) if x)]
         # ledger
-        intro = fill(self._bt_variant(rep, week, "ledger_intro", T.LEDGER_INTRO), V)
+        intro = fill(self._bt_variant(rep, week, "ledger_intro", T.LEDGER_INTRO, V), V)
         lab = lambda k, opts: self._bt_variant(rep, week, k, opts)   # noqa: E731
         lines = [f"{lab('l_score', ['Score', 'Final', 'Result'])}: {V['mine']}-{V['theirs']}.",
                  lab("l_rank", [f"Scoring rank this week: {V['wr_ord']} of {V['n']}.", f"Week rank: {V['wr_ord']} of {V['n']}.", f"Ranked {V['wr_ord']} of {V['n']} in scoring."]),
@@ -522,7 +639,7 @@ class BeatsTeam(Beats3):
                            "Use only these facts; add personal jabs from `profile`. No slurs, nothing about health or family tragedy.",
             "result": {"result": F["res"], "score": fmt(F["mine"]), "opponent": self.name(F["opp"]), "opponent_score": fmt(F["theirs"]),
                        "margin": fmt(F["margin"]), "week_scoring_rank": f"{F['wr']} of {F['n_week']}", "league_week_average": fmt(F["lavg"]),
-                       "bench_points_left": fmt(F["left"]), "playoff": F["playoff"]},
+                       "bench_points_left": fmt(F["left"]), "playoff": bool(F["alive"]), "consolation": bool(F["consol"])},
             "notable": [{"kind": k} for k in kinds],
             "profile": {k: prof.get(k) for k in ("nickname", "traits", "hometown", "catchphrase") if prof.get(k)},
             "grade": grade, "structure": structure,
@@ -555,6 +672,7 @@ class BeatsTeam(Beats3):
         last = self.ctx["last_completed"]
         for week in sorted(w for w in self.games_by_week if w <= last):
             self._bt_week_used = {u for u in self._bt_week_used if u[0] == week}
+            self._bt_week_sent = set()
             for g in sorted(self.games_by_week[week], key=lambda x: (x["a"], x["b"])):
                 if g["a"] not in self.teams or g["b"] not in self.teams:
                     continue

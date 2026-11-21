@@ -114,6 +114,21 @@ FACTS = {
             "The loss has a footnote: {bench_name} ({bench_pos}), {bench_pts}, bench. {o} wrote that footnote.",
         ],
     },
+    "bench_nr": {   # a bench player in the best legal lineup, with the starter he should have replaced
+        "W": [
+            "{bench_name} ({bench_pos}) scored {bench_pts} on {o}'s bench while {rep_name} ({rep_pos}) started and scored {rep_pts}. The team won anyway, which {o} will call vindication.",
+            "{o} started {rep_name} ({rep_pos}) for {rep_pts} and benched {bench_name} ({bench_pos}), who scored {bench_pts}. A win covers a lot of start-sit sins.",
+            "The slot that went to {rep_name} ({rep_pos}), {rep_pts}, was available to {bench_name} ({bench_pos}), {bench_pts}. {o} won and will not be revisiting the choice.",
+            "In a winning week, {o} chose {rep_name} ({rep_pos}) over {bench_name} ({bench_pos}) and got {rep_pts} instead of {bench_pts}. A win is a good place to hide that.",
+        ],
+        "L": [
+            "{o} started {rep_name} ({rep_pos}), who scored {rep_pts}, and left {bench_name} ({bench_pos}) on the bench for {bench_pts}. That is a decision, and a loss followed it.",
+            "{bench_name} ({bench_pos}) put up {bench_pts} on the bench, in a slot {rep_name} ({rep_pos}) filled for {rep_pts}. {o} picked the wrong one.",
+            "The start-sit that mattered: {rep_name} ({rep_pos}), {rep_pts}, in the lineup; {bench_name} ({bench_pos}), {bench_pts}, on the bench. The loss has {o}'s signature on it.",
+            "{o} lost with {bench_name} ({bench_pos}) holding {bench_pts} on the bench and {rep_name} ({rep_pos}) taking the slot for {rep_pts}. Whose idea was that?",
+            "Swap {rep_name} ({rep_pos}), {rep_pts}, for {bench_name} ({bench_pos}), {bench_pts}, and the week reads differently. {o} did not swap.",
+        ],
+    },
     "bench_gt": {
         "L": [
             "The {left} left on the bench is more than the {margin}-point margin, which turns the loss from a fate into a decision.",
@@ -330,7 +345,7 @@ FACTS = {
     },
     "trade_lead": {
         "A": [
-            "{o} traded with {partner} and, so far, is ahead: {got} has produced {my_pts} against {their_pts} for {gave}. Note the phrase so far.",
+            "{o} traded with {partner} and, so far, is ahead: {got} produced {my_pts} against {their_pts} for {gave}. Note the phrase so far.",
             "Early returns on the {partner} trade favor {o}, {split}. It is good news and probably an accident.",
             "{o}'s side of the {partner} trade is ahead, {split}. Enjoy it. The sample is only as big as it is.",
         ],
@@ -339,7 +354,7 @@ FACTS = {
         "A": [
             "{o}'s side of the trade with {partner} is behind, {split}. That is what is known in the business as a bad trade.",
             "Early returns on the {partner} trade: {my_pts} for {o}, {their_pts} for {partner}. The owner made the deal and now owns the number.",
-            "Getting {got} for {gave} has returned {my_pts} to {o}; {gave} has returned {their_pts} to {partner}. {o} lost this one on the merits.",
+            "Getting {got} for {gave} returned {my_pts} to {o}; {gave} returned {their_pts} to {partner}. {o} lost this one on the merits.",
         ],
     },
     "waiver_bid": {
@@ -436,6 +451,16 @@ FACTS = {
             "{o} averages {avg} a week against a league average of {lavg_s}. That is {diff_s} short, and the shortfall begins at the front office.",
             "{avg} a week is {diff_s} below the league's {lavg_s}. The team has been below average for long enough that it is the plan.",
             "{o}'s team scores {avg} a week, {diff_s} below the {lavg_s} league average. This is not variance. This is a profile.",
+        ],
+    },
+    "consol": {   # a game in the consolation bracket: never claims the team is in the playoffs
+        "A": [
+            "{o} finished the regular season {rec}, {rank_ord}. The title is not on the line in {wl}, which is a bad setting for a lineup that was already not on the line.",
+            "This was a consolation game, nothing riding on it but pride and a draft slot, and {o}'s lineup treated it with the seriousness it deserved.",
+            "A {rec} record and a {rank_ord}-place finish put {o} here, in a game that decides nothing. It is the right game for this owner.",
+            "Nothing in {wl} counts toward a title. {o} spent the week finding out whether that is also the lineup's philosophy.",
+            "{o} is {rec} and {rank_ord} on the year, and the season's last games are being played for position. The beat is not sure {o} knows the difference.",
+            "There is no title in {wl} for {o}, and there is no excuse for the lineup either.",
         ],
     },
     "finish": {
@@ -571,6 +596,8 @@ Q_DEFAULT = ["What, exactly, is the plan?", "Who is running this team?", "Is thi
 QUESTIONS = {
     "bench": ["Why were {left} left on the bench?", "What did the bench do to deserve {left} of points left unused?"],
     "bench_n": ["Why was {bench_name} ({bench_pos}) on the bench for {bench_pts}?", "Who made the seating chart that put {bench_name} on the bench?"],
+    "bench_nr": ["Why did {rep_name} ({rep_pos}) start over {bench_name} ({bench_pos})?", "What did {o} see in {rep_name} ({rep_pos}) that {bench_name} ({bench_pos}) was missing?"],
+    "consol": ["Does {o} even know which bracket this is?", "What is the plan for {wl}, other than a better draft slot?"],
     "bench_gt": ["Why did {left} sit on the bench in a {margin}-point loss?", "With {left} on the bench and a {margin}-point margin, whose fault is it?"],
     "dud": ["Why was {dud} ({dpos}) in the lineup for {dpts}?", "What did {o} see in {dud} ({dpos}) that the {dpts} says was not there?"],
     "shotgun": ["How does one lineup end up costing {nsg}?", "Is there any version of the shotgun rule that {o} has not already tested this week?"],

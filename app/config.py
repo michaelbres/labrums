@@ -115,7 +115,14 @@ def normalize_beat(raw: Any) -> dict[str, dict[str, str]]:
         if not key or not isinstance(fields, dict):
             log.warning("config: reporters.beat.%s must be a mapping with a name; ignored", owner)
             continue
-        clean = {k: " ".join(str(v).split()) for k, v in fields.items() if k in REPORTER_FIELDS and v is not None and str(v).strip()}
+        clean = {}
+        for k, v in fields.items():
+            if k not in REPORTER_FIELDS:
+                continue
+            if isinstance(v, str) and v.strip():   # only real text: a number or a list would render as "123" / "['a', 'b']"
+                clean[k] = " ".join(v.split())
+            elif v is not None:
+                log.warning("config: reporters.beat.%s.%s must be a non-empty string; ignored", owner, k)
         if not clean:
             log.warning("config: reporters.beat.%s has no name, outlet or bio; ignored", owner)
             continue
