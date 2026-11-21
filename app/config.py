@@ -79,7 +79,11 @@ def load_config(path: Path | None = None) -> dict[str, Any]:
         r["owners"] = [str(o) for o in (r.get("owners") or []) if str(o).strip()]
         rules.append(r)
     cfg["special_rules"] = rules
+    cfg_raw_reporters = cfg.get("reporters")
     cfg["reporters"] = {"overrides": normalize_overrides(cfg.get("reporters"))}
+    beat = normalize_beat((cfg_raw_reporters.get("beat") if isinstance(cfg_raw_reporters, dict) else None))
+    if beat:
+        cfg["reporters"]["beat"] = beat
     cfg["narratives"] = normalize_narratives(cfg.get("narratives"))
     return cfg
 
@@ -95,6 +99,27 @@ def normalize_overrides(raw: Any) -> dict[str, dict[str, str]]:
         clean = {k: " ".join(str(v).split()) for k, v in fields.items() if k in REPORTER_FIELDS and v is not None and str(v).strip()}
         if clean:
             out[str(vid)] = clean
+    return out
+
+
+def normalize_beat(raw: Any) -> dict[str, dict[str, str]]:
+    """reporters.beat -> {owner key: {name|outlet|bio: non-empty str}}; entries that cannot work are dropped with a warning."""
+    out: dict[str, dict[str, str]] = {}
+    if raw is None:
+        return out
+    if not isinstance(raw, dict):
+        log.warning("config: reporters.beat must be a mapping of owner -> {name, outlet, bio}; ignored")
+        return out
+    for owner, fields in raw.items():
+        key = " ".join(str(owner).split())
+        if not key or not isinstance(fields, dict):
+            log.warning("config: reporters.beat.%s must be a mapping with a name; ignored", owner)
+            continue
+        clean = {k: " ".join(str(v).split()) for k, v in fields.items() if k in REPORTER_FIELDS and v is not None and str(v).strip()}
+        if not clean:
+            log.warning("config: reporters.beat.%s has no name, outlet or bio; ignored", owner)
+            continue
+        out[key] = clean
     return out
 
 
