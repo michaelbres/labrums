@@ -290,8 +290,8 @@ def pick_owners(traded: list[dict], roster_ids: list[int], seasons: list[str], r
 
 def projected_slot(rnd: int, original: int, order_worst_first: list[int], n: int, is_next: bool,
                    snake: bool = False, expected_picks: dict[int, float] | None = None) -> float:
-    """Overall slot: the next draft follows the simulated expected pick (else the worst-first order); later drafts
-    get the middle of the round."""
+    """Overall slot: the next draft follows the simulated expected pick (league rule: max PF, lowest first; else the
+    worst-first standings order); later drafts get the middle of the round."""
     if is_next and expected_picks and original in expected_picks:
         pos = expected_picks[original]
     else:
@@ -333,7 +333,7 @@ def build_power_rankings(rosters: dict[int, dict], players: dict[str, dict], sta
     fut = future_seasons(drafts, traded, current_season)
     order = [r for r in reversed([r for r in standings if r in rosters])] if standings else []
     order = order + [r for r in rids if r not in order]   # worst first; unlisted teams last
-    if expected_picks:   # the simulated draft order (league rule: missed playoffs by max PF, then playoff exits)
+    if expected_picks:   # the simulated draft order (league rule: every team by season max PF, lowest first)
         order = sorted(rids, key=lambda r: (expected_picks.get(r, n + 1), order.index(r)))
     owners = pick_owners(traded, rids, fut, rounds)
 

@@ -256,17 +256,6 @@ def expected_picks(draft_order: dict | None) -> dict[int, float] | None:
     return {int(r["roster_id"]): float(r["expected_pick"]) for r in rows} if rows else None
 
 
-def load_winners_bracket(client, ctx: dict) -> list[dict]:
-    """The winners bracket once the regular season is over (before that it is only placeholders). Failure -> []."""
-    if ctx["last_completed"] < ctx["regular_weeks"][-1]:
-        return []
-    try:
-        return list(client.winners_bracket(ctx["league_id"]) or [])
-    except Exception as e:
-        log.warning("winners bracket for %s failed: %s", ctx["league_id"], e)
-        return []
-
-
 def load_power(client, cfg: dict, ctx: dict, standings: list[int], season_infos: list[dict] | None = None,
                draft_order: dict | None = None) -> dict:
     """Power rankings for the season in `ctx`. Current stats and traded picks are essential (SleeperError if they

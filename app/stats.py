@@ -200,8 +200,9 @@ def compute(ctx: dict) -> dict[str, Any]:
         # Sleeper's own season "potential points" (roster settings.ppts, undocumented field) wins over our greedy calc.
         if t.get("ppts"):
             opt_total, act_for_opt = float(t["ppts"]), pf
-        # Max PF for the draft-order rule: Sleeper's potential points when present, else our own optimal-lineup sum
-        # (weeks without per-player points count their actual score).
+        # Max PF for the draft-order rule: Sleeper's potential points (verified: the regular-season sum of each week's
+        # best lineup) when present, else our own optimal-lineup sum over the regular season (weeks without
+        # per-player points count their actual score).
         max_pf_calc = sum(optimal[rid].get(w, scores[rid][w]) for w in scores[rid] if w in reg_weeks)
         top_pid = max(player_points[rid], key=player_points[rid].get) if player_points[rid] else None
         team_stats[rid] = {

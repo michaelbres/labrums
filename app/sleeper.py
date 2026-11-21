@@ -209,9 +209,6 @@ class SleeperClient:
         return self.get(f"stats/nfl/regular/{season}", STATS_FINAL_TTL if final else STATS_TTL, transform=trim,
                         cache_key=f"stats/nfl/regular/{season}/{STATS_CACHE_VERSION}") or {}
 
-    def winners_bracket(self, league_id: str) -> list[dict]:
-        return self.get(f"league/{league_id}/winners_bracket", LIVE_TTL) or []
-
     def players(self) -> dict[str, dict]:
         """All NFL players, trimmed to the fields we use (the raw blob is ~5MB)."""
         def trim(raw: dict) -> dict:

@@ -18,7 +18,7 @@ from . import articles, draft_order, playoffs, shotguns, stats
 from .newsroom import calendar as release_calendar, desk
 from .config import DATA_DIR, ROOT, load_config, on_vercel, redis_settings
 from .db import Store, manual_to_items
-from .loader import LeagueNotFound, discover_seasons, load_network, load_power, load_season, load_winners_bracket
+from .loader import LeagueNotFound, discover_seasons, load_network, load_power, load_season
 from .redis_client import RedisError, UpstashRedis
 from .sleeper import SleeperClient, SleeperError
 from .storage import RedisCache, RedisStore
@@ -104,8 +104,7 @@ class State:
         st = stats.compute(ctx)
         cap: dict = {}
         po = playoffs.simulate(ctx, st, capture=cap)
-        bracket = load_winners_bracket(self.client, ctx)
-        dro = draft_order.build_block(ctx, st, po, cap, bracket)
+        dro = draft_order.build_block(ctx, st, po, cap)
         items = shotguns.detect(ctx, st)
         arts = articles.generate(ctx, st, po, items)
         model = {"ctx": ctx, "stats": st, "playoffs": po, "draft_order": dro, "shotgun_items": items, "articles": arts,

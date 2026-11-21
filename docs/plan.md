@@ -1,7 +1,7 @@
 # Plan / status board
 
 ## Right now
-- Projected rookie draft order shipped (2026-11-21): league rule (missed playoffs by max PF, then playoff exits), Today + Simulated views, draft board with pick owners on #/power, feeds pick valuation. Needs refuter pass.
+- Projected rookie draft order shipped (2026-11-21): league rule corrected to plain season max PF ascending for all teams (verified against the real 2024-2026 drafts), Today + Simulated views, draft board with pick owners on #/power, feeds pick valuation. Needs refuter pass.
 - Team beat reporters shipped (2026-11-21): 10 beat reporters, weekly `beat` team report per team, harsh on the owner; Laurel Hanrahan covers Patrick. Needs refuter pass. Owner can rename the 9 placeholders in config.yaml `reporters.beat`.
 - Added: power rankings on home (1-100 rating), Luck card + tiles, reporter name overrides (Ricky Sepe, Evan Klein, Evan Glas, Doomfist, Jon Fascinelli) and config-driven narratives (Evan Klein = Patrick hater). Catchphrases removed; quotes are situation-only until the iMessage export arrives.
 - Newsroom v2 shipped (50 reporters, 14 families, grounded facts, weekly roundup/preview, as-of-week snapshots); editorial desk + daily release calendar shipped; fix rounds 1-2 done (feud incidents, ordinals, trade timing, grammar, catchphrase share, game win probability in previews). Refuter7: all numbers verified, dates match calendar. 294 tests.

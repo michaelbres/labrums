@@ -291,6 +291,9 @@ FACTS = {
             "That ends a {k}-game winning streak for {o}, one the owner treated as a skill.",
             "The {k}-game winning streak is over. {o} will blame the loss on the matchup; the lineup was due.",
             "A {k}-game winning streak ended in {wl}. It lasted exactly as long as the owner's luck.",
+            "The {k}-game winning streak ends for {o}, and the lineup was never as good as the streak suggested.",
+            "{o}'s {k}-game winning streak is over. It was always going to be, with that lineup.",
+            "A {k}-game winning streak ended with a loss, and {o} had the lineup page open the whole time.",
         ],
     },
     "snap": {
@@ -298,6 +301,9 @@ FACTS = {
             "{o} snapped a {k}-game losing streak, which is the minimum the situation required.",
             "The {k}-game losing streak is over. {o} is expected to take credit.",
             "A win ends a {k}-game skid for {o}. It is the sort of progress that gets a press release in some leagues.",
+            "{o} ends a {k}-game losing streak. The streak ended because the schedule said so.",
+            "A {k}-game skid is over for {o}. The beat is told it was the plan.",
+            "{o} finally wins after {k} straight losses, which sets the bar about where it was.",
         ],
     },
     "luck_pos": {
@@ -305,6 +311,9 @@ FACTS = {
             "By the all-play math, {o} should be {exp_rec}. The record says {rec}. Someone is getting a lot of help from the schedule.",
             "{o}'s {rec} is flattered by luck: the all-play numbers put the team nearer {exp_rec}.",
             "The record is {rec}; the all-play record says {exp_rec}. The difference is the schedule's and not the owner's.",
+            "{o} is {rec} on the strength of the schedule; the all-play record says {exp_rec}. The owner will call it skill.",
+            "The all-play math prefers {exp_rec} to {o}'s {rec}. The schedule has been generous and nobody has thanked it.",
+            "At {rec}, {o} is outrunning the all-play record of {exp_rec}. Luck does not keep a streak forever.",
         ],
     },
     "luck_neg": {
@@ -312,6 +321,9 @@ FACTS = {
             "Unlucky, sure: the all-play record says {o} should be {exp_rec}, not {rec}. But a good team beats the schedule, not just the numbers.",
             "{o} is {rec} where the all-play math says {exp_rec}. Bad luck explains some of it. Lineup decisions explain what bad luck does not.",
             "The all-play numbers say {exp_rec}. The record says {rec}. {o} will blame the schedule. The schedule is only part of it.",
+            "{o}'s {rec} is worse than the all-play record of {exp_rec}. Bad luck is real. So are the start-sit decisions behind it.",
+            "With an all-play record of {exp_rec}, {o} deserves better than {rec}. The owner will say so. The owner is partly right.",
+            "{rec} on the board, {exp_rec} by all-play. {o} was unlucky, and also the one setting the lineup.",
         ],
     },
     "subpar": {
@@ -319,6 +331,9 @@ FACTS = {
             "{o} has landed below the league median in {c} of {m} weeks. A record can hide that. The scoring cannot.",
             "In {c} of {m} weeks, more than half the league outscored {o}. That is not a bad stretch, that is the profile.",
             "Below the median in {c} of {m} weeks: the owner's results are better than the owner's play, and that gap is luck.",
+            "{c} of {m} weeks below the league median is {o}'s scoring profile. The record is hiding it and the scoring is not.",
+            "In {c} of the last {m} weeks, {o} scored less than half the league. The roster is not the common factor.",
+            "Below the median {c} times in {m} weeks: {o}'s lineup keeps finding the lower half.",
         ],
     },
     "bottom": {
@@ -326,6 +341,9 @@ FACTS = {
             "{o} has had the league's lowest score of the week {k_times} this season. Some owners hold records. This owner holds a floor.",
             "The league's lowest score of the week has belonged to {o} {k_times} so far. The bottom has a regular.",
             "{k_times_cap} this season, {o} has posted the week's lowest score. It is no longer a fluke.",
+            "{o} owns the league's lowest score of the week {k_times} this season. The floor has a tenant.",
+            "Dead last in scoring {k_times} this year, {o} is the week's bottom line. It is not a statistic anyone is envious of.",
+            "The week's worst score has been {o}'s {k_times}. That is a trend with a name on it.",
         ],
     },
     "top": {
@@ -333,6 +351,9 @@ FACTS = {
             "{o} has had the league's high score {k_times} this season. It is the one statistic that makes the rest of the record harder to explain.",
             "The week's high score has been {o}'s {k_times}, which is evidence of a good roster and not necessarily a good owner.",
             "High score of the week, {k_times}. A roster that talented should be winning more arguments than the owner is.",
+            "{o} has posted the week's high score {k_times} this season. A roster that good makes the lineup mistakes harder to explain.",
+            "High score of the week for {o}, {k_times}. The talent is on the roster. Whether the owner deserves it is another matter.",
+            "Top score in the league {k_times} for {o}. Credit the players; the owner is just the signature.",
         ],
     },
     "trade_pending": {
@@ -378,6 +399,9 @@ FACTS = {
             "{o} made {n_adds} adds this week, led by {player} ({pos}). That is a lot of motion, and the standings are the measure of it.",
             "{n_adds_cap} waiver adds from {o} in {wl}, headlined by {player} ({pos}). Activity is not the same as improvement.",
             "{o} worked the wire {n_adds} times this week, with {player} ({pos}) the headliner. The roster is a revolving door and the owner is the one pushing it.",
+            "{n_adds_cap} adds for {o} this week, with {player} ({pos}) on top. The wire is not a plan.",
+            "{o} picked up {n_adds} players in {wl}, {player} ({pos}) among them. A busy roster is not the same as a good one.",
+            "With {n_adds} adds this week, {player} ({pos}) the headliner, {o} is treating the roster as a to-do list.",
         ],
     },
     "waiver_low": {
@@ -444,6 +468,9 @@ FACTS = {
             "{o} averages {avg} a week, {diff_s} above the league's {lavg_s}. The roster is strong; ask why that has not been enough to dominate.",
             "{avg} a week for {o}, {diff_s} better than the league's {lavg_s}. A roster that good makes the owner's mistakes more expensive, not less.",
             "{o}'s team averages {avg}, against a league average of {lavg_s}. Credit the roster; the owner is only on the invoice.",
+            "With {avg} a week against the league's {lavg_s}, {o} has the roster to win more. The question is the owner.",
+            "{o} scores {avg} a week, {diff_s} above the {lavg_s} league average. A good roster covers a lot of lineup mistakes.",
+            "The team averages {avg}, {diff_s} over the league's {lavg_s}. Whatever {o} is doing, the players are making it work.",
         ],
     },
     "avg_dn": {
@@ -451,6 +478,9 @@ FACTS = {
             "{o} averages {avg} a week against a league average of {lavg_s}. That is {diff_s} short, and the shortfall begins at the front office.",
             "{avg} a week is {diff_s} below the league's {lavg_s}. The team has been below average for long enough that it is the plan.",
             "{o}'s team scores {avg} a week, {diff_s} below the {lavg_s} league average. This is not variance. This is a profile.",
+            "At {avg} a week against a league average of {lavg_s}, {o}'s team is {diff_s} short. The gap is not a surprise.",
+            "{o} averages {avg} a week in a league that averages {lavg_s}. The shortfall is {diff_s} and it is not shrinking by itself.",
+            "{diff_s} below the league's {lavg_s} a week, at {avg}: {o}'s team is built to lose a little every Sunday.",
         ],
     },
     "consol": {   # a game in the consolation bracket: never claims the team is in the playoffs
@@ -565,12 +595,32 @@ GRADE_INTRO = [
     "The beat grades {o}'s {wl}: {grade}.",
     "This week's grade for {o}: {grade}.",
     "Grade for {o}'s management of {wl}: {grade}.",
+    "{o}'s mark for {wl}: {grade}.",
+    "Marking {o}'s {wl}, the beat arrives at a {grade}.",
+    "{wl} report card, {o}: {grade}.",
+    "The grade on {o}'s {wl} is a {grade}.",
+    "After {wl}, the beat gives {o} a {grade}.",
+    "Letter grade for {o}, {wl}: {grade}.",
+    "The beat's {wl} grade for {o}: {grade}.",
+    "{o} earns a {grade} for {wl}.",
+    "Assessment of {o}'s {wl}: {grade}.",
+    "Final mark, {wl}, {o}: {grade}.",
 ]
 GRADE_CASE = [
     "The case for the grade:",
     "How the grade was reached:",
     "Reasons for the {grade}:",
     "The comments on the report card:",
+    "What the grade reflects:",
+    "The grader's notes:",
+    "Where the points were lost:",
+    "The marks, in order:",
+    "Teacher's comments on {o}:",
+    "The reasoning behind the {grade}:",
+    "Written on the report card:",
+    "A few words in support of the {grade}:",
+    "The grading rubric, such as it is:",
+    "Why this is a {grade}:",
 ]
 HOMEWORK = {
     "bench": ["Homework for {o}: start the players who score the points.", "Homework for {o}: read the bench before the games, not after.", "Assignment for {o}: the best lineup is the one with the points in it."],
@@ -583,16 +633,37 @@ HOMEWORK = {
     "eff": ["Homework for {o}: raise the lineup efficiency above the floor.", "Assignment for {o}: stop leaving points on the sideline.", "Homework for {o}: a lineup that uses the whole roster, not part of it."],
     "default": ["Homework for {o}: anything.", "Assignment for {o}: a plan.", "Homework for {o}: show the work."],
 }
-LEDGER_INTRO = ["{column}, {wl}: the numbers on {o}.", "From {column}, {wl}:", "The ledger on {o} for {wl}:"]
-NOTE_LABEL = ["Note {i}:", "Item {i}:", "{i}."]
-NOTE_INTRO = ["{column}, {wl}: notes on {o} and the team.", "Notes on {o}'s team, {wl}.", "{column}: {wl}, one note at a time."]
-Q_INTRO = ["Three questions for {o} after {wl}.", "Questions the beat would like answered by {o}.", "{wl} leaves {o} with questions to answer."]
+LEDGER_INTRO = ["{column}, {wl}: the numbers on {o}.", "From {column}, {wl}:", "The ledger on {o} for {wl}:",
+                "{column}: the figures on {o}, {wl}.", "The books on {o}, {wl}:", "{wl}, by the numbers, for {o}:", "{column}: {o}'s {wl} in figures.",
+                "Entries for {o}, {wl}:", "{column} opens the books on {o}, {wl}:", "Audit of {o}'s {wl}:", "The {wl} accounts for {o}:",
+                "{column}: {o}, itemized, {wl}."]
+NOTE_LABEL = ["Note {i}:", "Item {i}:", "Point {i}:", "Entry {i}:"]
+NOTE_INTRO = ["{column}, {wl}: notes on {o} and the team.", "Notes on {o}'s team, {wl}.", "{column}: {wl}, one note at a time.",
+              "From the notebook, {wl}: {o}.", "{column}: scribbles on {o}, {wl}.", "Jotted down during {wl}, about {o}:", "{column}: {wl}, as written in the margins.",
+              "The notebook on {o}, {wl}.", "{column}: what the beat wrote down about {o}, {wl}.", "Field notes on {o}, {wl}.",
+              "{column} flips to {o}'s page, {wl}.", "Notes taken while watching {o}'s {wl}."]
+Q_INTRO = ["Three questions for {o} after {wl}.", "Questions the beat would like answered by {o}.", "{wl} leaves {o} with questions to answer.",
+           "The beat has questions for {o}, and {wl} supplied them.", "Before {o} moves on from {wl}, a few questions.", "Questions for {o}, courtesy of {wl}.",
+           "{o} has some explaining to do about {wl}, starting here.", "After {wl}, the beat is asking {o}:", "A short list of questions about {o}'s {wl}.",
+           "{wl} raised questions. {o} has the answers, allegedly.", "The beat would like a word with {o}. Three, in fact, about {wl}.", "{o}, about {wl}: please address the following."]
 Q_OUTRO = [
     "Answers are expected by next week's kickoff. They are not expected to be good.",
     "The beat will wait by the group chat.",
     "Responses may be sent to the lineup page, which is where the problem started.",
+    "Please reply in writing; the lineup has not been explaining itself.",
+    "The beat will take the answers in any form, including a better lineup.",
+    "No comment has been the owner's standard reply, and it has not helped.",
+    "The line for questions is open. It is the only open line on this team.",
+    "A response is requested before the next waiver run.",
+    "The beat asked politely. The beat will not ask twice.",
+    "Replies will be read, which is more than can be said for the lineup page.",
+    "Submit answers to the beat. Submit the lineup on time.",
+    "The questions stand until someone answers them or someone improves.",
 ]
-Q_DEFAULT = ["What, exactly, is the plan?", "Who is running this team?", "Is this the version of the lineup {o} meant to set?"]
+Q_DEFAULT = ["What, exactly, is the plan?", "Who is running this team?", "Is this the version of the lineup {o} meant to set?",
+             "Did {o} look at the lineup page before the games started?", "Who approved this lineup?", "Is there a version of this where {o} meant to do that?",
+             "What would {o} change, if anything, and would it matter?", "Was any of this deliberate?", "How does {o} explain {mine} points?",
+             "Who, besides {o}, is responsible for this lineup?", "Does {o} intend to improve, or merely to explain?", "At what point does the plan become visible?"]
 QUESTIONS = {
     "bench": ["Why were {left} left on the bench?", "What did the bench do to deserve {left} of points left unused?"],
     "bench_n": ["Why was {bench_name} ({bench_pos}) on the bench for {bench_pts}?", "Who made the seating chart that put {bench_name} on the bench?"],

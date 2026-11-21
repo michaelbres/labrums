@@ -301,9 +301,6 @@ class DemoClient:
         d = self._l(league_id)
         return d["transactions"].get(week, []) if d else []
 
-    def winners_bracket(self, league_id: str):
-        return []
-
     def drafts(self, league_id: str):
         d = self._l(league_id)
         return [{"draft_id": f"draft-{league_id}", "league_id": league_id, "status": "complete",

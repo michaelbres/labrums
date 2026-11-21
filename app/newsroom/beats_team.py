@@ -104,14 +104,14 @@ class BeatsTeam(Beats3):
         wide = [v for v in fresh + sorted((v for v in order if v in hist), key=hist.index) if not hist or v != hist[-1]] or order
 
         def fresh_sent(v: str) -> bool:
-            return V is None or not any(k in self._bt_week_sent for k in _sent_keys(fill(v, V)))
+            return V is None or not any(k in self._bt_week_sent for k in _sent_keys(fill(v, V) if V else v))
         pick = (next((v for v in cands if (week, key, v) not in self._bt_week_used and fresh_sent(v)), None)
                 or next((v for v in wide if (week, key, v) not in self._bt_week_used and fresh_sent(v)), None)
                 or next((v for v in wide if fresh_sent(v)), None)
                 or next((v for v in cands if (week, key, v) not in self._bt_week_used), cands[0]))
         self._bt_week_used.add((week, key, pick))
         if V is not None:
-            self._bt_week_sent.update(_sent_keys(fill(pick, V)))
+            self._bt_week_sent.update(_sent_keys(fill(pick, V) if V else pick))
         if pick in hist:
             hist.remove(pick)
         hist.append(pick)
@@ -618,14 +618,16 @@ class BeatsTeam(Beats3):
                     " ".join(x for x in (verdict, outro, tail) if x)]
         # ledger
         intro = fill(self._bt_variant(rep, week, "ledger_intro", T.LEDGER_INTRO, V), V)
-        lab = lambda k, opts: self._bt_variant(rep, week, k, opts)   # noqa: E731
+        lab = lambda k, opts: self._bt_variant(rep, week, k, opts, {})   # noqa: E731  (opts are filled in already; {} just turns on the repeat check)
         lines = [f"{lab('l_score', ['Score', 'Final', 'Result'])}: {V['mine']}-{V['theirs']}.",
                  lab("l_rank", [f"Scoring rank this week: {V['wr_ord']} of {V['n']}.", f"Week rank: {V['wr_ord']} of {V['n']}.", f"Ranked {V['wr_ord']} of {V['n']} in scoring."]),
-                 lab("l_bench", [f"Bench points left: {V['left_num']}.", f"Left on the bench: {V['left_num']}.", f"Unused bench points: {V['left_num']}."])]
+                 lab("l_bench", [f"Bench points left: {V['left_num']}.", f"Left on the bench: {V['left_num']}.", f"Unused bench points: {V['left_num']}.",
+                                 f"Bench points left by {V['o']}: {V['left_num']}.", f"Unused bench points, {V['o']}: {V['left_num']}."])]
         if F["snap"]:
             lines.append(f"{'Record' if not F['playoff'] else 'Regular-season record'}: {F['snap']['record']}, {ordinal(F['snap']['rank'])}.")
             if not F["playoff"] and F["snap"]["games"] >= 2:
-                lines.append(f"Streak: {F['snap']['streak']}.")
+                sk = F["snap"]["streak"]
+                lines.append(lab("l_streak", [f"Streak: {sk}.", f"Current run: {sk}.", f"Form: {sk}.", f"Streak for {V['o']}: {sk}.", f"{V['o']}'s current run: {sk}."]))
         head = " ".join(x for x in (opener, core, margin_line) if x)
         return [head, f"{intro} " + " ".join(lines), " ".join(x for x in (pad(f, 0), pad(f, 1), tic) if x),
                 " ".join(x for x in (pad(f, 2), pad(j, 0), verdict, tail) if x)]

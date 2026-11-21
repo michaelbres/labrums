@@ -14,7 +14,7 @@ import numpy as np
 
 
 def simulate(ctx: dict, st: dict, sims: int | None = None, seed: int = 42, capture: dict | None = None) -> dict[str, Any]:
-    """`capture`, if given, is filled with the simulation arrays (rids, seeds, pf, base_pf, mu, sd, seed) for draft_order."""
+    """`capture`, if given, is filled with the simulated season points (rids, pf, base_pf, sims) for draft_order."""
     cfg = ctx["config"]["playoffs"]
     sims = int(sims or cfg.get("simulations") or 5000)
     prior_games = float(cfg.get("prior_games") or 3)
@@ -149,7 +149,6 @@ def simulate(ctx: dict, st: dict, sims: int | None = None, seed: int = 42, captu
             "model": {"mu": round(float(mu[i]), 2), "sd": round(float(sd[i]), 2)},
         }
     if capture is not None:
-        capture.update(rids=rids, seeds=seeds, pf=pf, base_pf=base_pf, mu=mu, sd=sd, seed=seed, sims=sims,
-                       games_left=games_left, current_seeds=current_seeds)
+        capture.update(rids=rids, pf=pf, base_pf=base_pf, sims=sims)
     return {"sims": sims, "playoff_teams": playoff_teams, "seeding_rule": seeding_rule, "current_seeds": current_seeds, "next_week": next_week,
             "league_mu": round(league_mu, 2), "league_sd": round(league_sd, 2), "teams": out}

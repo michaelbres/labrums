@@ -295,10 +295,10 @@
     const D = state.data.draft_order;
     if (!D) return '';
     const sim = D.simulated.order;
-    const rows = sim.map((r) => `<tr><td class="num">${r.pick}</td><td>${teamCell(r.roster_id, { sub: 'record' })}</td><td class="num">${fmt(r.expected_pick, 1)}</td><td>${esc(r.why)}</td></tr>`).join('');
+    const rows = sim.map((r) => `<tr><td class="num">${r.pick}</td><td>${teamCell(r.roster_id, { sub: 'record' })}</td><td class="num">${fmt(r.expected_pick, 1)}</td><td class="num">${fmt(r.proj_max_pf, 1)}</td></tr>`).join('');
     return `<div class="card section"><div class="card-h"><h2>Projected ${esc(D.season)} rookie draft order</h2><a href="#/power">Full order and draft board →</a></div>
-      <p class="dim do-rule">Teams that miss the playoffs pick first (lowest max PF first), then playoff teams by when they lose; the champion picks last. Expected pick over the simulated seasons.</p>
-      <div class="table-wrap"><table><thead><tr><th class="num">Pick</th><th>Team</th><th class="num">Exp. pick</th><th>Most likely</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+      <p class="dim do-rule">${esc(D.rule)} Expected pick over the simulated seasons.</p>
+      <div class="table-wrap"><table><thead><tr><th class="num">Pick</th><th>Team</th><th class="num">Exp. pick</th><th class="num">Proj. max PF</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
   }
 
   function shotRow(s, editable) {
@@ -718,15 +718,15 @@
           <li><b>Replacement level.</b> The points per game of a player you could pick up for free: the ${esc(rr.QB)}th best QB, ${esc(rr.RB)}th RB, ${esc(rr.WR)}th WR and ${esc(rr.TE)}th TE in the NFL (${esc(Object.entries(d.replacement || {}).map(([k, v]) => `${k} ${v}`).join(', '))} points per game right now). The QB bar is deeper because this is a superflex league where teams stash several QBs. Only the points above that level count.</li>
           <li><b>Age.</b> The current season always counts in full. Value is multiplied by how many good seasons are left over the next ${esc(c.longevity_years)} years: later seasons are discounted by age, and each year further out counting ${esc(Math.round((c.longevity_discount || 0) * 100))}% as much as the one before. Production holds until a prime age (RB ${esc((c.prime_end || {}).RB)}, WR ${esc((c.prime_end || {}).WR)}, TE ${esc((c.prime_end || {}).TE)}, QB ${esc((c.prime_end || {}).QB)}) and fades to nothing at ${esc((c.cliff || {}).RB)} / ${esc((c.cliff || {}).WR)} / ${esc((c.cliff || {}).TE)} / ${esc((c.cliff || {}).QB)}.</li>
           <li><b>Young players.</b> Rookies and second- and third-year players who were drafted in this league are blended with what their draft slot has been worth: the fewer games they have played, the more the draft slot counts. The blend can only raise a player's value, never lower it.</li>
-          <li><b>Draft picks.</b> A pick is worth what a player taken at that slot has turned out to be worth (${esc(curveNote)}): about ${esc(cv['1'])} for the 1st overall pick, ${esc(cv['10'])} for the 10th, ${esc(cv['20'])} for the 20th and ${esc(cv['40'])} for the last pick of round 4. Next year's draft order is the simulated expected order under this league's own rule (see the draft order above): teams that miss the playoffs pick first, lowest max PF first, then playoff teams by when they are knocked out of the winners bracket, with the champion last. Later years use the middle of each round. Picks a year further away are worth ${esc(Math.round((c.pick_year_discount || 0) * 100))}% as much per year, and traded picks count for whoever owns them now.</li>
+          <li><b>Draft picks.</b> A pick is worth what a player taken at that slot has turned out to be worth (${esc(curveNote)}): about ${esc(cv['1'])} for the 1st overall pick, ${esc(cv['10'])} for the 10th, ${esc(cv['20'])} for the 20th and ${esc(cv['40'])} for the last pick of round 4. Next year's draft order is the simulated expected order under this league's own rule (see the draft order above): every team by season max PF, lowest first, whatever happens in the playoffs. Later years use the middle of each round. Picks a year further away are worth ${esc(Math.round((c.pick_year_discount || 0) * 100))}% as much per year, and traded picks count for whoever owns them now.</li>
           <li><b>Teams.</b> A team's value at a position is the sum of its rostered players' values there (taxi and reserve included); players plus picks gives the combined number. Ranks run 1 (best) to ${d.teams.length}.</li>
         </ol>
       </div>
       ${skipped}`;
   }
 
-  // ---------- projected rookie draft order (league rule: missed playoffs by max PF, then playoff exits) ----------
-  const doWhy = (r) => `${esc(r.why)}${r.why_pct != null && r.why_pct < 0.995 ? ` <span class="dim">${pct(r.why_pct)}</span>` : ''}`;
+  // ---------- projected rookie draft order (league rule: season max PF, lowest first) ----------
+  const doGap = (r) => (r.gap_to_next == null ? '—' : `${r.gap_to_next < 0 ? '−' : '+'}${fmt(Math.abs(r.gap_to_next), 1)}`);
   const doStrip = (r) => {
     const mx = Math.max(0.01, ...r.slot_odds);
     return `<span class="do-strip" role="img" aria-label="Chance of each pick, 1 to ${r.slot_odds.length}">${r.slot_odds.map((p, i) => `<i title="Pick ${i + 1}: ${pct(p)}" class="${i + 1 === r.most_likely_slot ? 'top' : ''}"><b style="height:${Math.round(100 * p / mx)}%"></b></i>`).join('')}</span>`;
@@ -736,21 +736,21 @@
     const view = sim ? D.simulated : D.today;
     const rows = view.order.map((r) => {
       const t = team(r.roster_id);
-      return `<div class="do-row ${r.pick === D.teams - D.playoff_teams ? 'do-cut' : ''}">
+      return `<div class="do-row">
         <span class="do-pick">${r.pick}</span>
         <span class="do-team">${powTeamCell(t)}</span>
-        <span class="do-pf" data-label="Max PF">${fmt(r.max_pf, 1)}</span>
-        <span class="do-why" data-label="Why">${sim ? doWhy(r) : esc(r.why)}</span>
+        <span class="do-pf" data-label="Max PF">${fmt(sim ? r.proj_max_pf : r.max_pf, 1)}</span>
+        <span class="do-gap" data-label="Gap to next">${doGap(r)}</span>
         ${sim ? `<span class="do-exp" data-label="Exp. pick">${fmt(r.expected_pick, 1)}</span><span class="do-odds" data-label="Pick odds">${doStrip(r)}</span>` : ''}
       </div>`;
     }).join('');
     const toggle = final ? '' : `<div class="chips pow-tabs" role="group" aria-label="Draft order view">
         <button type="button" class="pow-chip ${sim ? '' : 'active'}" data-do-view="today" aria-pressed="${!sim}">If the season ended today</button>
         <button type="button" class="pow-chip ${sim ? 'active' : ''}" data-do-view="sim" aria-pressed="${sim}">Simulated</button></div>`;
-    const status = final ? 'Final order.' : D.status === 'playoffs' ? 'Regular season over: non-playoff picks are locked; playoff results count as they finish.' : '';
+    const status = final ? 'Final order.' : '';
     return `<div class="card-h"><h2>Projected ${esc(D.season)} draft order</h2><small>${esc(view.basis)}</small></div>
       ${toggle}
-      <p class="dim do-rule">${esc(D.rule)} ${esc(status)} Ordered by pick; the same order repeats in every round${D.bracket === 'reseed' ? '' : ' (fixed bracket)'}.</p>
+      <p class="dim do-rule">${esc(D.rule)} ${esc(D.tiebreak)} ${esc(status)} The same order repeats in every round.</p>
       <div class="do-list ${sim ? 'is-sim' : ''}" role="table" aria-label="Projected draft order">${rows}</div>
       ${doBoardHtml(view)}`;
   }
