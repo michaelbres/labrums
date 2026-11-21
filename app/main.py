@@ -14,11 +14,11 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import articles, playoffs, shotguns, stats
+from . import articles, draft_order, playoffs, shotguns, stats
 from .newsroom import calendar as release_calendar, desk
 from .config import DATA_DIR, ROOT, load_config, on_vercel, redis_settings
 from .db import Store, manual_to_items
-from .loader import LeagueNotFound, discover_seasons, load_network, load_power, load_season
+from .loader import LeagueNotFound, discover_seasons, load_network, load_power, load_season, load_winners_bracket
 from .redis_client import RedisError, UpstashRedis
 from .sleeper import SleeperClient, SleeperError
 from .storage import RedisCache, RedisStore
@@ -102,10 +102,13 @@ class State:
         except LeagueNotFound as e:
             raise HTTPException(404, str(e)) from e
         st = stats.compute(ctx)
-        po = playoffs.simulate(ctx, st)
+        cap: dict = {}
+        po = playoffs.simulate(ctx, st, capture=cap)
+        bracket = load_winners_bracket(self.client, ctx)
+        dro = draft_order.build_block(ctx, st, po, cap, bracket)
         items = shotguns.detect(ctx, st)
         arts = articles.generate(ctx, st, po, items)
-        model = {"ctx": ctx, "stats": st, "playoffs": po, "shotgun_items": items, "articles": arts,
+        model = {"ctx": ctx, "stats": st, "playoffs": po, "draft_order": dro, "shotgun_items": items, "articles": arts,
                  "built_at": time.time(), "build_seconds": round(time.time() - t0, 2)}
         with self._lock:
             self._models[season] = (time.time(), model)
@@ -188,6 +191,7 @@ def serialize(season: str, m: dict, preview: bool = False) -> dict[str, Any]:
         "league_avg": st["league_avg"],
         "records": st["records"],
         "playoffs": m["playoffs"],
+        "draft_order": m["draft_order"],
         "shotguns": {"items": items, "leaderboard": board,
                      "rules": {**ctx["config"]["shotguns"],
                                "special": [r for r in ctx["config"].get("special_rules", []) if not r.get("season") or r["season"] == season]}},
@@ -255,7 +259,8 @@ def power_rankings():
         cur = str(state.cfg.get("current_season") or (state.seasons() or [{}])[0].get("season"))
         m = state.base_model(cur)  # 503/404 HTTPException on failure
         try:
-            out = load_power(state.client, state.cfg, m["ctx"], m["stats"]["standings"], state.seasons())
+            out = load_power(state.client, state.cfg, m["ctx"], m["stats"]["standings"], state.seasons(),
+                           draft_order=m["draft_order"])
         except SleeperError as e:
             raise HTTPException(503, f"Sleeper API unavailable: {e}") from e
         if not out.get("skipped"):  # a partial result is served but never cached

@@ -74,3 +74,10 @@ Modeled on davidsasser.com (brief saved during the session; the tokens live at t
 - Always critical of the owner; profile jabs (traits/nickname/hometown/catchphrase); health/grief traits are filtered out (SENSITIVE regex). No owner pronouns in templates.
 - Site: News page has a "team beat" chip (+ team select); team page has a Team beat card; masthead has a Team beat group (`beat_reporters` in the season payload). Desk export has `beat_standing_order`. Tests: tests/test_beat.py.
 - Caveat: playoff odds only appear in the latest week's report (no odds history exists). Real-data lint already fails on trade 5-21 ("1 picks"), pre-existing.
+
+## Projected rookie draft order (2026-11-21)
+- Rule (owner): picks 1..(n-k) = teams that miss the playoffs, lowest max PF first; then playoff teams by round lost (same round: lower max PF first), runner-up second to last, champion last. Winners bracket only (3rd/5th-place games ignored). Sizes derived from league settings.
+- app/draft_order.py: `order_picks` (reference), `run_bracket` (vectorised bracket with byes, fixed or reseed per settings.playoff_round_type; 1=reseed is UNVERIFIED), `build_block` -> `draft_order` in /api/season (today view + simulated slot matrix/expected pick). playoffs.simulate(capture=) exposes arrays; existing odds are unchanged (own RNG stream [seed, 7] for the bracket).
+- Max PF = Sleeper roster ppts if present else sum of weekly optimal lineups (stats max_pf / max_pf_calc; they match to the cent on the real league). Sim: season max PF = so far + simulated points x (max PF / PF).
+- Locking: once the regular season is over (no games left) the field/non-playoff picks are fixed; winners_bracket results (loader.load_winners_bracket) force played games; a decided championship gives status "final" with no simulation.
+- values.build_power_rankings(expected_picks=) uses the simulated expected pick for the NEXT draft; later years stay mid-round. Site: Power page section + draft board (#pow-do), small table on Playoff odds. Tests: tests/test_draft_order.py.

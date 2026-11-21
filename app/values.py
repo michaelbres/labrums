@@ -289,9 +289,13 @@ def pick_owners(traded: list[dict], roster_ids: list[int], seasons: list[str], r
 
 
 def projected_slot(rnd: int, original: int, order_worst_first: list[int], n: int, is_next: bool,
-                   snake: bool = False) -> float:
-    """Overall slot: the next draft follows the (worst-first) order; later drafts get the middle of the round."""
-    pos = order_worst_first.index(original) + 1 if is_next and original in order_worst_first else (n + 1) / 2
+                   snake: bool = False, expected_picks: dict[int, float] | None = None) -> float:
+    """Overall slot: the next draft follows the simulated expected pick (else the worst-first order); later drafts
+    get the middle of the round."""
+    if is_next and expected_picks and original in expected_picks:
+        pos = expected_picks[original]
+    else:
+        pos = order_worst_first.index(original) + 1 if is_next and original in order_worst_first else (n + 1) / 2
     if snake and rnd % 2 == 0:
         pos = n + 1 - pos
     return (rnd - 1) * n + pos
@@ -311,7 +315,8 @@ def _ranks(values: dict[int, dict]) -> dict[int, dict]:
 
 def build_power_rankings(rosters: dict[int, dict], players: dict[str, dict], stats: dict[str, dict],
                          drafts: list[dict], traded: list[dict], standings: list[int],
-                         current_season: str, scoring: dict | None = None) -> dict[str, Any]:
+                         current_season: str, scoring: dict | None = None,
+                         expected_picks: dict[int, float] | None = None) -> dict[str, Any]:
     """rosters: roster_id -> {name, team_name, avatar, players: [pid]} (taxi/reserve included in players)."""
     rostered = {str(p) for t in rosters.values() for p in t.get("players") or [] if p not in (None, "", "0")}
     production, repl = compute_production(players, stats, current_season, include=rostered, scoring=scoring)
@@ -328,6 +333,8 @@ def build_power_rankings(rosters: dict[int, dict], players: dict[str, dict], sta
     fut = future_seasons(drafts, traded, current_season)
     order = [r for r in reversed([r for r in standings if r in rosters])] if standings else []
     order = order + [r for r in rids if r not in order]   # worst first; unlisted teams last
+    if expected_picks:   # the simulated draft order (league rule: missed playoffs by max PF, then playoff exits)
+        order = sorted(rids, key=lambda r: (expected_picks.get(r, n + 1), order.index(r)))
     owners = pick_owners(traded, rids, fut, rounds)
 
     team_rows: dict[int, dict] = {}
@@ -349,7 +356,7 @@ def build_power_rankings(rosters: dict[int, dict], players: dict[str, dict], sta
                                     "value": v, "roster_id": rid, "owner": t.get("name")})
         team_rows[rid] = {"pos": by_pos, "picks": []}
     for (s, r, orig), owner in sorted(owners.items()):
-        slot = projected_slot(r, orig, order, n, s == fut[0], snake)
+        slot = projected_slot(r, orig, order, n, s == fut[0], snake, expected_picks)
         yrs = max(0, int(s) - int(current_season))
         team_rows[owner]["picks"].append({
             "season": s, "round": r, "original_roster_id": orig, "original": rosters[orig].get("name"),
@@ -381,6 +388,7 @@ def build_power_rankings(rosters: dict[int, dict], players: dict[str, dict], sta
         "season": str(current_season), "teams": teams, "players": player_rows,
         "curve": {"a": curve["a"], "b": curve["b"], "source": curve["source"], "samples": curve["n"],
                   "values": {str(s): round(curve_value(curve, s), 1) for s in CURVE_REPORT_SLOTS}},
-        "future_seasons": fut, "rounds": rounds, "next_draft_order": order,
+        "future_seasons": fut, "rounds": rounds, "snake": snake,
+        "pick_order_source": "simulated" if expected_picks else "standings", "next_draft_order": order,
         "replacement": {k: round(v, 2) for k, v in repl.items()}, "constants": constants(),
     }

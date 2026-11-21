@@ -250,7 +250,25 @@ def load_drafts(client, league_id: str) -> list[dict]:
     return out
 
 
-def load_power(client, cfg: dict, ctx: dict, standings: list[int], season_infos: list[dict] | None = None) -> dict:
+def expected_picks(draft_order: dict | None) -> dict[int, float] | None:
+    """roster_id -> expected pick number in the next rookie draft, from the draft_order block (None if absent)."""
+    rows = ((draft_order or {}).get("simulated") or {}).get("order")
+    return {int(r["roster_id"]): float(r["expected_pick"]) for r in rows} if rows else None
+
+
+def load_winners_bracket(client, ctx: dict) -> list[dict]:
+    """The winners bracket once the regular season is over (before that it is only placeholders). Failure -> []."""
+    if ctx["last_completed"] < ctx["regular_weeks"][-1]:
+        return []
+    try:
+        return list(client.winners_bracket(ctx["league_id"]) or [])
+    except Exception as e:
+        log.warning("winners bracket for %s failed: %s", ctx["league_id"], e)
+        return []
+
+
+def load_power(client, cfg: dict, ctx: dict, standings: list[int], season_infos: list[dict] | None = None,
+               draft_order: dict | None = None) -> dict:
     """Power rankings for the season in `ctx`. Current stats and traded picks are essential (SleeperError if they
     fail); older stats and drafts that fail are skipped and listed under `skipped` (the result is then partial)."""
     from .values import build_power_rankings
@@ -285,6 +303,7 @@ def load_power(client, cfg: dict, ctx: dict, standings: list[int], season_infos:
             log.warning("power: drafts for %s failed: %s", info["season"], e)
             skipped.append({"what": f"drafts {info['season']}", "error": str(e)[:200]})
     out = build_power_rankings(ctx["teams"], ctx["players"], stats, drafts, traded, list(standings), str(cur),
-                               scoring=(ctx.get("league") or {}).get("scoring_settings"))
+                               scoring=(ctx.get("league") or {}).get("scoring_settings"),
+                               expected_picks=expected_picks(draft_order))
     out["skipped"] = skipped
     return out

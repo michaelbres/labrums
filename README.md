@@ -12,7 +12,7 @@ A fantasy football league site powered by the Sleeper API. It turns your league'
 - Demo mode with fake data, so you can try everything offline.
 
 The **Network** page (`#/network`) charts which players each team has rostered across all seasons; `uv run python scripts/export_stints.py [out.csv]` dumps the same data as CSV (default `data/stints.csv`).
-The **Power** page (`#/power`) ranks the teams by roster and draft-pick value from our own player-valuation model (`app/values.py`; per position, picks, combined).
+The **Power** page (`#/power`) ranks the teams by roster and draft-pick value from our own player-valuation model (`app/values.py`; per position, picks, combined). It also shows the projected rookie draft order (`app/draft_order.py`): teams that miss the playoffs pick first by lowest max PF, then playoff teams by when they lose, champion last; shown as "if the season ended today" and as a simulation, plus a draft board with current pick owners.
 
 ## Quick start
 

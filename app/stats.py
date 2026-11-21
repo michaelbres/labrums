@@ -200,6 +200,9 @@ def compute(ctx: dict) -> dict[str, Any]:
         # Sleeper's own season "potential points" (roster settings.ppts, undocumented field) wins over our greedy calc.
         if t.get("ppts"):
             opt_total, act_for_opt = float(t["ppts"]), pf
+        # Max PF for the draft-order rule: Sleeper's potential points when present, else our own optimal-lineup sum
+        # (weeks without per-player points count their actual score).
+        max_pf_calc = sum(optimal[rid].get(w, scores[rid][w]) for w in scores[rid] if w in reg_weeks)
         top_pid = max(player_points[rid], key=player_points[rid].get) if player_points[rid] else None
         team_stats[rid] = {
             **{k: v for k, v in t.items() if k not in ("players", "starters", "profile")},
@@ -226,6 +229,9 @@ def compute(ctx: dict) -> dict[str, Any]:
             "weeks_bottom": sum(1 for w, r in weekly_low.items() if r == rid),
             "pos_points": {k: round(v, 2) for k, v in sorted(pos_points[rid].items(), key=lambda kv: -kv[1])},
             "optimal_pf": round(opt_total, 2),
+            "max_pf_calc": round(max_pf_calc, 2),
+            "max_pf": round(float(t["ppts"]), 2) if t.get("ppts") else round(max_pf_calc, 2),
+            "max_pf_source": "sleeper" if t.get("ppts") else "computed",
             "lineup_efficiency": round(act_for_opt / opt_total, 3) if opt_total else None,
             "bench_points_left": round(opt_total - act_for_opt, 2),
             "top_player": ({**player_label(players, top_pid), "points": round(player_points[rid][top_pid], 2)} if top_pid else None),
