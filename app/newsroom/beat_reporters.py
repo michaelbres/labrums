@@ -156,6 +156,8 @@ def assign(cfg: dict | None, teams: dict) -> dict[int, BeatReporter]:
         if rid is None:
             log.debug("config: reporters.beat.%s matches no owner in this league", key)
             continue
+        if fields.get("name") and fields["name"] != out[rid].name:   # a renamed reporter gets a column that carries the new name
+            fields = {**fields, "column": f"The {fields['name'].split()[-1]} Beat"}
         out[rid] = dataclasses.replace(out[rid], **fields)
     for rid, v in out.items():
         t = teams[rid]

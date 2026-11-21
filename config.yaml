@@ -155,6 +155,13 @@ reporters:
     everett-lindqvist:        # old-school columnist
       name: "Jon Fascinelli"
 
+  # Team beat reporters: every team has one reporter who writes that team's weekly report and is harshly critical of the
+  # OWNER (jabs come from the `owners` profiles above). Keyed by the owner, exactly like `owners` (Sleeper display name or
+  # user_id). To rename one, add a line: OwnerKey: {name: "Their Name"}; `outlet` and `bio` are optional too. Owners
+  # you do not list keep the built-in placeholder reporter (the invented names in app/newsroom/beat_reporters.py).
+  beat:
+    PatrickHanrahan: {name: "Laurel Hanrahan"}
+
 # ---------------------------------------------------------------------------
 # Narratives: a reporter with a take. When the reporter writes about the target, the framing follows the stance;
 # the facts never change (the numbers, scores and names are always the real ones).

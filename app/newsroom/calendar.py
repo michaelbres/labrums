@@ -4,7 +4,7 @@ Week W's "Tuesday" is the Tuesday after that week's games: week 1's Tuesday is t
 season start date, week W's is that + 7*(W-1) days. Calendar by type (offset from Tuesday of the article's week):
 
     Tue  recap (roundup), shotgun (Beer Report)        +0
-    Wed  waiver, trade                                 +1   (a trade made after Tuesday posts the day after it was made)
+    Wed  waiver, trade, beat (team reports)            +1   (a trade made after Tuesday posts the day after it was made)
     Thu  preview, rivalry hype (about week W+1)        +2 from the PRIOR week's Tuesday
     Fri  feud                                          +3
     Sat  standings                                     +4
@@ -21,7 +21,7 @@ from datetime import date, datetime, timedelta, timezone
 
 RELEASE_HOUR = 6   # local (America/New_York) hour at which a day's articles go live
 
-OFFSETS = {"recap": 0, "shotgun": 0, "waiver": 1, "trade": 1, "feud": 3, "standings": 4, "column": 5, "analytics": 6}
+OFFSETS = {"recap": 0, "shotgun": 0, "waiver": 1, "trade": 1, "beat": 1, "feud": 3, "standings": 4, "column": 5, "analytics": 6}
 PRIOR_WEEK_OFFSETS = {"preview": 2, "rivalry": 2}   # relative to the Tuesday of week-1 (the games just played)
 
 

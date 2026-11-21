@@ -311,6 +311,11 @@ tr.cut-line td { border-bottom: 1px dashed var(--accent); }
 .article.type-standings { border-top-color: var(--c-standings); }
 .article.type-column { border-top-color: var(--c-column); }
 .article.type-analytics { border-top-color: var(--c-analytics); }
+.article.type-beat { border-top-color: var(--accent); }
+.beat-note { margin: 0 0 12px; font-size: 13px; }
+.beat-card .m-name { font-weight: 560; letter-spacing: -.01em; }
+.beat-card .m-outlet { font-family: var(--mono); font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; margin: 2px 0 4px; }
+.beat-card .m-bio { color: var(--muted); font-size: 13px; line-height: 1.4; margin-bottom: 8px; }
 .desk-mark { color: var(--accent); border: 1px solid var(--accent); border-radius: 3px; padding: 0 6px; font-size: 10px; letter-spacing: .06em; }
 .article .kicker { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 500; color: var(--muted); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .article h3 { font-size: 22px; font-weight: 540; letter-spacing: -.03em; margin: 8px 0 4px; }

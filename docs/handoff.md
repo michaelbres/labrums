@@ -67,3 +67,10 @@ Modeled on davidsasser.com (brief saved during the session; the tokens live at t
 - Review fixes (2026-11-19): points are computed from raw season stat lines with the league's own scoring_settings (stat*setting for keys in both; bonus_*_te/rb/wr/qb only for that position) instead of pts_half_ppr; season_stats keeps gp + STAT_FIELDS (cache key stats/nfl/regular/<yr>/v2); players cache key is players/nfl/v2 (old trimmed blobs never reused); position falls back to first QB/RB/WR/TE in fantasy_positions (Travis Hunter DB/WR); current season counts in full (age curve only for t>=1); young blend = max(production, blend); current-season games possible = max gp - 1 (bye), share capped at 1.
 - Known simplification: the 2027 order is reverse standings (no playoff/consolation nuance); snake drafts supported, 3rd-round reversal is not.
 
+
+## Team beat reporters (2026-11-21)
+- One beat reporter per team (roster separate from the 50 staff: app/newsroom/beat_reporters.py, BEAT_VOICES), bound by OWNER key (Sleeper display name or user_id, like config `owners`). Config `reporters.beat` renames (Patrick -> Laurel Hanrahan); unlisted/unknown owners get placeholders dealt out deterministically by owner-key hash.
+- New article type `beat`, key `{season}:beat:{week}:{roster_id}`, one per team per completed week, posts Wednesday. Generator app/newsroom/beats_team.py (facts + 5 structures: verdict/grade/notebook/questions/ledger), line pools app/newsroom/beat_text.py. Runs as a third pass after all staff articles, so staff casting/ids are unchanged.
+- Always critical of the owner; profile jabs (traits/nickname/hometown/catchphrase); health/grief traits are filtered out (SENSITIVE regex). No owner pronouns in templates.
+- Site: News page has a "team beat" chip (+ team select); team page has a Team beat card; masthead has a Team beat group (`beat_reporters` in the season payload). Desk export has `beat_standing_order`. Tests: tests/test_beat.py.
+- Caveat: playoff odds only appear in the latest week's report (no odds history exists). Real-data lint already fails on trade 5-21 ("1 picks"), pre-existing.

@@ -197,7 +197,10 @@ def test_article_shape_and_llm_hooks(demo14_arts):
             assert k in a, (a["id"], k)
         r = a["reporter"]
         assert a["byline"] == f"{r['name']}, {r['outlet']}" and r["bio"]
-        assert r["id"] in BY_ID and BY_ID[r["id"]].family == r["family"]
+        if a["type"] == "beat":   # team beat reporters are a separate roster (app/newsroom/beat_reporters.py), not staff voices
+            assert r["id"] not in BY_ID and r["family"] == "beat"
+        else:
+            assert r["id"] in BY_ID and BY_ID[r["id"]].family == r["family"]
         json.dumps(a["facts"])
         assert a["facts"]["beats"] and len(a["facts"]["paras"]) == len(a["body"])
     assert len({a["id"] for a in arts}) == len(arts)

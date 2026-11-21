@@ -93,7 +93,7 @@ special_rules:
     points: 80
 ```
 
-Other sections: `playoffs` (`teams`, `simulations`, `prior_games`), `shotguns` (below), and `reporters` (article bylines).
+Other sections: `playoffs` (`teams`, `simulations`, `prior_games`), `shotguns` (below), and `reporters` (article bylines; `reporters.beat` names the team beat reporter for each owner, e.g. `PatrickHanrahan: {name: "Laurel Hanrahan"}`).
 
 ## Shotguns
 

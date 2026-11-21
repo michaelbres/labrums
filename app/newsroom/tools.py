@@ -24,9 +24,25 @@ def build(season: str | None = None):
     return season, nr, nr.generate(use_desk=False)
 
 
-def voice_card(reporter: dict) -> dict:
+BEAT_STANDING_ORDER = ("Team beat reports (type `beat`, key `{season}:beat:{week}:{roster_id}`): one per team per week, written by that "
+                       "team's beat reporter. They are HARSHLY CRITICAL OF THE OWNER, win or lose: a win gets backhanded credit, a "
+                       "loss gets the blame. Ground every line in the facts packet (score, bench points left, standing, streak, "
+                       "trades, waiver moves), add personal jabs from the owner's profile (nickname, traits, hometown, catchphrase), "
+                       "and keep it playful: no slurs, nothing about health, family tragedy or protected characteristics.")
+
+
+def voice_card(reporter: dict, nr=None) -> dict:
     v = BY_ID.get(reporter.get("id"))
     card = {k: reporter.get(k) for k in ("name", "outlet", "bio", "family")}
+    if v is None and nr is not None and str(reporter.get("id", "")).startswith("beat-"):
+        b = next((x for x in nr.beat_by_rid.values() if x.id == reporter["id"]), None)
+        if b is not None:
+            card.update(family_label="Team beat reporter", family_description="Covers one team all season and is harshly critical of its owner: "
+                        "backhanded credit for a win, blame for a loss, plus jabs from the owner's profile.",
+                        sentence_rhythm="short verdicts and dry asides", formality="newspaper", metaphor_domain="the press box and the lineup page",
+                        numbers="always the real score, bench points and record", signature_openers=list(b.openers),
+                        signature_closers=list(b.closers), verbal_tics=list(b.tics), beats=["beat"], column=b.column)
+        return card
     if v is None:
         return card
     fam = families.get(v.family)
@@ -50,15 +66,18 @@ def export_week(season: str, nr, arts: list[dict], week: int) -> dict:
         facts.pop("paras", None)   # per-paragraph bookkeeping for the template lint, not for writers
         lo, hi = word_target(a["type"])
         out.append({"key": a["key"], "type": a["type"], "week": a["week"], "publish_on": a["publish_on"],
-                    "teams": [nr.name(r) for r in a["teams"]], "reporter": voice_card(a["reporter"]),
+                    "teams": [nr.name(r) for r in a["teams"]], "reporter": voice_card(a["reporter"], nr),
                     "target_words": {"min": lo, "max": hi}, "facts": facts, "beats": beats,
                     "template": {"headline": a["headline"], "dek": a["dek"], "body": a["body"]}})
     owners = []
     for rid, t in sorted(nr.teams.items()):
         prof = t.get("profile") or {}
+        bt = nr.beat_by_rid.get(rid)
         owners.append({"roster_id": rid, "name": nr.name(rid), "team_name": nr.tname(rid), "nickname": prof.get("nickname"),
-                       "traits": prof.get("traits") or [], "catchphrase": prof.get("catchphrase")})
-    return {"season": season, "week": week, "format": "see docs/newsroom.md", "owners": owners, "articles": out}
+                       "traits": prof.get("traits") or [], "catchphrase": prof.get("catchphrase"), "hometown": prof.get("hometown"),
+                       "beat_reporter": bt.name if bt else None})
+    return {"season": season, "week": week, "format": "see docs/newsroom.md", "beat_standing_order": BEAT_STANDING_ORDER,
+            "owners": owners, "articles": out}
 
 
 def weeks_with_articles(arts: list[dict]) -> list[int]:

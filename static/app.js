@@ -2,7 +2,7 @@
 (() => {
   const $ = (sel, el = document) => el.querySelector(sel);
   const app = $('#app');
-  const state = { seasons: [], season: null, data: null, newsFilter: 'all', newsWeek: 'all', shotFilter: 'outstanding', shotGroup: 'owner' };
+  const state = { seasons: [], season: null, data: null, newsFilter: 'all', newsWeek: 'all', newsTeam: 'all', shotFilter: 'outstanding', shotGroup: 'owner' };
 
   // ---------- utils ----------
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -123,7 +123,7 @@
     const owed = lb.reduce((a, r) => a + r.outstanding, 0);
     const rec = d.records || {};
     const hi = rec.high_score ? `${fmt(rec.high_score.points)} · ${team(rec.high_score.roster_id).name} (wk ${rec.high_score.week})` : '—';
-    const headlines = pickHeadlines(d.articles, 6);
+    const headlines = pickHeadlines(d.articles.filter((a) => a.type !== 'beat'), 6);
     const po = d.playoffs.teams;
     const [tw, tl, tt] = String(top.record).split('-').map(Number);
     const bubble = d.standings.slice(1).map(team).filter((t) => po[t.roster_id] && po[t.roster_id].playoff_pct != null)
@@ -230,7 +230,13 @@
     const roster = [...t.roster].sort((a, b) => (b.starter - a.starter) || (b.season_points - a.season_points)).map((p) => `<tr><td>${p.starter ? '<span class="badge accent">ST</span>' : '<span class="dim">BN</span>'}</td><td class="mono">${esc(p.position)}</td><td>${esc(p.name)}</td><td class="dim">${esc(p.team || '')}</td><td class="num">${fmt(p.season_points, 1)}</td></tr>`).join('');
     const h2h = Object.entries(t.h2h).filter(([, r]) => r.w + r.l + r.t > 0).map(([o, r]) => `<tr><td>${teamCell(o, { sub: 'record' })}</td><td class="num">${r.w}-${r.l}${r.t ? `-${r.t}` : ''}</td></tr>`).join('');
     const shots = d.shotguns.items.filter((s) => s.roster_id === t.roster_id);
-    const arts = d.articles.filter((a) => a.teams.includes(t.roster_id)).slice(0, 8);
+    const teamArts = d.articles.filter((a) => a.teams.includes(t.roster_id));
+    const arts = teamArts.filter((a) => a.type !== 'beat').slice(0, 8);
+    const beatArts = teamArts.filter((a) => a.type === 'beat');
+    const br = (d.beat_reporters || []).find((b) => b.team && b.team.roster_id === t.roster_id);
+    const beatCard = br || beatArts.length ? `<div class="card section beat-card"><div class="card-h"><h2>Team beat</h2>${beatArts.length ? `<a href="#/news" data-beat-team="${esc(t.roster_id)}">All ${beatArts.length} reports →</a>` : ''}</div>
+            ${br ? `<div class="m-name">${esc(br.name)}</div><div class="m-outlet">${esc(br.outlet)}</div><div class="m-bio">${esc(br.bio)}</div>` : ''}
+            <ul class="clean headlines">${beatArts.slice(0, 4).map((a) => `<li><div class="kicker">week ${esc(a.week)}</div><a href="#/news/${esc(a.id)}">${esc(a.headline)}</a></li>`).join('') || '<li class="empty">No report yet.</li>'}</ul></div>` : '';
     const prof = t.profile || {};
     const seedDist = (po.seed_dist || []).map((p, i) => `<div class="hbar"><span>Seed ${i + 1}</span><div class="meter ${i < d.league.playoff_teams ? '' : 'bad'}"><i style="width:${p * 100}%"></i></div><span class="num">${pct(p)}</span></div>`).join('');
     return `
@@ -260,6 +266,7 @@
         <div>
           <div class="card section"><div class="card-h"><h2>Head to head</h2></div><div class="table-wrap"><table><tbody>${h2h || '<tr><td class="empty">—</td></tr>'}</tbody></table></div></div>
           <div class="card section"><div class="card-h"><h2>Shotgun ledger</h2><a href="#/shotguns">Manage →</a></div>${shots.length ? shots.map((s) => shotRow(s, false)).join('') : '<div class="empty">Clean sheet. Suspicious.</div>'}</div>
+          ${beatCard}
           <div class="card"><div class="card-h"><h2>In the news</h2></div><ul class="clean headlines">${arts.map((a) => `<li><div class="kicker">${esc(a.type)} · week ${a.week}</div><a href="#/news/${esc(a.id)}">${esc(a.headline)}</a></li>`).join('') || '<li class="empty">No coverage yet.</li>'}</ul></div>
         </div>
       </div>`;
@@ -355,14 +362,17 @@
 
   function mastheadCard() {
     const rs = state.data.reporters || [];
-    if (!rs.length) return '';
-    return `<div class="card section masthead"><div class="card-h"><h2>Masthead</h2><small>${rs.length} reporters, no two alike</small></div>
-      <ul class="clean masthead-list">${rs.map((r) => `<li><div class="m-name">${esc(r.name)}</div><div class="m-outlet">${esc(r.outlet)}</div><div class="m-bio">${esc(r.bio)}</div>${r.known_for ? `<div class="m-known"><span class="dim">Known for:</span> ${esc(r.known_for)}</div>` : ''}</li>`).join('')}</ul></div>`;
+    const bs = state.data.beat_reporters || [];
+    const staff = rs.length ? `<div class="card section masthead"><div class="card-h"><h2>Masthead</h2><small>${rs.length} reporters, no two alike</small></div>
+      <ul class="clean masthead-list">${rs.map((r) => `<li><div class="m-name">${esc(r.name)}</div><div class="m-outlet">${esc(r.outlet)}</div><div class="m-bio">${esc(r.bio)}</div>${r.known_for ? `<div class="m-known"><span class="dim">Known for:</span> ${esc(r.known_for)}</div>` : ''}</li>`).join('')}</ul></div>` : '';
+    const beat = bs.length ? `<div class="card section masthead"><div class="card-h"><h2>Team beat</h2><small>${bs.length} reporters, one per team, all of them tough on the owner</small></div>
+      <ul class="clean masthead-list">${bs.map((r) => `<li><div class="m-name">${esc(r.name)}</div><div class="m-outlet">${esc(r.outlet)}</div><div class="m-bio">${esc(r.bio)}</div>${r.team ? `<div class="m-known"><span class="dim">Covers:</span> ${teamLink(r.team.roster_id)}</div>` : ''}</li>`).join('')}</ul></div>` : '';
+    return staff + beat;
   }
 
   function articleCard(a, open = false) {
     return `<article class="card article type-${esc(a.type)} ${open ? 'open' : ''}" id="art-${esc(a.id)}">
-      <div class="kicker"><span>${esc(a.type)}</span><span>·</span><span>Week ${a.week}</span>${a.source === 'desk' ? '<span class="desk-mark" title="Written by hand at the editorial desk">✎ Desk</span>' : ''}${a.tags.includes('rivalry') ? '<span class="badge bad">rivalry</span>' : ''}</div>
+      <div class="kicker"><span>${esc(a.type === 'beat' ? 'team beat' : a.type)}</span><span>·</span><span>Week ${a.week}</span>${a.source === 'desk' ? '<span class="desk-mark" title="Written by hand at the editorial desk">✎ Desk</span>' : ''}${a.tags.includes('rivalry') ? '<span class="badge bad">rivalry</span>' : ''}</div>
       <h3>${esc(a.headline)}</h3><div class="dek">${esc(a.dek)}</div><div class="byline">${bylineOf(a)} · ${a.teams.map((rid) => teamLink(rid)).join(', ')}</div>
       <div class="body">${a.body.map((p) => `<p>${esc(p)}</p>`).join('')}</div>
       <span class="more" data-more>${open ? 'Collapse' : 'Read more'}</span></article>`;
@@ -376,15 +386,21 @@
       const related = d.articles.filter((x) => x.id !== a.id && x.teams.some((t) => a.teams.includes(t))).slice(0, 6);
       return `<div class="back"><a href="#/news">← All news</a></div>${articleCard(a, true)}<div class="card section"><div class="card-h"><h2>Related</h2></div><ul class="clean headlines">${related.map((x) => `<li><div class="kicker">${esc(x.type)} · week ${x.week}</div><a href="#/news/${esc(x.id)}">${esc(x.headline)}</a></li>`).join('') || '<li class="empty">—</li>'}</ul></div>`;
     }
-    const types = ['all', ...new Set(d.articles.map((a) => a.type))];
-    const weeks = ['all', ...new Set(d.articles.map((a) => a.week))];
-    let arts = d.articles;
-    if (state.newsFilter !== 'all') arts = arts.filter((a) => a.type === state.newsFilter);
+    // The 10 weekly team reports are their own filter: they never crowd the other stories out of the main list.
+    const beat = d.articles.filter((a) => a.type === 'beat'), main = d.articles.filter((a) => a.type !== 'beat');
+    const inBeat = state.newsFilter === 'beat' && beat.length > 0;
+    const types = ['all', ...new Set(main.map((a) => a.type)), ...(beat.length ? ['beat'] : [])];
+    const weeks = ['all', ...new Set((inBeat ? beat : main).map((a) => a.week))];
+    let arts = inBeat ? beat : state.newsFilter === 'all' || state.newsFilter === 'beat' ? main : main.filter((a) => a.type === state.newsFilter);
     if (state.newsWeek !== 'all') arts = arts.filter((a) => String(a.week) === String(state.newsWeek));
+    if (inBeat && state.newsTeam !== 'all') arts = arts.filter((a) => a.teams.includes(Number(state.newsTeam)));
+    const beatTeams = (d.beat_reporters || []).map((b) => b.team).filter(Boolean);
+    const teamSelect = inBeat ? `<select class="select" id="news-team"><option value="all">All teams</option>${beatTeams.map((t) => `<option value="${esc(t.roster_id)}" ${String(state.newsTeam) === String(t.roster_id) ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select>` : '';
     return `
       ${pageHead('05 / News', 'League News', 'All of it fake. Most of it accurate.',
-        `<select class="select" id="news-week">${weeks.map((w) => `<option value="${w}" ${String(state.newsWeek) === String(w) ? 'selected' : ''}>${w === 'all' ? 'All weeks' : `Week ${w}`}</option>`).join('')}</select>`)}
-      <div class="chips section">${types.map((t) => `<span class="chip ${state.newsFilter === t ? 'active' : ''}" data-news="${t}">${t}</span>`).join('')}</div>
+        `<select class="select" id="news-week">${weeks.map((w) => `<option value="${esc(w)}" ${String(state.newsWeek) === String(w) ? 'selected' : ''}>${w === 'all' ? 'All weeks' : `Week ${esc(w)}`}</option>`).join('')}</select>${teamSelect}`)}
+      <div class="chips section">${types.map((t) => `<span class="chip ${state.newsFilter === t ? 'active' : ''}" data-news="${esc(t)}">${t === 'beat' ? `team beat (${beat.length})` : esc(t)}</span>`).join('')}</div>
+      ${inBeat ? '<p class="muted beat-note">One beat reporter per team, every week, and every one of them is hard on the owner.</p>' : ''}
       <div class="grid" style="gap:12px">${arts.map((a) => articleCard(a)).join('') || '<div class="empty">No stories match.</div>'}</div>
       ${mastheadCard()}`;
   }
@@ -813,9 +829,11 @@
   app.addEventListener('click', async (e) => {
     const more = e.target.closest('[data-more]');
     if (more) { const art = more.closest('.article'); art.classList.toggle('open'); more.textContent = art.classList.contains('open') ? 'Collapse' : 'Read more'; return; }
+    const bt = e.target.closest('[data-beat-team]');
+    if (bt) { state.newsFilter = 'beat'; state.newsTeam = bt.dataset.beatTeam; state.newsWeek = 'all'; }   // the link itself still navigates to #/news
     const chip = e.target.closest('.chip');
     if (chip) {
-      if (chip.dataset.news) state.newsFilter = chip.dataset.news;
+      if (chip.dataset.news) { state.newsFilter = chip.dataset.news; if (chip.dataset.news !== 'beat') state.newsTeam = 'all'; }
       if (chip.dataset.filter) state.shotFilter = chip.dataset.filter;
       if (chip.dataset.group) state.shotGroup = chip.dataset.group;
       route(); return;
@@ -843,6 +861,7 @@
       } catch (err) { box.checked = !box.checked; box.disabled = false; toast(`Error: ${err.message}`); }
     }
     if (e.target.id === 'news-week') { state.newsWeek = e.target.value; route(); }
+    if (e.target.id === 'news-team') { state.newsTeam = e.target.value; route(); }
   });
   app.addEventListener('submit', async (e) => {
     if (e.target.id !== 'manual-form') return;

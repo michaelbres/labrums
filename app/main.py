@@ -168,6 +168,7 @@ def serialize(season: str, m: dict, preview: bool = False) -> dict[str, Any]:
             t["current_seed"] = seeds.get(rid)
             t["in_playoff_spot"] = t["current_seed"] is not None
         teams[str(rid)] = t
+    nr = articles.Newsroom(ctx, st, m["playoffs"], m["shotgun_items"])
     return {
         "season": season,
         "league": {"league_id": ctx["league_id"], "name": league.get("name"), "status": league.get("status"),
@@ -191,8 +192,9 @@ def serialize(season: str, m: dict, preview: bool = False) -> dict[str, Any]:
                      "rules": {**ctx["config"]["shotguns"],
                                "special": [r for r in ctx["config"].get("special_rules", []) if not r.get("season") or r["season"] == season]}},
         "articles": wire_articles,
-        "rivalries": articles.Newsroom(ctx, st, m["playoffs"], m["shotgun_items"]).rivalries,
+        "rivalries": nr.rivalries,
         "reporters": articles.reporters(),
+        "beat_reporters": nr.beat_reporters(),
         "meta": {"demo": state.demo, "built_at": m["built_at"], "build_seconds": m["build_seconds"],
                  "admin_locked": bool(state.admin_pin), "persistence": state.persistence,
                  "desk": {"weeks_covered": sorted({a["week"] for a in m["articles"] if a.get("source") == "desk"}),

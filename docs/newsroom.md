@@ -13,7 +13,7 @@ the first Tuesday after the season start date; each later week is +7 days).
 | Day | Type | Notes |
 |---|---|---|
 | Tue | `recap` (weekly roundup), `shotgun` (Beer Report) | |
-| Wed | `waiver`, `trade` | a trade made after Tuesday posts the day after it was made |
+| Wed | `waiver`, `trade`, `beat` | a trade made after Tuesday posts the day after it was made; `beat` = the weekly team reports |
 | Thu | `preview`, `rivalry` | about week W+1; filed under week W+1 |
 | Fri | `feud` | |
 | Sat | `standings` | |
@@ -30,7 +30,7 @@ A desk article may override its date with `"publish_on": "YYYY-MM-DD"`.
 
 Every article has `key = "{season}:{type}:{week}:{teams}"`, for example `2026:recap:4:all` or `2026:feud:4:5-7`.
 One-per-week pieces (recap, preview, shotgun, waiver, standings, analytics, offseason) use `all`; pair pieces
-(trade, feud, column, rivalry) use the sorted roster ids joined by `-` (two trades between the same pair in one week
+(trade, feud, column, rivalry) use the sorted roster ids joined by `-`; team beat reports (`beat`) use the one roster id, e.g. `2026:beat:5:2` (two trades between the same pair in one week
 get `#2` by transaction id). Keys depend only on the data, never on which reporter was assigned or on build order.
 
 ## The weekly routine
@@ -132,6 +132,17 @@ use numbers and names that come from the facts; the lint rejects a slanted line 
 supply, a warm line in a hater article, a sour one in a homer article, or the theme more than once. `facts.beats`
 tags slanted lines `slot~neg` / `slot~pos` / `slot~neutral` and `facts.slant` summarizes them (the sentiment score is the
 count of `~neg` beats).
+
+## Team beat reports
+
+Every team has its own beat reporter (`reporters.beat` in config.yaml, keyed by owner; defaults and placeholders in
+`app/newsroom/beat_reporters.py`; `scripts/newsroom_facts.py` lists each owner's `beat_reporter`). Each completed week
+yields one `beat` article per team, key `{season}:beat:{week}:{roster_id}`, posting Wednesday. **Standing instruction:
+beat reports are harshly critical of the OWNER, win or lose** (a win gets backhanded credit, a loss gets the blame),
+grounded in the facts packet (score, bench points left, standing, streak, trades, waiver moves) plus personal jabs
+from the owner profile. Keep it playful: no slurs, nothing about health, family tragedy or protected characteristics,
+and do not guess the owner's pronouns. A desk entry with a beat key replaces the article but keeps the team's reporter
+unless you sign your own. The staff 50 never write beat reports.
 
 ## Under the hood
 

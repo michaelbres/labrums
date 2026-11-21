@@ -1,4 +1,5 @@
-"""The Labrums newsroom: 50 reporters (renamable in config.yaml), 14 style families, facts-first articles.
+"""The Labrums newsroom: 50 reporters (renamable in config.yaml), 14 style families, facts-first articles,
+plus one beat reporter per team (beat_reporters.py) who writes the weekly team report.
 
 Public API (re-exported by app.articles): Newsroom, generate(ctx, st, po, shotgun_items).
 Every article dict carries `reporter` ({id, name, outlet, bio, family, known_for}) and `facts` (a JSON-friendly
@@ -13,7 +14,7 @@ import random
 from collections import Counter, defaultdict
 
 from . import calendar, desk, lint, narratives
-from .beats_extra import Beats3
+from .beats_team import BeatsTeam
 from .voices import BY_ID, VOICES, Voice
 
 log = logging.getLogger("labrums.newsroom")
@@ -26,7 +27,7 @@ FAVOR = {"recap": (0.8, 0), "preview": (0.8, 0)}
 FAVOR_DEFAULT = (0.5, 1)
 
 TYPE_ORDER = {"preview": 0, "rivalry": 0, "recap": 1, "standings": 2, "shotgun": 3, "trade": 4, "offseason": 4,
-              "waiver": 5, "feud": 6, "column": 7, "analytics": 8}
+              "waiver": 5, "feud": 6, "column": 7, "analytics": 8, "beat": 9}
 
 
 class Assigner:
@@ -72,7 +73,7 @@ class Assigner:
         self.week_used[week].add(v.id)
 
 
-class Newsroom(Beats3):
+class Newsroom(BeatsTeam):
     def __init__(self, ctx: dict, st: dict, po: dict, shotgun_items: list[dict], *, debug: bool | None = None):
         super().__init__(ctx, st, po, shotgun_items)
         self.debug = (os.environ.get("LABRUMS_NEWSROOM_DEBUG", "") in ("1", "true", "yes")) if debug is None else debug
@@ -217,6 +218,8 @@ class Newsroom(Beats3):
             art = self._build("analytics", week, lambda v, wk=week: self.analytics(wk, v))
             if art:
                 out.append(art)
+        # Team beat reports: a third pass, after everything else, so the casting and ids of every older article type are untouched.
+        out.extend(self.beat_reports())
         out.sort(key=lambda a: (-a["week"], TYPE_ORDER.get(a["type"], 9), a["id"]))
         self._finish(out, use_desk)
         return out
@@ -252,6 +255,10 @@ class Newsroom(Beats3):
     @staticmethod
     def reporters() -> list[dict]:
         return [v.card() for v in VOICES]
+
+    def beat_reporters(self) -> list[dict]:
+        """The team beat reporters of THIS league (the 'Team beat' masthead group), each with the team it covers."""
+        return self.beat_masthead()
 
     def masthead(self) -> list[dict]:
         """The reporter cards for THIS league's config (overrides and `known_for` resolved against its owners)."""
