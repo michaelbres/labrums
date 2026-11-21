@@ -194,6 +194,9 @@ def load_season(client, cfg: dict, league_id: str) -> dict[str, Any]:
         "divisions": divisions,
         "season_start_ms": season_start_ms(state, transactions, league),
         "teams": teams,
+        # Current taxi / IR lists per roster (Sleeper gives no weekly snapshot); beat reports use them for bench claims.
+        "inactive": {int(r["roster_id"]): {"taxi": [str(p) for p in r.get("taxi") or []],
+                                           "reserve": [str(p) for p in r.get("reserve") or []]} for r in rosters},
         "matchups": matchups,
         "transactions": transactions,
         "players": players,

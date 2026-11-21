@@ -339,3 +339,136 @@ def test_real_league_has_ten_reporters_and_laurel_covers_patrick():
     assert all(a["byline"].startswith("Laurel Hanrahan") for a in beats if a["teams"] == [patrick])
     assert len(beats) == 10 * nr.ctx["last_completed"]
     assert all(lint.check(a, nr) == [] for a in beats)
+
+
+# ---------------------------------------------------------------- review round 2: legal bench, consolation, text, config, names
+def _bench_nr(demo7, *, qb_bench=25.0, margin=4.0, taxi=("tx_wr",), reserve=("ir_rb",)):
+    """A Newsroom whose week-1 matchup for team 1 is hand-built: roster QB/RB/WR/FLEX + two bench spots."""
+    import random
+    ctx, st, po, items = demo7
+    ctx = copy.deepcopy(ctx)
+    ctx["roster_positions"] = ["QB", "RB", "WR", "FLEX", "BN", "BN", "BN"]
+    for pid, pos in (("qb_s", "QB"), ("rb_s", "RB"), ("wr_s", "WR"), ("fx_s", "RB"), ("tx_wr", "WR"), ("bn_qb", "QB"), ("ir_rb", "RB")):
+        ctx["players"][pid] = {"first_name": pid, "last_name": "Test", "position": pos, "fantasy_positions": [pos]}
+    pts = {"qb_s": 5.0, "rb_s": 2.0, "wr_s": 3.0, "fx_s": 4.0, "tx_wr": 30.0, "bn_qb": qb_bench, "ir_rb": 25.0}
+    row = next(r for r in ctx["matchups"][1] if int(r["roster_id"]) == 1)
+    row.update(starters=["qb_s", "rb_s", "wr_s", "fx_s"], players_points=pts, points=14.0,
+               starters_points=[5.0, 2.0, 3.0, 4.0])
+    ctx["inactive"] = {1: {"taxi": list(taxi), "reserve": list(reserve)}}
+    nr = Newsroom(ctx, st, po, items, debug=True)
+    g = {"week": 1, "a": 1, "b": 2, "a_pts": 14.0, "b_pts": 14.0 + margin, "winner": 2, "margin": margin}
+    return nr, g, random.Random(1)
+
+
+def test_bench_left_is_the_best_legal_lineup_minus_actual(demo7):
+    nr, g, rng = _bench_nr(demo7)
+    left, best = nr._bt_bench(1, 1)
+    # taxi (30) and IR (25) players cannot start: only the bench QB (25) may replace the starting QB (5)
+    assert left == 20.0
+    assert best["name"] == "bn_qb Test" and best["points"] == 25.0
+    assert best["replaces"]["name"] == "qb_s Test" and best["replaces"]["points"] == 5.0
+    # without the exclusion lists the taxi WR would be (wrongly) counted
+    nr2, _, _ = _bench_nr(demo7, taxi=(), reserve=())
+    assert nr2._bt_bench(1, 1)[0] > 20.0
+    assert nr2._bt_bench(1, 1)[1]["name"] == "tx_wr Test"
+
+
+def test_ineligible_bench_player_is_never_named(demo7):
+    # the bench QB (9.0) outscored by the starting QB (5.0)? no: make the bench QB score LESS than the starter's slot
+    nr, g, rng = _bench_nr(demo7, qb_bench=4.0)
+    left, best = nr._bt_bench(1, 1)
+    assert left == 0.0 and best is None       # nothing legal beats the actual lineup, so nobody is named (the taxi 30 and IR 25 do not count)
+    F = nr._bt_facts(1, g, 1)
+    assert all(not k["kind"].startswith("bench") for k in nr._bt_cands(F, rng))
+    art = nr.team_report(1, g, 1)
+    text = " ".join(art["body"]) + art["headline"]
+    assert "tx_wr" not in text and "ir_rb" not in text and "bn_qb" not in text
+
+
+def test_avoidable_loss_only_when_the_legal_gap_exceeds_the_margin(demo7):
+    nr, g, rng = _bench_nr(demo7, margin=4.0)                      # left 20 > margin 4
+    kinds = [c["kind"] for c in nr._bt_cands(nr._bt_facts(1, g, 1), rng)]
+    assert "bench_gt" in kinds
+    nr, g, rng = _bench_nr(demo7, margin=25.0)                     # left 20 < margin 25: a loss the lineup could not have saved
+    kinds = [c["kind"] for c in nr._bt_cands(nr._bt_facts(1, g, 1), rng)]
+    assert "bench_gt" not in kinds and "bench_nr" in kinds
+    nr, g, rng = _bench_nr(demo7, margin=20.0)                     # equal is not "exceeds"
+    assert "bench_gt" not in [c["kind"] for c in nr._bt_cands(nr._bt_facts(1, g, 1), rng)]
+
+
+def test_consolation_games_are_not_written_up_as_playoff_games():
+    ctx, st, po, items = _demo_with(7)      # the demo has no playoff games: call weeks 5-6 the playoffs (6 of 12 teams make it)
+    ctx = copy.deepcopy(ctx)
+    ctx["playoff_start"], ctx["regular_weeks"] = 5, [1, 2, 3, 4]
+    nr = Newsroom(ctx, st, po, items, debug=True)
+    beats = _beats(nr.generate(use_desk=False))
+    field = set(nr.snap(nr.final_reg_week)["standings"][: nr.ctx["playoff_teams"]])
+    pw = [a for a in beats if a["week"] >= nr.ctx["playoff_start"]]
+    assert pw
+    cons = [a for a in pw if a["facts"]["result"]["consolation"]]
+    assert cons and len(cons) < len(pw)
+    for a in pw:
+        rid = a["teams"][0]
+        text = " ".join(a["body"]) + " " + a["headline"] + " " + a["dek"]
+        if a["facts"]["result"]["consolation"]:
+            assert "consolation week" in a["dek"].lower()
+            assert not re.search(r"playoff week|enough to get here|came into the postseason", text, re.I), a["key"]
+        else:
+            assert rid in field and "layoff week" in a["dek"]
+    for a in cons:        # still critical of the owner, never silent
+        assert len(a["body"]) >= 3
+
+
+def test_am_pm_does_not_start_a_new_sentence():
+    from app.newsroom.beats_team import _polish
+    assert _polish("The owner sets his lineup at 4 a.m. with Daft Punk on.", None) == "The owner sets his lineup at 4 a.m. with Daft Punk on."
+    assert _polish("Done at 4 p.m. and nobody noticed. then it ended.", None) == "Done at 4 p.m. and nobody noticed. Then it ended."
+
+
+def test_plural_trade_subjects_have_no_singular_verb():
+    from app.newsroom import beat_text as T
+
+    def strings(x):
+        if isinstance(x, str):
+            yield x
+        elif isinstance(x, dict):
+            for v in x.values():
+                yield from strings(v)
+        elif isinstance(x, (list, tuple)):
+            for v in x:
+                yield from strings(v)
+    bad = [s for s in strings(T.FACTS) if re.search(r"\{(got|gave)\} (has|is|was|does)\b", s)]
+    assert not bad, bad
+
+
+def test_no_sentence_repeats_in_one_week(demo7_arts):
+    nr, arts = demo7_arts
+    from app.newsroom.util import split_sentences
+    for wk in {a["week"] for a in _beats(arts)}:
+        seen: dict[str, str] = {}
+        for a in (x for x in _beats(arts) if x["week"] == wk):
+            for s in {" ".join(x.casefold().split()) for x in split_sentences(" ".join(a["body"]))}:
+                assert s not in seen, (wk, s, seen[s], a["key"])
+                seen[s] = a["key"]
+
+
+def test_normalize_beat_accepts_only_non_empty_strings(caplog):
+    with caplog.at_level(logging.WARNING):
+        out = config.normalize_beat({"A": {"name": 123, "outlet": ["a", "b"], "bio": "  Fine   bio "},
+                                     "B": {"name": True, "outlet": {"x": 1}},
+                                     "C": {"name": "  Ok  Name ", "bio": 4.5}})
+    assert out == {"A": {"bio": "Fine bio"}, "C": {"name": "Ok Name"}}
+    msgs = " ".join(r.getMessage() for r in caplog.records)
+    assert "reporters.beat.A.name" in msgs and "reporters.beat.A.outlet" in msgs and "reporters.beat.B" in msgs
+
+
+def test_beat_reporter_names_share_no_name_with_staff_or_each_other():
+    def toks(name):
+        return [t for t in re.split(r"[\s\-]+", name.casefold().replace(".", "")) if t]
+    staff = {t for v in VOICES for t in toks(v.name)}
+    seen: set[str] = set()
+    for v in BEAT_VOICES:
+        mine = set(toks(v.name))
+        assert not mine & staff, (v.name, mine & staff)
+        assert not mine & seen, (v.name, mine & seen)
+        seen |= mine

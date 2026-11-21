@@ -352,7 +352,7 @@ class BeatsTeam(Beats3):
         rank, rec = S["rank"], S["record"]
         base = {"rec": rec, "rank_ord": ordinal(rank)}
         if F["playoff"]:
-            add("finish" if F["alive"] else "consol", 1.5, base)
+            add("finish" if F["alive"] else "consol", 1.5 if F["alive"] else 5.0, base)   # a consolation game always gets its own framing
             return out
         line = "inside" if rank <= self.ctx["playoff_teams"] else "outside"
         if S["games"] >= 2:
