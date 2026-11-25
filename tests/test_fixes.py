@@ -210,3 +210,10 @@ def test_week_is_not_complete_until_monday_night_is_over():
     assert loader.completed_week_cutoff(league, {**state, "week": 2}, now=ts(2026, 9, 15, 9)) == 1
     # No usable start date: fall back to Sleeper's week alone.
     assert loader.completed_week_cutoff(league, {"season": "2026", "season_type": "regular", "week": 12}) == 11
+
+
+def test_clock_weeks_handle_any_start_weekday():
+    from datetime import datetime, timezone
+    now = datetime(2026, 11, 25, 15, tzinfo=timezone.utc).timestamp()
+    for start in ("2026-09-07", "2026-09-09", "2026-09-10", "2026-09-11", "2026-09-13"):   # Mon, Wed, Thu, Fri, Sun
+        assert loader.weeks_finished_by_clock({"season_start_date": start}, now) == 11, start

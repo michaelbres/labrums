@@ -81,7 +81,8 @@ def weeks_finished_by_clock(state: dict, now: float | None = None) -> int | None
         start = datetime.strptime(str(state.get("season_start_date"))[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
     except ValueError:
         return None
-    thursday = start + timedelta(days=(3 - start.weekday()) % 7)
+    ahead = (3 - start.weekday()) % 7          # days to the next Thursday (0 if it is one)
+    thursday = start + timedelta(days=ahead if ahead <= 3 else ahead - 7)   # Fri-Sun dates belong to the Thursday just before
     first_end = thursday + timedelta(days=5, hours=WEEK_END_HOUR_UTC)   # the Tuesday after week 1's Monday game
     t = datetime.fromtimestamp(time.time() if now is None else now, tz=timezone.utc)
     if t < first_end:
