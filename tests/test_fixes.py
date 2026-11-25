@@ -148,7 +148,7 @@ def test_all_zero_matchups_not_cached_as_final(tmp_path, monkeypatch):
         return [{"roster_id": 1, "points": 0}, {"roster_id": 2, "points": 0}]
     monkeypatch.setattr(client, "_fetch", fake_fetch)
     client.matchups("L", 3, final=True)
-    path = client._cache_path("league/L/matchups/3")
+    path = client._cache_path(f"league/L/matchups/3/{sleeper.WEEK_CACHE_VERSION}")
     import json
     blob = json.loads(path.read_text())
     blob["fetched_at"] -= sleeper.LIVE_TTL + 10
@@ -192,3 +192,21 @@ def test_refresh_requires_admin_pin(locked_api):  # noqa: F811
 
 def test_refresh_open_without_pin(api):  # noqa: F811
     assert api.post("/api/season/2026/refresh").status_code == 200
+
+
+def test_week_is_not_complete_until_monday_night_is_over():
+    from datetime import datetime, timezone
+    league = {"status": "in_season", "season": "2026"}
+    state = {"season": "2026", "season_type": "regular", "week": 12, "season_start_date": "2026-09-09"}
+    ts = lambda *a: datetime(*a, tzinfo=timezone.utc).timestamp()
+    # Week 11's Monday game is 2026-11-23 (ET). Sleeper already says week 12, but the clock says week 11 is still live.
+    assert loader.completed_week_cutoff(league, state, now=ts(2026, 11, 23, 12)) == 10      # Monday morning
+    assert loader.completed_week_cutoff(league, state, now=ts(2026, 11, 24, 3)) == 10       # during Monday night (ET)
+    assert loader.completed_week_cutoff(league, state, now=ts(2026, 11, 24, 9)) == 11       # Tuesday morning
+    assert loader.completed_week_cutoff(league, state, now=ts(2026, 11, 25, 15)) == 11
+    # Sleeper's own week still caps it (clock ahead of Sleeper), and week 1 needs its Monday game too.
+    assert loader.completed_week_cutoff(league, {**state, "week": 5}, now=ts(2026, 11, 25, 15)) == 4
+    assert loader.completed_week_cutoff(league, {**state, "week": 2}, now=ts(2026, 9, 14, 20)) == 0
+    assert loader.completed_week_cutoff(league, {**state, "week": 2}, now=ts(2026, 9, 15, 9)) == 1
+    # No usable start date: fall back to Sleeper's week alone.
+    assert loader.completed_week_cutoff(league, {"season": "2026", "season_type": "regular", "week": 12}) == 11

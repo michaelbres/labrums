@@ -30,6 +30,8 @@ PLAYER_FIELDS = ("full_name", "first_name", "last_name", "position", "team",
 # Cache keys carry a version so blobs trimmed by older code (missing fields) are never reused.
 PLAYERS_CACHE_KEY = "players/nfl/v2"
 STATS_CACHE_VERSION = "v3"
+# Weekly matchups/transactions: bumped to drop weeks that were cached as final before Monday night was played.
+WEEK_CACHE_VERSION = "v2"
 # Offensive stat fields kept from the season stat lines (everything a league may score; analytics are dropped).
 STAT_FIELDS = (
     "pass_yd", "pass_td", "pass_int", "pass_2pt", "pass_fd", "pass_att", "pass_cmp", "pass_inc", "pass_sack",
@@ -173,12 +175,13 @@ class SleeperClient:
     def matchups(self, league_id: str, week: int, final: bool) -> list[dict]:
         ttl = FINAL_TTL if final else LIVE_TTL
         # A week where every row is 0 points hasn't been scored yet: never cache it as final.
-        return self.get(f"league/{league_id}/matchups/{week}", ttl,
+        return self.get(f"league/{league_id}/matchups/{week}", ttl, cache_key=f"league/{league_id}/matchups/{week}/{WEEK_CACHE_VERSION}",
                         ttl_for=lambda rows: ttl if any(float((r or {}).get("points") or 0) != 0
                                                         for r in rows or []) else LIVE_TTL) or []
 
     def transactions(self, league_id: str, week: int, final: bool) -> list[dict]:
-        return self.get(f"league/{league_id}/transactions/{week}", FINAL_TTL if final else LIVE_TTL) or []
+        return self.get(f"league/{league_id}/transactions/{week}", FINAL_TTL if final else LIVE_TTL,
+                        cache_key=f"league/{league_id}/transactions/{week}/{WEEK_CACHE_VERSION}") or []
 
     def drafts(self, league_id: str) -> list[dict]:
         """All drafts of a league. Finished drafts never change, so they are cached long."""

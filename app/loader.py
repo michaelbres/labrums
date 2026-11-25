@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+import time
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from .config import clean_profile
@@ -50,7 +51,7 @@ def discover_seasons(client, cfg: dict) -> list[dict]:
     return out
 
 
-def completed_week_cutoff(league: dict, state: dict) -> int:
+def completed_week_cutoff(league: dict, state: dict, now: float | None = None) -> int:
     """Highest week number whose scoring is final."""
     status = league.get("status")
     if status == "complete":
@@ -63,7 +64,29 @@ def completed_week_cutoff(league: dict, state: dict) -> int:
         return MAX_WEEK
     if state.get("season_type") == "pre" or not state.get("week"):
         return 0
-    return max(0, int(state.get("week")) - 1)
+    done = max(0, int(state.get("week")) - 1)
+    # Sleeper can roll `week` forward before Monday night football has been played, which made unplayed
+    # Monday starters look like zeros. A week only counts once the clock says its Monday game is over.
+    by_clock = weeks_finished_by_clock(state, now)
+    return done if by_clock is None else min(done, by_clock)
+
+
+WEEK_END_HOUR_UTC = 9  # Tuesday 09:00 UTC (4-5am Eastern): Monday night football is long over
+
+
+def weeks_finished_by_clock(state: dict, now: float | None = None) -> int | None:
+    """How many NFL weeks have fully finished (through Monday night) by the wall clock, or None if the
+    season start is unknown. Week 1 opens on the first Thursday on/after state["season_start_date"]."""
+    try:
+        start = datetime.strptime(str(state.get("season_start_date"))[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return None
+    thursday = start + timedelta(days=(3 - start.weekday()) % 7)
+    first_end = thursday + timedelta(days=5, hours=WEEK_END_HOUR_UTC)   # the Tuesday after week 1's Monday game
+    t = datetime.fromtimestamp(time.time() if now is None else now, tz=timezone.utc)
+    if t < first_end:
+        return 0
+    return int((t - first_end) // timedelta(days=7)) + 1
 
 
 def season_start_ms(state: dict, transactions: dict[int, list[dict]], league: dict | None = None) -> int | None:
