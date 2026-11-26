@@ -1,141 +1,165 @@
 {
-  "week": 9,
-  "articles": [
-    {
-      "key": "2026:analytics:9:all",
-      "headline": "Cian never changes, and Patrick never stops changing",
-      "body": [
-        "PSSST. It's Monday, the spreadsheets have been talking, and through Week 9, with 9 games in the books for every team, they named names.",
-        "Start with fortune's favorite. Jimmy is 7-2 on just 5.6 expected wins, a luck score of +1.4. And the one fortune ghosted? Patrick, 2-7 when the math says 3.6 wins, good for -1.6. Allegedly.",
-        "Now the lineup dish. Tom is getting 91% of the points available to him. Adam is getting 80%, with the league at 84%. So guess whose bench is the hottest party in town? Adam has left 302.40 points sitting there, the most in the league. Tom has left 159.37 points, the least. And the single worst night out belongs to Nick: in Week 4 he finished 62.25 points short of his best lineup, with Keon Coleman (WR) scoring 22.60 points from the bench.",
-        "Steadiest act on the carpet? Cian, with an average weekly rank of 8.0, never better than 5th and never worse than 10th. The wildest? Patrick, who has finished everywhere from 1st to 10th.",
-        "And that Week 4 trade everyone stopped talking about? Over the 6 weeks since, the players Bowie got have scored 186.30 points. The ones Cian got: 66.60 points.",
-        "More receipts next Monday.",
-        "That's all the gossip fit to print."
-      ]
-    },
-    {
-      "key": "2026:column:9:7-8",
-      "headline": "The Where's Waldo Bowl: has anyone actually seen Steven or Cian?",
-      "body": [
-        "Scoop alert. Through Week 9 the standings have Steven 4th at 6-3 and Cian 10th at 1-8, and yes, darlings, we checked twice.",
-        "These two have not met this season. No meeting yet, no receipts, only vibes. And the vibes are lopsided: Steven's recent form reads won by 60.61, won by 38.19, and won by 3.95. Cian's reads lost by 47.07, lost by 37.80, and lost by 9.13. The points column? Steven 1456.80, Cian 1050.59. That is a 406.21-point gap. Make of that what you will.",
-        "Insiders call it The Where's Waldo Bowl: two owners who are never around, playing a game neither of them will watch, from locations neither will disclose.",
-        "“I'm 4th, Cian is 10th, and I didn't even have to pick up the phone,” Steven let slip. Cian fired back: “Nobody expects anything from me. That's exactly where I'm dangerous.”",
-        "Our vote goes to Steven, on scoring average. Cian, do prove us wrong; it would be the story of the year.",
-        "Stay nosy."
-      ]
-    },
-    {
-      "key": "2026:feud:9:3-4",
-      "headline": "Bowie drops Jimmy with a 68.26-point finisher!",
-      "body": [
-        "Gentlemen, the card is set. Week 9! Bowie versus Jimmy! And it was over before the bell stopped ringing! Bowie 191.95! Jimmy 123.69! That's a 68.26-point blowout! That's a clean pin!",
-        "But check the tale of the tape, because the bar tab tells its own story! Bowie has 5 shotguns on the season! Jimmy has 2 shotguns! The winner is the one hauling the heavier belt of cans!",
-        "And here's the build-up you need: through Week 9, Jimmy still sits 1st at 7-2, and Bowie is 3rd at 6-3, which means the man who got folded like a chair is still holding the top spot while the man who folded him is climbing the ropes right behind him!",
-        "Bowie grabbed the microphone: “191.95. I'd say it louder, but I'm on my fourth energy drink and the building can't take it.” Jimmy never broke stride on the ramp: “One bad night. Check who's still 1st.”",
-        "This one isn't settled. Not even close.",
-        "That's the card. See you at the next show."
-      ]
-    },
-    {
-      "key": "2026:recap:9:all",
-      "headline": "Week 9: Bowie posts 191.95 and beats first-place Jimmy by 68.26",
-      "dek": "Week 9: 5 games · biggest margin 68.26 (Bowie over Jimmy) · high score 191.95 (Bowie)",
-      "body": [
-        "From the league ledger: Bowie scored 191.95 in Week 9, the highest total of the week, and defeated Jimmy, who scored 123.69. The margin was 68.26. The league average was 130.22. Jimmy entered the week 1st and Bowie entered 5th. Jordan Love (QB) supplied 36.18 points, 19% of Bowie's total. Jimmy left 53.32 points on the bench, including 27.50 points from Kayshon Boutte (WR).",
-        "“It was over after the first Sunday window. Jimmy can have the highlights. I'll keep the 191.95,” Bowie wrote in a message to the group chat. “Tell Bowie congratulations. Tell Bowie it won't happen again. Don't tell Bowie I said either,” Jimmy said.",
-        "Michael defeated Adam, 148.84 to 105.20, a margin of 43.64. Bucky Irving (RB) led Michael with 27 points. Michael has won 3 straight and stands 5th at 6-3. Adam's 5-4 record is 1.2 wins better than the weekly scoring suggests. “I'd say it was close, but I don't lie in public. 43.64 points,” Michael said.",
-        "Steven defeated Tom, 168.20 to 164.25, a margin of 3.95. Steven has won 4 consecutive games and stands 4th at 6-3. CeeDee Lamb (WR) scored 30 points for Steven. Tom has lost 3 consecutive games and stands 2nd at 6-3.",
-        "Nick defeated Patrick, 117.09 to 89.40. Matthew Golden (WR) scored 30.40 points for Nick. Nick owes 1 shotgun for starting Adonai Mitchell (WR). Patrick owes 2 shotguns: one for starting Ladd McConkey (WR), who scored 0 points, and one under the “scored less than Nick” rule.",
-        "Colin defeated Cian, 101.38 to 92.25. Cian owes 1 shotgun for starting Emanuel Wilson (RB). The best possible lineup would have added 18.36 points for Cian. Attribution: the box score.",
-        "After Week 9, Jimmy is first at 7-2. The sixth and last playoff spot belongs to Adam at 5-4.",
-        "That is the record as it stands."
-      ]
-    },
-    {
-      "key": "2026:shotgun:9:all",
-      "headline": "Beer Report: 4 shotguns in the Week 9 forecast, and the storm sits over Patrick",
-      "dek": "4 shotguns owed across 3 owners · Patrick leads with 2",
-      "body": [
-        "Grab an umbrella; it's been a busy week. The Week 9 gauge reads 4 shotguns across 3 owners, a steady drizzle with one real downpour, and wouldn't you know it, the radar has it parked right over the same house again.",
-        "That house is Patrick's. Two systems collided there: a zero-point reading from Ladd McConkey (WR), and the “scored less than Nick” rule, triggered when Patrick's 89.40 came in under Nick's 117.09. That's 2 shotguns, folks, the heaviest accumulation of the week.",
-        "Scattered showers elsewhere! Cian picks up 1 shotgun after Emanuel Wilson (RB) registered a flat 0 on the instruments. And Nick, even on the sunny side of that rule, couldn't stay completely dry: Adonai Mitchell (WR) also read 0, good for 1 shotgun.",
-        "The seasonal totals? Patrick leads the league with 9 shotguns, and that front shows no sign of moving out. Pressure is building.",
-        "“I owe two shotguns, and I'd like it noted that I'm taking it well,” Patrick said. Lovely attitude for a man standing in a puddle.",
-        "Stay dry, stay safe, and set your lineups."
-      ]
-    },
-    {
-      "key": "2026:waiver:9:all",
-      "headline": "Nick bids $45 on Corey Kiner; the first data point is 2.50",
-      "dek": "14 adds · top move: Nick adds Corey Kiner (RB) for $45",
-      "body": [
-        "First, a note on sample size: it is small. With that caveat registered (and it will be registered again), the largest bid of Week 9 was Nick's $45 for Corey Kiner (RB), which is nine times the next-highest bid on the wire.",
-        "The return so far: 2.50 points over 1 week. That is a negative return on $45 by any accounting I am willing to sign, though one week is a single observation, and a single observation is an anecdote wearing a lab coat.",
-        "The rest of the distribution is cheap. Cian added Mack Hollins (WR) for $5, and Tom added Kyle McCord (QB) for $2. Jimmy added three players for nothing: Drew Lock (QB), Daniel Jones (QB) and Jahan Dotson (WR). In total, 14 players were added by 7 owners, so the median claim cost considerably less than Nick's.",
-        "“I'm not saying the claim for Corey Kiner was a mistake. I'm saying I'd like to see the tape,” Nick said. The tape, for the record, is 2.50 points long. Correlation is not a lineup decision.",
-        "Further analysis pending more weeks."
-      ]
-    },
-    {
-      "key": "2026:beat:9:9",
-      "headline": "Nick Wins by 27.69; the Court Credits the Schedule",
-      "body": [
-        "The court has reviewed the tape. Nick beat Patrick, 117.09 to 89.40, a margin of 27.69. The verdict comes first this week: the win stands, and the owner is credited with being present for it.",
-        "Count one. Nick owes 1 shotgun for starting Adonai Mitchell (WR). Winning owners do not usually leave the building with a fine. This one did.",
-        "Count two. Nick bid $45 on Corey Kiner (RB), the only add of the week. The court notes the receipt and reserves judgment on the purchase.",
-        "Count three. Kenyon Sadiq (TE) scored 10.90 points on the bench while Greg Dulcich (TE) started and scored 4.40 points. In all, 12.60 points were left behind, and the best lineup was worth 129.69. Objection overruled.",
-        "Count four. Nick's 117.09 ranked 6th of 10 and sat below the league average of 130.22. In Week 9, 5 teams outscored Nick. Patrick was not among them. That is scheduling, not strategy.",
-        "The record is 2-7, good for 9th, and the winning streak stands at one. For the file: Nick is the reason three owners have a bonus shotgun rule, so a shotgun in victory is at least consistent. Grade: C-.",
-        "The court is adjourned. The owner is not acquitted."
-      ]
-    },
-    {
-      "key": "2026:beat:9:8",
-      "headline": "Eight Straight for Cian, and This Was Nearly the Best Lineup Available",
-      "body": [
-        "Dateline: the group chat. Notes from Week 9, where Cian lost to Colin, 101.38 to 92.25. The margin was 9.13. The league average was 130.22, Colin came in well under it, and Cian still could not get there. Notebook follows.",
-        "Item: the streak. Cian has lost eight straight. At eight, it stops being a streak and becomes a description.",
-        "Item: the shotgun. Cian owes 1 shotgun for starting Emanuel Wilson (RB). The beat reports it. The owner drinks it.",
-        "Item: the cellar. Cian is 1-8 and 10th of 10, and scored 9th of 10 this week. Only 3.40 points were left on the bench, so this was very nearly the best lineup the roster had. That is the bad news. The owner built the roster too.",
-        "Item: the waiver wire. Cian made 1 add, bidding $5 on Mack Hollins (WR). A $5 answer to a 1-8 question.",
-        "Item: the owner. Cian sets his lineup from a different time zone every week. I have checked several. The lineup is no better in any of them. Grade: F.",
-        "More from the field as the situation deteriorates."
-      ]
-    },
-    {
-      "key": "2026:beat:9:5",
-      "headline": "Tom Drops One to Steven by 3.95 and Has Three Straight Losses to Explain",
-      "body": [
-        "UPDATE: Tom lost 164.25-168.20 to Steven, and the beat has questions. Why does a score that ranked 3 of 10, against a league average of 130.22, still end in an L? Why were 11.70 points left on the bench? Is that what 6-3 and second place feels like?",
-        "Call it unlucky if you like. Tom will. The lineup page says otherwise. (More as it develops.)",
-        "There was a waiver move, naturally: Kyle McCord (QB) for $2. Nobody can say the owner is not active. The streak is now L3 all the same. Brock Bowers (TE) scored 26.05 points, which means the star did his job and the rest of the decisions did not.",
-        "The profile keeps supplying material. Tom is still trying to beat a brother, Joe, at something, and this week was not that something.",
-        "Grade: D. Refresh for more disappointment."
-      ]
-    },
-    {
-      "key": "2026:beat:9:6",
-      "headline": "Adam Loses to Michael by 43.64, and the Bench Had Better Ideas",
-      "body": [
-        "Look, I want to be positive. Adam scored 105.20 against Michael's 148.84, a blowout of 43.64 points, and I am out of angles.",
-        "What did Adam see in Tyler Allgeier (RB), who gave 5.60 points, that Jake Ferguson (TE) did not? Ferguson sat on the bench with 11.10 points. In all, 14.60 points were left there, and the optimal lineup would have reached 119.80. Even that would not have won, but it would have looked better.",
-        "The five-game winning streak is over, and the loss left Adam at 5-4 and 6th. Efficiency was 80%, 10th in the league, and 302.40 points have been left on the bench this season.",
-        "To be fair, and I am trying to be fair: Joe Burrow (QB) put up 29.54 points. The star showed up. The owner is the reason it did not matter. Adam will trade you sheep for wood at a rate that should be illegal, and that same instinct is apparently at work in the lineup.",
-        "Week scoring rank: 7 of 10. Grade: D. I will remain optimistic, professionally."
-      ]
-    },
-    {
-      "key": "2026:beat:9:7",
-      "headline": "Steven Beats Tom 168.20-164.25 and Should Not Take the Credit",
-      "body": [
-        "Exclusive: Steven won 168.20-164.25 over Tom, a 3.95-point margin that the ledger will record under the roster, not the owner. The week ranked 2 of 10, 9.60 points stayed on the bench, and the record is 6-3, 4th.",
-        "That makes four wins in a row. Streaks are what happen when the schedule and the players cooperate. Josh Jacobs (RB) put up 0.50 points in a starting slot, and nobody forced that choice. Shocking, yes. Surprising, no.",
-        "The score sat 37.97 points above the league average of 130.22 for the week. Across the season Steven averages 161.87 against a league average of 145, which is 16.87 points up. Do not call it genius. The roster is carrying the owner.",
-        "Steven cannot be reached by phone, text, or carrier pigeon, so the beat will not be asking for comment. Grade: B-, and that is the roster's grade.",
-        "No further questions."
-      ]
-    }
-  ]
+ "week": 9,
+ "articles": [
+  {
+   "key": "2026:analytics:9:all",
+   "headline": "Cian never changes, and Patrick never stops changing",
+   "body": [
+    "PSSST. It's Monday, the spreadsheets have been talking, and through Week 9, with 9 games in the books for every team, they named names.",
+    "Start with fortune's favorite. Jimmy is 7-2 on just 5.6 expected wins, a luck score of +1.4. And the one fortune ghosted? Patrick, 2-7 when the math says 3.6 wins, good for -1.6. Allegedly.",
+    "Now the lineup dish. Tom is getting 91% of the points available to him. Adam is getting 80%, with the league at 84%. So guess whose bench is the hottest party in town? Adam has left 302.40 points sitting there, the most in the league. Tom has left 159.37 points, the least. And the single worst night out belongs to Nick: in Week 4 he finished 62.25 points short of his best lineup, with Keon Coleman (WR) scoring 22.60 points from the bench.",
+    "Steadiest act on the carpet? Cian, with an average weekly rank of 8.0, never better than 5th and never worse than 10th. The wildest? Patrick, who has finished everywhere from 1st to 10th.",
+    "And that Week 4 trade everyone stopped talking about? Over the 6 weeks since, the players Bowie got have scored 186.30 points. The ones Cian got: 66.60 points.",
+    "More receipts next Monday.",
+    "That's all the gossip fit to print."
+   ]
+  },
+  {
+   "key": "2026:column:9:7-8",
+   "headline": "The Where's Waldo Bowl: has anyone actually seen Steven or Cian?",
+   "body": [
+    "Scoop alert. Through Week 9 the standings have Steven 4th at 6-3 and Cian 10th at 1-8, and yes, darlings, we checked twice.",
+    "These two have not met this season. No meeting yet, no receipts, only vibes. And the vibes are lopsided: Steven's recent form reads won by 60.61, won by 38.19, and won by 3.95. Cian's reads lost by 47.07, lost by 37.80, and lost by 9.13. The points column? Steven 1456.80, Cian 1050.59. That is a 406.21-point gap. Make of that what you will.",
+    "Insiders call it The Where's Waldo Bowl: two owners who are never around, playing a game neither of them will watch, from locations neither will disclose.",
+    "“I'm 4th, Cian is 10th, and I didn't even have to pick up the phone,” Steven let slip. Cian fired back: “Nobody expects anything from me. That's exactly where I'm dangerous.”",
+    "Our vote goes to Steven, on scoring average. Cian, do prove us wrong; it would be the story of the year.",
+    "Stay nosy."
+   ]
+  },
+  {
+   "key": "2026:feud:9:3-4",
+   "headline": "Bowie drops Jimmy with a 68.26-point finisher!",
+   "body": [
+    "Gentlemen, the card is set. Week 9! Bowie versus Jimmy! And it was over before the bell stopped ringing! Bowie 191.95! Jimmy 123.69! That's a 68.26-point blowout! That's a clean pin!",
+    "But check the tale of the tape, because the bar tab tells its own story! Bowie has 5 shotguns on the season! Jimmy has 2 shotguns! The winner is the one hauling the heavier belt of cans!",
+    "And here's the build-up you need: through Week 9, Jimmy still sits 1st at 7-2, and Bowie is 3rd at 6-3, which means the man who got folded like a chair is still holding the top spot while the man who folded him is climbing the ropes right behind him!",
+    "Bowie grabbed the microphone: “191.95. I'd say it louder, but I'm on my fourth energy drink and the building can't take it.” Jimmy never broke stride on the ramp: “One bad night. Check who's still 1st.”",
+    "This one isn't settled. Not even close.",
+    "That's the card. See you at the next show."
+   ]
+  },
+  {
+   "key": "2026:recap:9:all",
+   "headline": "Week 9: Bowie posts 191.95 and beats first-place Jimmy by 68.26",
+   "dek": "Week 9: 5 games · biggest margin 68.26 (Bowie over Jimmy) · high score 191.95 (Bowie)",
+   "body": [
+    "From the league ledger: Bowie scored 191.95 in Week 9, the highest total of the week, and defeated Jimmy, who scored 123.69. The margin was 68.26. The league average was 130.22. Jimmy entered the week 1st and Bowie entered 5th. Jordan Love (QB) supplied 36.18 points, 19% of Bowie's total. Jimmy left 53.32 points on the bench, including 27.50 points from Kayshon Boutte (WR).",
+    "“It was over after the first Sunday window. Jimmy can have the highlights. I'll keep the 191.95,” Bowie wrote in a message to the group chat. “Tell Bowie congratulations. Tell Bowie it won't happen again. Don't tell Bowie I said either,” Jimmy said.",
+    "Michael defeated Adam, 148.84 to 105.20, a margin of 43.64. Bucky Irving (RB) led Michael with 27 points. Michael has won 3 straight and stands 5th at 6-3. Adam's 5-4 record is 1.2 wins better than the weekly scoring suggests. “I'd say it was close, but I don't lie in public. 43.64 points,” Michael said.",
+    "Steven defeated Tom, 168.20 to 164.25, a margin of 3.95. Steven has won 4 consecutive games and stands 4th at 6-3. CeeDee Lamb (WR) scored 30 points for Steven. Tom has lost 3 consecutive games and stands 2nd at 6-3.",
+    "Nick defeated Patrick, 117.09 to 89.40. Matthew Golden (WR) scored 30.40 points for Nick. Nick owes 1 shotgun for starting Adonai Mitchell (WR). Patrick owes 2 shotguns: one for starting Ladd McConkey (WR), who scored 0 points, and one under the “scored less than Nick” rule.",
+    "Colin defeated Cian, 101.38 to 92.25. Cian owes 1 shotgun for starting Emanuel Wilson (RB). The best possible lineup would have added 18.36 points for Cian. Attribution: the box score.",
+    "After Week 9, Jimmy is first at 7-2. The sixth and last playoff spot belongs to Adam at 5-4.",
+    "That is the record as it stands."
+   ]
+  },
+  {
+   "key": "2026:shotgun:9:all",
+   "headline": "Beer Report: 4 shotguns in the Week 9 forecast, and the storm sits over Patrick",
+   "dek": "4 shotguns owed across 3 owners · Patrick leads with 2",
+   "body": [
+    "Grab an umbrella; it's been a busy week. The Week 9 gauge reads 4 shotguns across 3 owners, a steady drizzle with one real downpour, and wouldn't you know it, the radar has it parked right over the same house again.",
+    "That house is Patrick's. Two systems collided there: a zero-point reading from Ladd McConkey (WR), and the “scored less than Nick” rule, triggered when Patrick's 89.40 came in under Nick's 117.09. That's 2 shotguns, folks, the heaviest accumulation of the week.",
+    "Scattered showers elsewhere! Cian picks up 1 shotgun after Emanuel Wilson (RB) registered a flat 0 on the instruments. And Nick, even on the sunny side of that rule, couldn't stay completely dry: Adonai Mitchell (WR) also read 0, good for 1 shotgun.",
+    "The seasonal totals? Patrick leads the league with 9 shotguns, and that front shows no sign of moving out. Pressure is building.",
+    "“I owe two shotguns, and I'd like it noted that I'm taking it well,” Patrick said. Lovely attitude for a man standing in a puddle.",
+    "Stay dry, stay safe, and set your lineups."
+   ]
+  },
+  {
+   "key": "2026:waiver:9:all",
+   "headline": "Nick bids $45 on Corey Kiner; the first data point is 2.50",
+   "dek": "14 adds · top move: Nick adds Corey Kiner (RB) for $45",
+   "body": [
+    "First, a note on sample size: it is small. With that caveat registered (and it will be registered again), the largest bid of Week 9 was Nick's $45 for Corey Kiner (RB), which is nine times the next-highest bid on the wire.",
+    "The return so far: 2.50 points over 1 week. That is a negative return on $45 by any accounting I am willing to sign, though one week is a single observation, and a single observation is an anecdote wearing a lab coat.",
+    "The rest of the distribution is cheap. Cian added Mack Hollins (WR) for $5, and Tom added Kyle McCord (QB) for $2. Jimmy added three players for nothing: Drew Lock (QB), Daniel Jones (QB) and Jahan Dotson (WR). In total, 14 players were added by 7 owners, so the median claim cost considerably less than Nick's.",
+    "“I'm not saying the claim for Corey Kiner was a mistake. I'm saying I'd like to see the tape,” Nick said. The tape, for the record, is 2.50 points long. Correlation is not a lineup decision.",
+    "Further analysis pending more weeks."
+   ]
+  },
+  {
+   "key": "2026:beat:9:9",
+   "headline": "Nick Wins by 27.69; the Court Credits the Schedule",
+   "body": [
+    "The court has reviewed the tape. Nick beat Patrick, 117.09 to 89.40, a margin of 27.69. The verdict comes first this week: the win stands, and the owner is credited with being present for it.",
+    "Count one. Nick owes 1 shotgun for starting Adonai Mitchell (WR). Winning owners do not usually leave the building with a fine. This one did.",
+    "Count two. Nick bid $45 on Corey Kiner (RB), the only add of the week. The court notes the receipt and reserves judgment on the purchase.",
+    "Count three. Kenyon Sadiq (TE) scored 10.90 points on the bench while Greg Dulcich (TE) started and scored 4.40 points. In all, 12.60 points were left behind, and the best lineup was worth 129.69. Objection overruled.",
+    "Count four. Nick's 117.09 ranked 6th of 10 and sat below the league average of 130.22. In Week 9, 5 teams outscored Nick. Patrick was not among them. That is scheduling, not strategy.",
+    "The record is 2-7, good for 9th, and the winning streak stands at one. For the file: Nick is the reason three owners have a bonus shotgun rule, so a shotgun in victory is at least consistent. Grade: C-.",
+    "The court is adjourned. The owner is not acquitted."
+   ]
+  },
+  {
+   "key": "2026:beat:9:8",
+   "headline": "Eight Straight for Cian, and This Was Nearly the Best Lineup Available",
+   "body": [
+    "Dateline: the group chat. Notes from Week 9, where Cian lost to Colin, 101.38 to 92.25. The margin was 9.13. The league average was 130.22, Colin came in well under it, and Cian still could not get there. Notebook follows.",
+    "Item: the streak. Cian has lost eight straight. At eight, it stops being a streak and becomes a description.",
+    "Item: the shotgun. Cian owes 1 shotgun for starting Emanuel Wilson (RB). The beat reports it. The owner drinks it.",
+    "Item: the cellar. Cian is 1-8 and 10th of 10, and scored 9th of 10 this week. Only 3.40 points were left on the bench, so this was very nearly the best lineup the roster had. That is the bad news. The owner built the roster too.",
+    "Item: the waiver wire. Cian made 1 add, bidding $5 on Mack Hollins (WR). A $5 answer to a 1-8 question.",
+    "Item: the owner. Cian sets his lineup from a different time zone every week. I have checked several. The lineup is no better in any of them. Grade: F.",
+    "More from the field as the situation deteriorates."
+   ]
+  },
+  {
+   "key": "2026:beat:9:5",
+   "headline": "Tom Drops One to Steven by 3.95 and Has Three Straight Losses to Explain",
+   "body": [
+    "UPDATE: Tom lost 164.25-168.20 to Steven, and the beat has questions. Why does a score that ranked 3 of 10, against a league average of 130.22, still end in an L? Why were 11.70 points left on the bench? Is that what 6-3 and second place feels like?",
+    "Call it unlucky if you like. Tom will. The lineup page says otherwise. (More as it develops.)",
+    "There was a waiver move, naturally: Kyle McCord (QB) for $2. Nobody can say the owner is not active. The streak is now L3 all the same. Brock Bowers (TE) scored 26.05 points, which means the star did his job and the rest of the decisions did not.",
+    "The profile keeps supplying material. Tom is still trying to beat a brother, Joe, at something, and this week was not that something.",
+    "Grade: D. Refresh for more disappointment."
+   ]
+  },
+  {
+   "key": "2026:beat:9:6",
+   "headline": "Adam Loses to Michael by 43.64, and the Bench Had Better Ideas",
+   "body": [
+    "Look, I want to be positive. Adam scored 105.20 against Michael's 148.84, a blowout of 43.64 points, and I am out of angles.",
+    "What did Adam see in Tyler Allgeier (RB), who gave 5.60 points, that Jake Ferguson (TE) did not? Ferguson sat on the bench with 11.10 points. In all, 14.60 points were left there, and the optimal lineup would have reached 119.80. Even that would not have won, but it would have looked better.",
+    "The five-game winning streak is over, and the loss left Adam at 5-4 and 6th. Efficiency was 80%, 10th in the league, and 302.40 points have been left on the bench this season.",
+    "To be fair, and I am trying to be fair: Joe Burrow (QB) put up 29.54 points. The star showed up. The owner is the reason it did not matter. Adam will trade you sheep for wood at a rate that should be illegal, and that same instinct is apparently at work in the lineup.",
+    "Week scoring rank: 7 of 10. Grade: D. I will remain optimistic, professionally."
+   ]
+  },
+  {
+   "key": "2026:beat:9:7",
+   "headline": "Steven Beats Tom 168.20-164.25 and Should Not Take the Credit",
+   "body": [
+    "Exclusive: Steven won 168.20-164.25 over Tom, a 3.95-point margin that the ledger will record under the roster, not the owner. The week ranked 2 of 10, 9.60 points stayed on the bench, and the record is 6-3, 4th.",
+    "That makes four wins in a row. Streaks are what happen when the schedule and the players cooperate. Josh Jacobs (RB) put up 0.50 points in a starting slot, and nobody forced that choice. Shocking, yes. Surprising, no.",
+    "The score sat 37.97 points above the league average of 130.22 for the week. Across the season Steven averages 161.87 against a league average of 145, which is 16.87 points up. Do not call it genius. The roster is carrying the owner.",
+    "Steven cannot be reached by phone, text, or carrier pigeon, so the beat will not be asking for comment. Grade: B-, and that is the roster's grade.",
+    "No further questions."
+   ]
+  },
+  {
+   "key": "2026:beat:9:1",
+   "headline": "Michael Wins by 43.64 and Still Leaves 38.75 Points on the Bench",
+   "body": [
+    "Week 9 report card, Michael: C. From the beat desk: Michael beat Adam 148.84 to 105.20, a margin of 43.64. A blowout, yes. Also the 4th-best score of 10 in a week when the league averaged 130.22. The opponent did a great deal of the work.",
+    "The line item that earns the grade: 38.75 points left on the bench. The best available lineup was worth 187.59. Travis Kelce (TE) scored 19.80 points from a seat. The owner will say the team won anyway. The ledger says the team won in spite of the lineup page, which is a different entry.",
+    "That makes three straight wins and a 6-3 record. It also coincides with a slide from 3rd to 5th in the standings, which takes some doing. Michael's team averages 159.82 a week, 14.82 points above the league's 145, so the roster is plainly fine. The filing of it is the problem. Receipts available on request.",
+    "In fairness, Michael answers lineup questions from his work bathroom, and Week 9 reads like one answered in a hurry.",
+    "The ledger will be updated next week, whether or not the owner is."
+   ]
+  },
+  {
+   "key": "2026:beat:9:10",
+   "headline": "Colin Wins With 101.38, a Score That Loses to 7 Teams",
+   "body": [
+    "Standard Deviations, Week 9: notes on Colin. Run the numbers and weep: Colin beat Cian 101.38 to 92.25, a 9.13-point win with the 8th-best score of 10, in a week when the league averaged 130.22.",
+    "Note 1: The bench held 23.03 points. Pat Bryant (WR) scored 14.60 of them from the sideline. The best lineup available was worth 124.41, which would still have trailed the league average, but an owner should at least try.",
+    "Note 2: That score loses to 7 teams this week. The schedule supplied one of the others. This is a scheduling result and should be filed as one. Variance is not an alibi.",
+    "Note 3: The week's waiver activity was 1 add, Demarcus Robinson (WR) for $0. He has returned 4.20 points since. The price was fair.",
+    "Note 4: The win snaps a three-game losing streak and moves Colin to 4-5, 7th in the standings. Grade: C-. The minus is for the bench.",
+    "Note 5: Colin sets his lineup between Minecraft sessions. Week 9 suggests the sessions ran long.",
+    "Sample size noted. Sympathy not included."
+   ]
+  }
+ ]
 }

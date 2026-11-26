@@ -1,0 +1,19 @@
+{
+ "week": 12,
+ "articles": [
+  {
+   "key": "2026:preview:12:all",
+   "headline": "Steven Is a 73% Favorite Over Adam in Week 12, and Adam Is the One With Something to Lose",
+   "dek": "Week 12: five games, one of them with real playoff leverage. Adam (6-5) vs. Steven (8-3) is the game of the week.",
+   "body": [
+    "Before the narrative, the numbers. The model flags Adam against Steven as the Week 12 game worth watching, and not because it projects as close: Steven (8-3, 162.0 points per game) is a 73% favorite over Adam (6-5, 130.7), who holds the remaining 27%. The interest is in the leverage. Steven's playoff odds sit at 100% whatever happens, while Adam's sit at 59%, and this one game swings them by 27 points. Only one side of the spreadsheet has a formula in it.",
+    "Tom (8-3, 181.3 per game, the highest average on the slate) meets Nick (2-9, 114.5), and the model has it 87% to 13%. Tom's playoff odds are 100% and Nick's are 0%, so nothing in this cell changes with the result.",
+    "Bowie (7-4, 156.4) against Colin (5-6, 138.4) is the other game with a live column. Bowie is the favorite at 66% to Colin's 34% and is at 99% to make the playoffs; Colin is at 41%, with a swing of 26 points riding on the outcome (a one-in-three underdog is not a rounding error, whatever the favorite's owner would prefer).",
+    "Patrick (2-9, 132.5) and Cian (1-10, 111.1) are both at 0% playoff odds. Patrick is favored, 66% to 34%, in a game the simulations record mostly for completeness.",
+    "Michael and Jimmy are both 8-3 and both at 100%. Michael averages 162.4 to Jimmy's 148.6 and is the model's pick at 62% to 38%, which is the narrowest favorite of the week and still only one draw from the distribution.",
+    "The caveat of this desk, filed in the notes column where it belongs: Tom's schedule has been soft, and an 87% line against a 2-9 opponent will not do much to test that.",
+    "The model will be revised as the season is."
+   ]
+  }
+ ]
+}
